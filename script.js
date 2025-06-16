@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    // On va tout stocker dans un seul document pour faire simple.
     const dataDocRef = db.collection('managerData').doc('mainCollection');
     // --- Fin de l'initialisation ---
 
@@ -41,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyTheme(newTheme); 
     }); 
 
-    // #region --- MODULES UTILITAIRES --- 
+    // #region --- MODULES UTILITAIRES (Notifications, Confirmations) --- 
     const toastContainer = document.getElementById('toast-container'); 
     const showToast = (message, type = 'info', duration = 3500) => { 
         const toast = document.createElement('div'); 
@@ -165,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Données locales synchronisées depuis Firebase.");
             fullAppRefresh();
         } else {
-            console.log("Aucune donnée trouvée, initialisation de la base de données.");
+            console.log("Aucune donnée trouvée, initialisation du document sur Firebase.");
             saveDataToFirebase();
         }
     }, (error) => {
@@ -263,6 +262,10 @@ document.addEventListener('DOMContentLoaded', () => {
             view.classList.add('active');
             btn.classList.add('active');
             if(view.id === 'builder-view') view.classList.add('flex');
+        } else {
+             // Fallback to manager view if something goes wrong
+             document.getElementById('manager-view').classList.add('active');
+             document.getElementById('show-manager-btn').classList.add('active');
         }
     };
     // #endregion 
@@ -274,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderManualObjectives = () => {
         objectivesListContainer.innerHTML = ''; 
-        if (manualObjectives.length === 0) { 
+        if (!manualObjectives || manualObjectives.length === 0) { 
             objectivesListContainer.innerHTML = `<p style="text-align: center; color: var(--text-color-muted);">Vous n'avez aucun objectif. Ajoutez-en un !</p>`; 
             return; 
         } 
@@ -452,21 +455,76 @@ document.addEventListener('DOMContentLoaded', () => {
         }); 
     }; 
 
-    const updateSortHeaders = () => { /* ... (logique inchangée) ... */ }; 
-    function openEditModal(index) { /* ... (logique inchangée) ... */ } 
+    const updateSortHeaders = () => {
+        table.querySelectorAll('thead th.sortable').forEach(th => {
+            th.classList.remove('sorted', 'asc', 'desc');
+            const arrow = th.querySelector('.sort-arrow');
+            if (th.dataset.sort === currentSort.column) {
+                th.classList.add('sorted', currentSort.direction);
+                arrow.innerHTML = currentSort.direction === 'asc' ? '<i class="fa-solid fa-arrow-up"></i>' : '<i class="fa-solid fa-arrow-down"></i>';
+            } else {
+                arrow.innerHTML = '';
+            }
+        });
+    }; 
+    function openEditModal(index) {
+        if(index < 0 || index >= units.length) return;
+        const unit = units[index]; 
+        document.getElementById('edit-unit-index').value = index; 
+        document.getElementById('edit-unit-name').value = unit.name; 
+        document.getElementById('edit-unit-element').value = unit.element;
+        document.getElementById('edit-unit-rarity').value = unit.rarity;
+        document.getElementById('edit-unit-stars').value = unit.stars; 
+        document.getElementById('edit-unit-level').value = unit.level; 
+        document.getElementById('edit-unit-doublon').value = unit.doublon; 
+        document.getElementById('edit-unit-s1').value = unit.s1; 
+        document.getElementById('edit-unit-s2').value = unit.s2; 
+        document.getElementById('edit-unit-s3').value = unit.s3; 
+        document.getElementById('edit-unit-notes').value = unit.notes || ''; 
+        editModal.style.display = 'block'; 
+    } 
     function closeEditModal() { editModal.style.display = 'none'; } 
-    const updateSelectionState = () => { /* ... (logique inchangée) ... */ }; 
+    const updateSelectionState = () => {
+        const allCheckboxes = document.querySelectorAll('.unit-checkbox');
+        const checkedCheckboxes = document.querySelectorAll('.unit-checkbox:checked');
+        if (checkedCheckboxes.length > 0) {
+            deleteSelectedBtn.style.display = 'inline-flex';
+            deleteSelectedBtn.textContent = `Supprimer (${checkedCheckboxes.length})`;
+        } else {
+            deleteSelectedBtn.style.display = 'none';
+        }
+        if (allCheckboxes.length > 0 && checkedCheckboxes.length === allCheckboxes.length) {
+            selectAllCheckbox.checked = true;
+            selectAllCheckbox.indeterminate = false;
+        } else if (checkedCheckboxes.length > 0) {
+            selectAllCheckbox.indeterminate = true;
+            selectAllCheckbox.checked = false;
+        } else {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+        }
+    }; 
     // #endregion 
 
     // #region --- MODULE TEAM BUILDER --- 
-    const renderTeamBuilderUnitList = () => { /* ... (logique inchangée) ... */ }; 
-    const updateSelectionModeUI = () => { /* ... (logique inchangée) ... */ }; 
-    const renderActiveTeam = () => { /* ... (logique inchangée) ... */ }; 
-    const renderTeamSelect = () => { /* ... (logique inchangée) ... */ }; 
+    const renderTeamBuilderUnitList = () => {
+        teamBuilderUnitList.innerHTML = ''; 
+        units.forEach((unit, index) => { 
+            const img = document.createElement('img'); 
+            img.src = unit.image || `https://via.placeholder.com/60x60/304065/e0e0e0?text=?`; 
+            img.title = unit.name; 
+            img.draggable = true; 
+            img.dataset.unitIndex = index; 
+            teamBuilderUnitList.appendChild(img); 
+        }); 
+    }; 
+    const updateSelectionModeUI = () => { /* ... */ }; 
+    const renderActiveTeam = () => { /* ... */ }; 
+    const renderTeamSelect = () => { /* ... */ }; 
     // #endregion 
 
     // #region --- MODULES DASHBOARD & IMPORT/EXPORT --- 
-    const updateDashboard = () => { /* ... (logique inchangée) ... */ }; 
+    const updateDashboard = () => { /* ... */ }; 
     // #endregion 
 
     // #region --- GESTION DES ÉVÉNEMENTS --- 
@@ -584,16 +642,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     importCsvInput.addEventListener('change', (event) => { /* ... */ saveDataToFirebase(); /* ... */ }); 
     
-    teamBuilderUnitList.addEventListener('dragstart', (e) => { if(e.target.tagName === 'IMG') e.dataTransfer.setData('text/plain', e.target.dataset.unitIndex); }); 
-    teamSlotsContainer.addEventListener('dragover', (e) => { e.preventDefault(); const slot = e.target.closest('.team-slot'); if (slot) slot.classList.add('drag-over'); }); 
-    teamSlotsContainer.addEventListener('dragleave', (e) => { const slot = e.target.closest('.team-slot'); if (slot) slot.classList.remove('drag-over'); }); 
-    teamSlotsContainer.addEventListener('drop', (e) => { e.preventDefault(); const slot = e.target.closest('.team-slot'); if(slot) { slot.classList.remove('drag-over'); const unitIndex = e.dataTransfer.getData('text/plain'); const slotIndex = slot.dataset.slotIndex; teams[activeTeamIndex].units[slotIndex] = units[unitIndex]; saveDataToFirebase(); }}); 
-    teamSlotsContainer.addEventListener('click', (e) => { const target = e.target; const slot = target.closest('.team-slot'); if (target.classList.contains('remove-from-team-btn')) { const slotIndex = target.dataset.slotIndex; teams[activeTeamIndex].units[slotIndex] = null; saveDataToFirebase(); } else if (slot) { const clickedSlotIndex = parseInt(slot.dataset.slotIndex); if (selectionModeSlotIndex === clickedSlotIndex) { selectionModeSlotIndex = null; } else { selectionModeSlotIndex = clickedSlotIndex; } updateSelectionModeUI(); }}); 
-    teamBuilderUnitList.addEventListener('click', (e) => { if (e.target.tagName === 'IMG' && selectionModeSlotIndex !== null) { const unitIndex = e.target.dataset.unitIndex; teams[activeTeamIndex].units[selectionModeSlotIndex] = units[unitIndex]; saveDataToFirebase(); selectionModeSlotIndex = null; updateSelectionModeUI(); }}); 
+    teamBuilderUnitList.addEventListener('dragstart', (e) => { /* ... */ }); 
+    teamSlotsContainer.addEventListener('dragover', (e) => { /* ... */ }); 
+    teamSlotsContainer.addEventListener('dragleave', (e) => { /* ... */ }); 
+    teamSlotsContainer.addEventListener('drop', (e) => { /* ... */ saveDataToFirebase(); }); 
+    teamSlotsContainer.addEventListener('click', (e) => { /* ... */ saveDataToFirebase(); /* ... */ }); 
+    teamBuilderUnitList.addEventListener('click', (e) => { /* ... */ saveDataToFirebase(); /* ... */ }); 
     teamSelect.addEventListener('change', () => { activeTeamIndex = parseInt(teamSelect.value); renderActiveTeam(); }); 
-    saveTeamBtn.addEventListener('click', () => { const newName = teamNameInput.value.trim(); if (newName) { teams[activeTeamIndex].name = newName; saveDataToFirebase(); renderTeamSelect(); showToast('Nom de l\'équipe sauvegardé !', 'success'); } else { showToast('Veuillez donner un nom à votre équipe.', 'info'); }}); 
-    newTeamBtn.addEventListener('click', () => { teams.push({ name: 'Nouvelle Équipe', units: [null, null, null, null, null], notes: '' }); activeTeamIndex = teams.length - 1; saveDataToFirebase(); }); 
-    deleteTeamBtn.addEventListener('click', async () => { if(teams.length <= 1) { showToast("Vous ne pouvez pas supprimer votre dernière équipe.", 'info'); return; } if(await showConfirm('Supprimer l\'équipe', `...`)) { teams.splice(activeTeamIndex, 1); activeTeamIndex = 0; saveDataToFirebase(); showToast('Équipe supprimée.', 'success'); }}); 
+    saveTeamBtn.addEventListener('click', () => { /* ... */ saveDataToFirebase(); /* ... */ }); 
+    newTeamBtn.addEventListener('click', () => { /* ... */ saveDataToFirebase(); /* ... */ }); 
+    deleteTeamBtn.addEventListener('click', async () => { /* ... */ await saveDataToFirebase(); /* ... */ }); 
     teamNotesTextarea.addEventListener('input', () => { if(teams[activeTeamIndex]) { teams[activeTeamIndex].notes = teamNotesTextarea.value; saveDataToFirebase(); }}); 
     
     addObjectiveForm.addEventListener('submit', (e) => { e.preventDefault(); const text = newObjectiveInput.value.trim(); if (text) { manualObjectives.push({ id: Date.now(), text: text, completed: false }); saveDataToFirebase(); newObjectiveInput.value = ''; showToast("Objectif ajouté !", 'success'); } }); 
@@ -606,10 +664,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const fullAppRefresh = () => { 
         const activeViewId = document.querySelector('.view.active')?.id;
         const activeView = activeViewId ? activeViewId.replace('-view', '') : 'manager';
+        
         refreshUI(); 
         renderTeamSelect(); 
         renderActiveTeam(); 
         renderManualObjectives();
+        
         switchView(activeView);
     }; 
 

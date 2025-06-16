@@ -194,13 +194,13 @@ body.light-theme .nav-btn.active { color: white; }
     min-width: 0; 
 } 
  
-.list-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; } 
+.list-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; gap: 15px; } 
+.list-title-container { display: flex; align-items: center; gap: 15px; }
 .list-header h2 { border: none; padding: 0; margin: 0; } 
 .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-/* Correction pour la taille des boutons */
 .header-actions .action-btn, .header-actions label.action-btn {
     flex: 1 1 auto;
-    min-width: 180px;
+    min-width: 160px; /* Base pour que les boutons ne soient pas trop petits */
     text-align: center;
 }
 h2, h3 { margin-top: 0; color: var(--text-color); font-weight: 600; } 
@@ -258,6 +258,25 @@ textarea {
     background-color: rgba(241, 196, 15, 0.1); 
     color: var(--star-color); 
 } 
+
+.discreet-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--text-color-muted);
+    font-size: 1.2em;
+    padding: 5px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.discreet-btn:hover {
+    color: var(--primary-color);
+    background-color: var(--hover-background);
+    border-color: var(--border-color);
+}
+
 
 .table-wrapper { overflow-x: auto; } 
 table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; } 

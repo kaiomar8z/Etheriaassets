@@ -115,17 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let teams = JSON.parse(localStorage.getItem('etheriaTeams')) || []; 
     let manualObjectives = JSON.parse(localStorage.getItem('etheriaManualObjectives')) || []; 
     let dailyRoutine = JSON.parse(localStorage.getItem('etheriaDailyRoutine')) || {}; 
-    
-    // La base de données est maintenant intégrée ici
-    const unitsDB = [
-      { "name": "Archange Michael", "element": "Light", "rarity": "SSR" },
-      { "name": "Chevalier Arthur", "element": "Rouge", "rarity": "SSR" },
-      { "name": "Elfe Sylvanas", "element": "Vert", "rarity": "SR" },
-      { "name": "Sorcier de Glace", "element": "Bleu", "rarity": "SR" },
-      { "name": "Gobelin Fantassin", "element": "Vert", "rarity": "R" },
-      { "name": "Nécromancien Zokar", "element": "Dark", "rarity": "SSR" },
-      { "name": "Cachi le Gardien", "element": "Bleu", "rarity": "SSR" }
-    ];
+    let unitsDB = null;
 
     let activeTeamIndex = 0; 
     let currentSort = { column: 'level', direction: 'desc' }; 
@@ -298,15 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'Light': 'constant.webp'
     };
 
-    function normalizeStringForFilename(str) {
-        if (!str) return '';
-        return str
-            .toLowerCase()
-            .normalize("NFD") 
-            .replace(/[\u0300-\u036f]/g, "") 
-            .replace(/ /g, '');
-    }
-
     const resetAddForm = () => { 
         addForm.reset();
         unitImageData = null; 
@@ -315,9 +296,68 @@ document.addEventListener('DOMContentLoaded', () => {
         unitNameInput.focus(); 
     }; 
     
+    const fetchAndFillUnitData = async (unitName) => {
+        if (!unitName.trim()) return;
+        const dbUrl = './units_db.json';
+
+        try {
+            if (!unitsDB) {
+                const response = await fetch(dbUrl);
+                if (!response.ok) throw new Error('Erreur réseau lors de la récupération de la DB.');
+                unitsDB = await response.json();
+            }
+
+            const foundUnit = unitsDB.find(u => u.name.toLowerCase() === unitName.toLowerCase());
+
+            if (foundUnit) {
+                document.getElementById('unit-element').value = foundUnit.element;
+                document.getElementById('unit-rarity').value = foundUnit.rarity;
+                showToast(`Données pour ${foundUnit.name} chargées !`, 'success');
+            }
+        } catch (error) {
+            console.error("Erreur lors de la récupération de la base de données d'unités:", error);
+            showToast("Impossible de charger la base de données des unités.", "error");
+        }
+    };
+
+    const findUnitImage = async (unitName) => { 
+        if (!unitName || !unitName.trim()) return;
+        
+        const formattedName = unitName.trim().replace(/ /g, '_').toLowerCase();
+        const extensions = ['webp', 'png', 'jpg', 'jpeg', 'gif']; 
+        let foundImageUrl = null; 
+        
+        imagePlaceholder.innerHTML = '<span><i class="fa-solid fa-spinner fa-spin"></i> Recherche...</span>'; 
+        
+        for (const ext of extensions) { 
+            const potentialUrl = `${imageBaseUrl}${formattedName}.${ext}`; 
+            try { 
+                const response = await fetch(potentialUrl, { method: 'HEAD', cache: 'no-cache' }); 
+                if (response.ok) { 
+                    foundImageUrl = potentialUrl; 
+                    break; 
+                } 
+            } catch (error) { /* Ignore */ } 
+        } 
+
+        if (foundImageUrl) { 
+            const response = await fetch(foundImageUrl); 
+            const blob = await response.blob(); 
+            const reader = new FileReader(); 
+            reader.onload = (e) => { 
+                unitImageData = e.target.result; 
+                imagePlaceholder.innerHTML = `<img src="${unitImageData}" alt="${unitName}">`; 
+            }; 
+            reader.readAsDataURL(blob); 
+        } else { 
+            unitImageData = null; 
+            imagePlaceholder.innerHTML = '<span>Image non trouvée.<br>Cliquez pour uploader.</span>'; 
+        } 
+    }; 
+    
     const fetchImageForUnit = async (unitName) => {
         if (!unitName || !unitName.trim()) return null;
-        const formattedName = normalizeStringForFilename(unitName);
+        const formattedName = unitName.trim().replace(/ /g, '_').toLowerCase();
         const extensions = ['webp', 'png', 'jpg', 'jpeg', 'gif'];
         
         for (const ext of extensions) {
@@ -336,30 +376,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) { /* Ignore */ }
         }
         return null;
-    };
-
-    const findUnitImage = async (unitName) => { 
-        imagePlaceholder.innerHTML = '<span><i class="fa-solid fa-spinner fa-spin"></i> Recherche...</span>'; 
-        const imageData = await fetchImageForUnit(unitName);
-        if (imageData) {
-            unitImageData = imageData;
-            imagePlaceholder.innerHTML = `<img src="${imageData}" alt="${unitName}">`;
-        } else {
-            unitImageData = null;
-            imagePlaceholder.innerHTML = '<span>Image non trouvée.<br>Cliquez pour uploader.</span>';
-        }
-    }; 
-    
-    const fetchAndFillUnitData = (unitName) => {
-        if (!unitName.trim()) return;
-        
-        const foundUnit = unitsDB.find(u => u.name.toLowerCase() === unitName.toLowerCase());
-
-        if (foundUnit) {
-            document.getElementById('unit-element').value = foundUnit.element;
-            document.getElementById('unit-rarity').value = foundUnit.rarity;
-            showToast(`Données pour ${foundUnit.name} chargées !`, 'success');
-        }
     };
 
     const updateAllMissingImages = async () => {
@@ -451,7 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (unit.image) {
                 img.src = unit.image;
             } else {
-                const formattedName = normalizeStringForFilename(unit.name);
+                const formattedName = unit.name.trim().replace(/ /g, '_').toLowerCase();
                 if (formattedName) {
                     img.src = `${imageBaseUrl}${formattedName}.webp`;
                 } else {

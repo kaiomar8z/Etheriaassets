@@ -93,14 +93,13 @@
 
                 <div class="list-container card">
                     <div class="list-header">
-                        <h2>Liste des Unités</h2>
+                        <div class="list-title-container">
+                            <h2>Liste des Unités</h2>
+                            <button id="update-images-btn" class="discreet-btn" title="Cherche et télécharge les images manquantes pour les unités existantes.">
+                                <i class="fa-solid fa-images"></i>
+                            </button>
+                        </div>
                         <div class="header-actions">
-                            <button id="update-images-btn" class="action-btn info-btn" title="Cherche et télécharge les images manquantes pour les unités existantes.">
-                                <i class="fa-solid fa-images"></i> Mettre à jour les images
-                            </button>
-                            <button id="delete-selected-btn" class="action-btn delete-selected-btn" style="display:none;">
-                                <i class="fa-solid fa-trash-can"></i> Supprimer la sélection
-                            </button>
                             <input type="file" id="import-csv-input" accept=".csv,text/csv" style="display: none;">
                             <label for="import-csv-input" class="action-btn">
                                 <i class="fa-solid fa-file-csv"></i> Importer CSV
@@ -114,6 +113,9 @@
                             </button>
                         </div>
                     </div>
+                    <button id="delete-selected-btn" class="action-btn delete-selected-btn" style="display:none; width: 100%; margin: -10px 0 15px 0;">
+                        <i class="fa-solid fa-trash-can"></i> Supprimer la sélection
+                    </button>
                     
                     <div class="filter-controls" style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
                         <input type="search" id="search-input" placeholder="Rechercher par nom..." style="flex: 2; min-width: 180px;">
@@ -212,8 +214,8 @@
                     <div class="form-group"><label for="edit-unit-stars">Étoiles * (3-6)</label><input type="number" id="edit-unit-stars" min="3" max="6" required></div>
                     <div class="form-group"><label for="edit-unit-level">Level *</label><input type="number" id="edit-unit-level" min="1" max="100" required></div>
                     <div class="form-group"><label for="edit-unit-doublon">Doublon *</label><select id="edit-unit-doublon" required><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
-                    <div class="form-group"><label for="edit-unit-s1">S1 * (1-5)</label><input type="number" id="edit-unit-s1" min="1" max="5" required></div>
-                    <div class="form-group"><label for="edit-unit-s2">S2 * (1-5)</label><input type="number" id="edit-unit-s2" min="1" max="5" required></div>
+                    <div class="form-group"><label for="unit-s1">S1 * (1-5)</label><input type="number" id="edit-unit-s1" min="1" max="5" required></div>
+                    <div class="form-group"><label for="unit-s2">S2 * (1-5)</label><input type="number" id="edit-unit-s2" min="1" max="5" required></div>
                     <div class="form-group"><label for="edit-unit-s3">S3 * (1-5)</label><input type="number" id="edit-unit-s3" min="1" max="5" required></div>
                     
                     <div class="form-group full-width">

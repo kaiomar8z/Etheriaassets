@@ -196,6 +196,13 @@ body.light-theme .nav-btn.active { color: white; }
  
 .list-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; } 
 .list-header h2 { border: none; padding: 0; margin: 0; } 
+.header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+/* Correction pour la taille des boutons */
+.header-actions .action-btn, .header-actions label.action-btn {
+    flex: 1 1 auto;
+    min-width: 180px;
+    text-align: center;
+}
 h2, h3 { margin-top: 0; color: var(--text-color); font-weight: 600; } 
 h3 { margin-bottom: 20px; } 
  

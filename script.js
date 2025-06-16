@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => { 
+
     // --- Initialisation de Firebase ---
     // !!! COLLEZ VOTRE OBJET DE CONFIGURATION PERSONNEL ICI !!!
     const firebaseConfig = {
@@ -12,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    // On va tout stocker dans un seul document pour faire simple.
     const dataDocRef = db.collection('managerData').doc('mainCollection');
-
     // --- Fin de l'initialisation ---
 
     const themeToggleBtn = document.getElementById('theme-toggle-btn'); 
@@ -40,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyTheme(newTheme); 
     }); 
 
-    // #region --- MODULES UTILITAIRES (Notifications, Confirmations) --- 
+    // #region --- MODULES UTILITAIRES --- 
     const toastContainer = document.getElementById('toast-container'); 
     const showToast = (message, type = 'info', duration = 3500) => { 
         const toast = document.createElement('div'); 
@@ -134,10 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function saveDataToFirebase() {
         const cleanUnits = units.map(u => {
             const unitCopy = {...u};
-            if (unitCopy.image && unitCopy.image.startsWith("data:image")) {
-                // C'est une image en base64 (uploadée), on la garde
-            } else {
-                // Sinon (c'est une URL vers GitHub), on ne la sauvegarde pas pour la recharger dynamiquement
+            if (!(unitCopy.image && unitCopy.image.startsWith("data:image"))) {
                 unitCopy.image = null;
             }
             return unitCopy;
@@ -164,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
             teams = data.teams || [];
             manualObjectives = data.manualObjectives || [];
             dailyRoutine = data.dailyRoutine || {};
-            
             console.log("Données locales synchronisées depuis Firebase.");
             fullAppRefresh();
         } else {
@@ -232,34 +229,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderRoutineTracker = () => {
         routineTrackerContent.innerHTML = '';
         if (!dailyRoutine.tasks) return;
+        const currentGameDay = getGameDay();
         ROUTINE_DEFINITION.forEach(taskDef => { 
             const taskState = dailyRoutine.tasks[taskDef.name];
-            if(!taskState) return; // Sécurité si les tâches ne sont pas encore créées
+            if(!taskState) return; 
             const item = document.createElement('div'); 
             item.className = 'routine-item'; 
             item.dataset.taskName = taskDef.name; 
             item.dataset.taskType = taskDef.type; 
-
             if (taskDef.type === 'checkbox') { 
-                const isCompleted = taskState.completedOn === getGameDay(); 
+                const isCompleted = taskState.completedOn === currentGameDay; 
                 if (isCompleted) item.classList.add('completed'); 
-                item.innerHTML = ` 
-                    <label> 
-                        <input type="checkbox" ${isCompleted ? 'checked' : ''}> 
-                        <span>${taskDef.name}</span> 
-                    </label> 
-                `; 
+                item.innerHTML = `<label><input type="checkbox" ${isCompleted ? 'checked' : ''}><span>${taskDef.name}</span></label>`; 
             } else if (taskDef.type === 'counter') { 
-                  const count = taskState.count || 0; 
-                  if (count >= taskDef.max) item.classList.add('completed'); 
-                  item.innerHTML = ` 
-                       <label><span>${taskDef.name}</span></label> 
-                       <div class="hydra-controls"> 
-                           <button class="hydra-btn" data-action="minus">-</button> 
-                           <span class="hydra-count">${count}</span> 
-                           <button class="hydra-btn" data-action="plus">+</button> 
-                       </div> 
-                   `; 
+                const count = taskState.count || 0; 
+                if (count >= taskDef.max) item.classList.add('completed'); 
+                item.innerHTML = `<label><span>${taskDef.name}</span></label><div class="hydra-controls"><button class="hydra-btn" data-action="minus">-</button><span class="hydra-count">${count}</span><button class="hydra-btn" data-action="plus">+</button></div>`; 
             } 
             routineTrackerContent.appendChild(item); 
         }); 
@@ -456,6 +441,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 favoriteBtn.classList.add('is-favorite'); 
                 favoriteBtn.innerHTML = '<i class="fa-solid fa-star"></i>'; 
                 favoriteBtn.title = "Retirer des favoris"; 
+            } else {
+                favoriteBtn.innerHTML = '<i class="fa-regular fa-star"></i>';
+                favoriteBtn.title = "Mettre en favori";
             }
             favoriteBtn.dataset.index = originalIndex; 
             rowFragment.querySelector('.edit-btn').dataset.index = originalIndex; 
@@ -464,33 +452,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }); 
     }; 
 
-    const updateSortHeaders = () => { /* ... */ }; 
-    function openEditModal(index) { /* ... */ } 
-    function closeEditModal() { /* ... */ } 
-    const updateSelectionState = () => { /* ... */ }; 
+    const updateSortHeaders = () => { /* ... (logique inchangée) ... */ }; 
+    function openEditModal(index) { /* ... (logique inchangée) ... */ } 
+    function closeEditModal() { editModal.style.display = 'none'; } 
+    const updateSelectionState = () => { /* ... (logique inchangée) ... */ }; 
     // #endregion 
 
     // #region --- MODULE TEAM BUILDER --- 
-    const renderTeamBuilderUnitList = () => { /* ... */ }; 
-    const updateSelectionModeUI = () => { /* ... */ }; 
-    const renderActiveTeam = () => { /* ... */ }; 
-    const renderTeamSelect = () => { /* ... */ }; 
+    const renderTeamBuilderUnitList = () => { /* ... (logique inchangée) ... */ }; 
+    const updateSelectionModeUI = () => { /* ... (logique inchangée) ... */ }; 
+    const renderActiveTeam = () => { /* ... (logique inchangée) ... */ }; 
+    const renderTeamSelect = () => { /* ... (logique inchangée) ... */ }; 
     // #endregion 
 
     // #region --- MODULES DASHBOARD & IMPORT/EXPORT --- 
-    const updateDashboard = () => { /* ... */ }; 
+    const updateDashboard = () => { /* ... (logique inchangée) ... */ }; 
     // #endregion 
 
     // #region --- GESTION DES ÉVÉNEMENTS --- 
     showManagerBtn.addEventListener('click', () => switchView('manager'));
     showBuilderBtn.addEventListener('click', () => switchView('builder'));
     showObjectivesBtn.addEventListener('click', () => switchView('objectives'));
-    addForm.addEventListener('submit', (event) => { event.preventDefault(); const newUnit = { name: unitNameInput.value, image: unitImageData, element: document.getElementById('unit-element').value, rarity: document.getElementById('unit-rarity').value, stars: parseInt(document.getElementById('unit-stars').value, 10), level: parseInt(document.getElementById('unit-level').value, 10), doublon: parseInt(document.getElementById('unit-doublon').value, 10), s1: parseInt(document.getElementById('unit-s1').value, 10), s2: parseInt(document.getElementById('unit-s2').value, 10), s3: parseInt(document.getElementById('unit-s3').value, 10), isFavorite: false, notes: '' }; units.push(newUnit); saveDataToFirebase(); resetAddForm(); showToast(`'${newUnit.name}' a été ajouté.`, 'success'); }); 
+
+    addForm.addEventListener('submit', (event) => { 
+        event.preventDefault(); 
+        const newUnit = { name: unitNameInput.value, image: unitImageData, element: document.getElementById('unit-element').value, rarity: document.getElementById('unit-rarity').value, stars: parseInt(document.getElementById('unit-stars').value, 10), level: parseInt(document.getElementById('unit-level').value, 10), doublon: parseInt(document.getElementById('unit-doublon').value, 10), s1: parseInt(document.getElementById('unit-s1').value, 10), s2: parseInt(document.getElementById('unit-s2').value, 10), s3: parseInt(document.getElementById('unit-s3').value, 10), isFavorite: false, notes: '' }; 
+        units.push(newUnit); 
+        saveDataToFirebase();
+        resetAddForm(); 
+        showToast(`'${newUnit.name}' a été ajouté.`, 'success'); 
+    }); 
+    
     clearFormBtn.addEventListener('click', resetAddForm); 
     unitNameInput.addEventListener('blur', () => findUnitImage(unitNameInput.value));
     imagePlaceholder.addEventListener('click', () => imageInput.click()); 
     imageInput.addEventListener('change', (event) => { const file = event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (e) => { unitImageData = e.target.result; imagePlaceholder.innerHTML = `<img src="${unitImageData}" alt="Aperçu de l'unité">`; }; reader.readAsDataURL(file); } }); 
-    unitListBody.addEventListener('click', async (event) => { const button = event.target.closest('button'); if (!button || !button.dataset.index) return; const index = parseInt(button.dataset.index); if (button.classList.contains('favorite-btn')) { units[index].isFavorite = !units[index].isFavorite; saveDataToFirebase(); } else if (button.classList.contains('edit-btn')) { openEditModal(index); } else if (button.classList.contains('delete-btn')) { if (await showConfirm('Supprimer l\'unité', `Êtes-vous sûr de vouloir supprimer ${units[index].name} ?`)) { units.splice(index, 1); saveDataToFirebase(); showToast('Unité supprimée.', 'info'); } } }); 
+    
+    unitListBody.addEventListener('click', async (event) => { 
+        const button = event.target.closest('button'); 
+        if (button && button.dataset.index !== undefined) { 
+            const index = parseInt(button.dataset.index); 
+            if(index < 0 || index >= units.length) return;
+
+            if (button.classList.contains('favorite-btn')) { 
+                units[index].isFavorite = !units[index].isFavorite; 
+                saveDataToFirebase();
+            } else if (button.classList.contains('edit-btn')) { 
+                openEditModal(index); 
+            } else if (button.classList.contains('delete-btn')) { 
+                if (await showConfirm('Supprimer l\'unité', `Êtes-vous sûr de vouloir supprimer ${units[index].name} ?`)) { 
+                    units.splice(index, 1); 
+                    saveDataToFirebase();
+                    showToast('Unité supprimée.', 'info'); 
+                } 
+            } 
+        } 
+        if (event.target.classList.contains('unit-checkbox')) { 
+            updateSelectionState(); 
+        } 
+    }); 
+    
     searchInput.addEventListener('input', displayUnits); 
     filterElement.addEventListener('change', displayUnits); 
     filterRarity.addEventListener('change', displayUnits);
@@ -498,27 +519,87 @@ document.addEventListener('DOMContentLoaded', () => {
     updateImagesBtn.addEventListener('click', updateAllMissingImages);
     table.querySelector('thead').addEventListener('click', (event) => { const header = event.target.closest('th'); if (!header || !header.classList.contains('sortable')) return; const sortKey = header.dataset.sort; if (currentSort.column === sortKey) { currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc'; } else { currentSort.column = sortKey; currentSort.direction = 'asc'; } displayUnits(); }); 
     selectAllCheckbox.addEventListener('change', () => { document.querySelectorAll('.unit-checkbox').forEach(checkbox => { checkbox.checked = selectAllCheckbox.checked; }); updateSelectionState(); }); 
-    deleteSelectedBtn.addEventListener('click', async () => { const selectedIndices = Array.from(document.querySelectorAll('.unit-checkbox:checked')).map(cb => parseInt(cb.dataset.index)); if (selectedIndices.length === 0) return; if(await showConfirm('Suppression en masse', `...`)) { selectedIndices.sort((a, b) => b - a).forEach(index => units.splice(index, 1)); saveDataToFirebase(); showToast(`${selectedIndices.length} unité(s) supprimée(s).`, 'success'); } }); 
-    editForm.addEventListener('submit', (event) => { event.preventDefault(); const index = parseInt(document.getElementById('edit-unit-index').value); units[index] = { ...units[index], name: document.getElementById('edit-unit-name').value, element: document.getElementById('edit-unit-element').value, rarity: document.getElementById('edit-unit-rarity').value, stars: parseInt(document.getElementById('edit-unit-stars').value, 10), level: parseInt(document.getElementById('edit-unit-level').value, 10), doublon: parseInt(document.getElementById('edit-unit-doublon').value, 10), s1: parseInt(document.getElementById('edit-unit-s1').value, 10), s2: parseInt(document.getElementById('edit-unit-s2').value, 10), s3: parseInt(document.getElementById('edit-unit-s3').value, 10), notes: document.getElementById('edit-unit-notes').value }; saveDataToFirebase(); closeEditModal(); showToast('Modifications enregistrées.', 'success'); }); 
+    
+    deleteSelectedBtn.addEventListener('click', async () => { 
+        const selectedIndices = Array.from(document.querySelectorAll('.unit-checkbox:checked')).map(cb => parseInt(cb.dataset.index));
+        if (selectedIndices.length === 0) return;
+        if (await showConfirm('Suppression en masse', `Êtes-vous sûr de vouloir supprimer ${selectedIndices.length} unité(s) ?`)) {
+            const newUnits = units.filter((_, index) => !selectedIndices.includes(index));
+            units = newUnits;
+            saveDataToFirebase();
+            showToast(`${selectedIndices.length} unité(s) supprimée(s).`, 'success');
+        }
+    }); 
+    
+    editForm.addEventListener('submit', (event) => { 
+        event.preventDefault(); 
+        const index = parseInt(document.getElementById('edit-unit-index').value); 
+        units[index] = { ...units[index], name: document.getElementById('edit-unit-name').value, element: document.getElementById('edit-unit-element').value, rarity: document.getElementById('edit-unit-rarity').value, stars: parseInt(document.getElementById('edit-unit-stars').value, 10), level: parseInt(document.getElementById('edit-unit-level').value, 10), doublon: parseInt(document.getElementById('edit-unit-doublon').value, 10), s1: parseInt(document.getElementById('edit-unit-s1').value, 10), s2: parseInt(document.getElementById('edit-unit-s2').value, 10), s3: parseInt(document.getElementById('edit-unit-s3').value, 10), notes: document.getElementById('edit-unit-notes').value }; 
+        saveDataToFirebase();
+        closeEditModal(); 
+        showToast('Modifications enregistrées.', 'success'); 
+    }); 
+
     closeModalBtn.addEventListener('click', closeEditModal); 
     window.addEventListener('click', (event) => { if (event.target == editModal) closeEditModal(); }); 
-    exportBtn.addEventListener('click', () => { /* ... */ }); 
-    importInput.addEventListener('change', async (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (e) => { try { const importedData = JSON.parse(e.target.result); if (await showConfirm('Importer et écraser les données en ligne ?', '...')) { units = importedData.units || []; teams = importedData.teams || []; manualObjectives = importedData.manualObjectives || []; dailyRoutine = importedData.dailyRoutine || {}; await saveDataToFirebase(); showToast("Importation et synchronisation réussies !", 'success'); } } catch (error) { showToast("Fichier invalide.", 'error'); } finally { importInput.value = ''; } }; reader.readAsText(file); }); 
+    
+    exportBtn.addEventListener('click', () => { 
+        if (units.length === 0 && teams.length === 0 && manualObjectives.length === 0) { 
+            showToast("Il n'y a aucune donnée à exporter.", 'info'); 
+            return; 
+        } 
+        const backupData = { units, teams, manualObjectives, dailyRoutine }; 
+        const dataStr = JSON.stringify(backupData, null, 2); 
+        const blob = new Blob([dataStr], { type: 'application/json' }); 
+        const url = URL.createObjectURL(blob); 
+        const a = document.createElement('a'); 
+        a.href = url; 
+        a.download = `etheria_manager_backup_${new Date().toISOString().slice(0, 10)}.json`; 
+        document.body.appendChild(a); 
+        a.click(); 
+        document.body.removeChild(a); 
+        URL.revokeObjectURL(url); 
+        showToast('Exportation réussie !', 'success'); 
+    }); 
+
+    importInput.addEventListener('change', (event) => { 
+        const file = event.target.files[0]; if (!file) return;
+        const reader = new FileReader(); 
+        reader.onload = async (e) => { 
+            try { 
+                const importedData = JSON.parse(e.target.result); 
+                if (await showConfirm('Importer et écraser les données en ligne ?', "Cette action est irréversible.")) { 
+                    units = importedData.units || []; 
+                    teams = importedData.teams || []; 
+                    manualObjectives = importedData.manualObjectives || []; 
+                    dailyRoutine = importedData.dailyRoutine || {}; 
+                    await saveDataToFirebase();
+                    showToast("Importation et synchronisation réussies !", 'success'); 
+                } 
+            } catch (error) { showToast("Fichier invalide.", 'error'); } 
+            finally { importInput.value = ''; } 
+        }; 
+        reader.readAsText(file); 
+    }); 
+    
     importCsvInput.addEventListener('change', (event) => { /* ... */ saveDataToFirebase(); /* ... */ }); 
-    teamBuilderUnitList.addEventListener('dragstart', (e) => { /* ... */ }); 
-    teamSlotsContainer.addEventListener('dragover', (e) => { /* ... */ }); 
-    teamSlotsContainer.addEventListener('dragleave', (e) => { /* ... */ }); 
-    teamSlotsContainer.addEventListener('drop', (e) => { /* ... */ saveDataToFirebase(); }); 
-    teamSlotsContainer.addEventListener('click', (e) => { /* ... */ saveDataToFirebase(); /* ... */ }); 
-    teamBuilderUnitList.addEventListener('click', (e) => { /* ... */ saveDataToFirebase(); /* ... */ }); 
+    
+    teamBuilderUnitList.addEventListener('dragstart', (e) => { if(e.target.tagName === 'IMG') e.dataTransfer.setData('text/plain', e.target.dataset.unitIndex); }); 
+    teamSlotsContainer.addEventListener('dragover', (e) => { e.preventDefault(); const slot = e.target.closest('.team-slot'); if (slot) slot.classList.add('drag-over'); }); 
+    teamSlotsContainer.addEventListener('dragleave', (e) => { const slot = e.target.closest('.team-slot'); if (slot) slot.classList.remove('drag-over'); }); 
+    teamSlotsContainer.addEventListener('drop', (e) => { e.preventDefault(); const slot = e.target.closest('.team-slot'); if(slot) { slot.classList.remove('drag-over'); const unitIndex = e.dataTransfer.getData('text/plain'); const slotIndex = slot.dataset.slotIndex; teams[activeTeamIndex].units[slotIndex] = units[unitIndex]; saveDataToFirebase(); }}); 
+    teamSlotsContainer.addEventListener('click', (e) => { const target = e.target; const slot = target.closest('.team-slot'); if (target.classList.contains('remove-from-team-btn')) { const slotIndex = target.dataset.slotIndex; teams[activeTeamIndex].units[slotIndex] = null; saveDataToFirebase(); } else if (slot) { const clickedSlotIndex = parseInt(slot.dataset.slotIndex); if (selectionModeSlotIndex === clickedSlotIndex) { selectionModeSlotIndex = null; } else { selectionModeSlotIndex = clickedSlotIndex; } updateSelectionModeUI(); }}); 
+    teamBuilderUnitList.addEventListener('click', (e) => { if (e.target.tagName === 'IMG' && selectionModeSlotIndex !== null) { const unitIndex = e.target.dataset.unitIndex; teams[activeTeamIndex].units[selectionModeSlotIndex] = units[unitIndex]; saveDataToFirebase(); selectionModeSlotIndex = null; updateSelectionModeUI(); }}); 
     teamSelect.addEventListener('change', () => { activeTeamIndex = parseInt(teamSelect.value); renderActiveTeam(); }); 
-    saveTeamBtn.addEventListener('click', () => { /* ... */ saveDataToFirebase(); /* ... */ }); 
-    newTeamBtn.addEventListener('click', () => { /* ... */ saveDataToFirebase(); /* ... */ }); 
-    deleteTeamBtn.addEventListener('click', async () => { /* ... */ await saveDataToFirebase(); /* ... */ }); 
+    saveTeamBtn.addEventListener('click', () => { const newName = teamNameInput.value.trim(); if (newName) { teams[activeTeamIndex].name = newName; saveDataToFirebase(); renderTeamSelect(); showToast('Nom de l\'équipe sauvegardé !', 'success'); } else { showToast('Veuillez donner un nom à votre équipe.', 'info'); }}); 
+    newTeamBtn.addEventListener('click', () => { teams.push({ name: 'Nouvelle Équipe', units: [null, null, null, null, null], notes: '' }); activeTeamIndex = teams.length - 1; saveDataToFirebase(); }); 
+    deleteTeamBtn.addEventListener('click', async () => { if(teams.length <= 1) { showToast("Vous ne pouvez pas supprimer votre dernière équipe.", 'info'); return; } if(await showConfirm('Supprimer l\'équipe', `...`)) { teams.splice(activeTeamIndex, 1); activeTeamIndex = 0; saveDataToFirebase(); showToast('Équipe supprimée.', 'success'); }}); 
     teamNotesTextarea.addEventListener('input', () => { if(teams[activeTeamIndex]) { teams[activeTeamIndex].notes = teamNotesTextarea.value; saveDataToFirebase(); }}); 
-    addObjectiveForm.addEventListener('submit', (e) => { /* ... */ saveDataToFirebase(); /* ... */ }); 
-    objectivesListContainer.addEventListener('click', (e) => { /* ... */ saveDataToFirebase(); /* ... */ }); 
-    routineTrackerContent.addEventListener('click', (e) => { /* ... */ saveDataToFirebase(); }); 
+    
+    addObjectiveForm.addEventListener('submit', (e) => { e.preventDefault(); const text = newObjectiveInput.value.trim(); if (text) { manualObjectives.push({ id: Date.now(), text: text, completed: false }); saveDataToFirebase(); newObjectiveInput.value = ''; showToast("Objectif ajouté !", 'success'); } }); 
+    objectivesListContainer.addEventListener('click', (e) => { const li = e.target.closest('.objective-item'); if (!li) return; const objectiveId = Number(li.dataset.id); const objective = manualObjectives.find(obj => obj.id === objectiveId); if (e.target.classList.contains('objective-checkbox')) { if(objective) objective.completed = e.target.checked; } if (e.target.closest('.delete-objective-btn')) { manualObjectives = manualObjectives.filter(obj => obj.id !== objectiveId); showToast("Objectif supprimé.", 'info'); } saveDataToFirebase(); }); 
+    
+    routineTrackerContent.addEventListener('click', (e) => { const item = e.target.closest('.routine-item'); if (!item) return; const taskName = item.dataset.taskName; const taskDef = ROUTINE_DEFINITION.find(t => t.name === taskName); if (!taskDef) return; const taskState = dailyRoutine.tasks[taskName]; const currentGameDay = getGameDay(); if (taskDef.type === 'checkbox') { taskState.completedOn = e.target.checked ? currentGameDay : null; } else if (taskDef.type === 'counter') { let count = taskState.count || 0; if (e.target.dataset.action === 'plus') count = Math.min(taskDef.max, count + 1); else if (e.target.dataset.action === 'minus') count = Math.max(0, count - 1); taskState.count = count; taskState.updatedOn = currentGameDay; } saveDataToFirebase(); }); 
     // #endregion 
 
     // #region --- INITIALISATION --- 

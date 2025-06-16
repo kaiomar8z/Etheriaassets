@@ -456,14 +456,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const img = rowFragment.querySelector('.unit-image-cell img'); 
             img.alt = unit.name;
 
+            // Logique d'affichage d'image corrigée
             if (unit.image) {
+                // Si une image a été uploadée manuellement (en base64), on l'utilise.
                 img.src = unit.image;
             } else {
+                // Sinon, on construit l'URL à partir du nom NORMALISÉ.
                 const formattedName = normalizeStringForFilename(unit.name);
-                img.src = `${imageBaseUrl}${formattedName}.webp`;
+                if (formattedName) {
+                    img.src = `${imageBaseUrl}${formattedName}.webp`;
+                } else {
+                    img.src = 'https://via.placeholder.com/50x50/304065/e0e0e0?text=?';
+                }
                 
+                // Si l'image n'est pas trouvée (erreur 404), on met une image par défaut.
                 img.onerror = () => {
                     img.src = 'https://via.placeholder.com/50x50/304065/e0e0e0?text=?';
+                    // Important: on supprime l'événement pour éviter une boucle d'erreurs.
                     img.onerror = null; 
                 };
             }
@@ -524,7 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             unitListBody.appendChild(rowFragment); 
         }); 
-    }; 
+    };
 
     const updateSortHeaders = () => { 
         table.querySelectorAll('thead th.sortable').forEach(th => { 

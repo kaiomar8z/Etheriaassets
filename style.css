@@ -236,7 +236,6 @@ textarea {
 .submit-btn { width: 100%; padding: 15px; font-size: 1.1em; flex-grow: 2;} 
 .submit-btn:hover, .action-btn:hover, .filter-btn:hover { background-color: var(--primary-color-hover); transform: translateY(-2px); } 
 .action-btn.import-btn { background-color: var(--success-color); } 
-.action-btn.info-btn { background-color: var(--info-color); } /* NOUVELLE CLASSE */
 .action-btn.clear-btn { background-color: var(--text-color-muted); flex-grow: 1; } 
 .action-btn.delete-selected-btn { background-color: var(--danger-color); } 
  
@@ -387,6 +386,7 @@ th.sorted .sort-arrow { opacity: 1; }
 .objective-item .delete-objective-btn { background: none; border: none; color: var(--text-color-muted); font-size: 1.2em; cursor: pointer; transition: color 0.2s; } 
 .objective-item .delete-objective-btn:hover { color: var(--danger-color); } 
 
+/* NOUVEAU: Style pour les icônes dans le tableau */
 .table-icon {
     height: 24px;
     vertical-align: middle;

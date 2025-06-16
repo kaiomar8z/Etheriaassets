@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalBtn = document.querySelector('#edit-modal .close-btn'); 
     
     const searchInput = document.getElementById('search-input'); 
-    const filterElement = document.getElementById('filter-element');
+    const filterElement = document.getElementById('filter-element'); 
     const filterRarity = document.getElementById('filter-rarity');
     const filterFavoritesBtn = document.getElementById('filter-favorites-btn'); 
     const table = document.getElementById('units-table'); 
@@ -84,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const importInput = document.getElementById('import-input'); 
     const importCsvInput = document.getElementById('import-csv-input'); 
     const exportBtn = document.getElementById('export-btn'); 
-    const updateImagesBtn = document.getElementById('update-images-btn');
 
     const showManagerBtn = document.getElementById('show-manager-btn'); 
     const showBuilderBtn = document.getElementById('show-builder-btn'); 
@@ -115,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let teams = JSON.parse(localStorage.getItem('etheriaTeams')) || []; 
     let manualObjectives = JSON.parse(localStorage.getItem('etheriaManualObjectives')) || []; 
     let dailyRoutine = JSON.parse(localStorage.getItem('etheriaDailyRoutine')) || {}; 
-    let unitsDB = null;
+    let unitsDB = null; // Pour stocker la base de données des unités en cache
 
     let activeTeamIndex = 0; 
     let currentSort = { column: 'level', direction: 'desc' }; 
@@ -128,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveManualObjectives = () => localStorage.setItem('etheriaManualObjectives', JSON.stringify(manualObjectives)); 
     const saveDailyRoutine = () => localStorage.setItem('etheriaDailyRoutine', JSON.stringify(dailyRoutine)); 
     // #endregion 
-
+    
     // #region --- MODULE DE GESTION DE LA ROUTINE --- 
     const ROUTINE_DEFINITION = [ 
         { name: "Arène", type: "checkbox" }, 
@@ -296,44 +295,37 @@ document.addEventListener('DOMContentLoaded', () => {
         unitNameInput.focus(); 
     }; 
     
-    const fetchImageForUnit = async (unitName) => {
-        if (!unitName || !unitName.trim()) return null;
-        const formattedName = unitName.trim().replace(/ /g, '_').toLowerCase();
-        const extensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
-        
-        for (const ext of extensions) {
-            const potentialUrl = `${imageBaseUrl}${formattedName}.${ext}`;
-            try {
-                const response = await fetch(potentialUrl, { method: 'HEAD', cache: 'no-cache' });
-                if (response.ok) {
-                    const imageResponse = await fetch(potentialUrl);
-                    const blob = await imageResponse.blob();
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
-                    });
-                }
-            } catch (error) { /* Ignore */ }
-        }
-        return null;
-    };
-
     const findUnitImage = async (unitName) => { 
+        if (!unitName || !unitName.trim()) return; 
+        const formattedName = unitName.trim().replace(/ /g, '_').toLowerCase();
+        const extensions = ['png', 'jpg', 'jpeg', 'gif', 'webp']; 
+        let foundImageUrl = null; 
         imagePlaceholder.innerHTML = '<span><i class="fa-solid fa-spinner fa-spin"></i> Recherche...</span>'; 
-        const imageData = await fetchImageForUnit(unitName);
-        if (imageData) {
-            unitImageData = imageData;
-            imagePlaceholder.innerHTML = `<img src="${imageData}" alt="${unitName}">`;
-        } else {
-            unitImageData = null;
-            imagePlaceholder.innerHTML = '<span>Image non trouvée.<br>Cliquez pour uploader.</span>';
-        }
+        for (const ext of extensions) { 
+            const potentialUrl = `${imageBaseUrl}${formattedName}.${ext}`; 
+            try { 
+                const response = await fetch(potentialUrl, { method: 'HEAD', cache: 'no-cache' }); 
+                if (response.ok) { foundImageUrl = potentialUrl; break; } 
+            } catch (error) { /* Ignore fetch errors */ } 
+        } 
+        if (foundImageUrl) { 
+            const response = await fetch(foundImageUrl); 
+            const blob = await response.blob(); 
+            const reader = new FileReader(); 
+            reader.onload = (e) => { 
+                unitImageData = e.target.result; 
+                imagePlaceholder.innerHTML = `<img src="${unitImageData}" alt="${unitName}">`; 
+            }; 
+            reader.readAsDataURL(blob); 
+        } else { 
+            unitImageData = null; 
+            imagePlaceholder.innerHTML = '<span>Image non trouvée.<br>Cliquez pour uploader.</span>'; 
+        } 
     }; 
     
     const fetchAndFillUnitData = async (unitName) => {
         if (!unitName.trim()) return;
-        const dbUrl = './units_db.json';
+        const dbUrl = 'https://raw.githubusercontent.com/kaiomar8z/Etheriaassets/main/units_db.json';
 
         try {
             if (!unitsDB) {
@@ -353,32 +345,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Erreur lors de la récupération de la base de données d'unités:", error);
             showToast("Impossible de charger la base de données des unités.", "error");
         }
-    };
-
-    const updateAllMissingImages = async () => {
-        const unitsToUpdate = units.filter(u => !u.image);
-        if (unitsToUpdate.length === 0) {
-            showToast("Toutes les unités ont déjà une image.", "info");
-            return;
-        }
-
-        updateImagesBtn.disabled = true;
-        showToast(`Mise à jour de ${unitsToUpdate.length} image(s) en cours...`, 'info');
-
-        let updatedCount = 0;
-        // On utilise une boucle for...of pour bien gérer les 'await'
-        for (const unit of unitsToUpdate) {
-            const imageData = await fetchImageForUnit(unit.name);
-            if (imageData) {
-                unit.image = imageData;
-                updatedCount++;
-            }
-        }
-
-        saveUnits();
-        displayUnits();
-        updateImagesBtn.disabled = false;
-        showToast(`${updatedCount} image(s) mise(s) à jour avec succès !`, 'success');
     };
 
     const renderSkillLevel = (level) => { 
@@ -750,8 +716,6 @@ document.addEventListener('DOMContentLoaded', () => {
         filterFavoritesBtn.classList.toggle('active', favoritesFilterActive); 
         displayUnits(); 
     }); 
-
-    updateImagesBtn.addEventListener('click', updateAllMissingImages);
 
     table.querySelector('thead').addEventListener('click', (event) => { 
         const header = event.target.closest('th'); 

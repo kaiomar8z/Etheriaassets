@@ -288,6 +288,20 @@ document.addEventListener('DOMContentLoaded', () => {
         'Light': 'constant.webp'
     };
 
+    /**
+     * "Normalise" une chaîne de caractères pour correspondre à un nom de fichier.
+     * @param {string} str La chaîne à normaliser.
+     * @returns {string} La chaîne normalisée (minuscules, sans espaces, sans accents).
+     */
+    function normalizeStringForFilename(str) {
+        if (!str) return '';
+        return str
+            .toLowerCase()
+            .normalize("NFD") // Sépare les accents des lettres (ex: "é" -> "e" + "´")
+            .replace(/[\u0300-\u036f]/g, "") // Supprime les caractères diacritiques combinés
+            .replace(/ /g, ''); // Supprime les espaces
+    }
+
     const resetAddForm = () => { 
         addForm.reset();
         unitImageData = null; 
@@ -298,8 +312,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const fetchImageForUnit = async (unitName) => {
         if (!unitName || !unitName.trim()) return null;
-        const formattedName = unitName.trim().replace(/ /g, '_').toLowerCase();
-        const extensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
+        // On utilise la nouvelle fonction de normalisation ici
+        const formattedName = normalizeStringForFilename(unitName);
+        const extensions = ['webp', 'png', 'jpg', 'jpeg', 'gif'];
         
         for (const ext of extensions) {
             const potentialUrl = `${imageBaseUrl}${formattedName}.${ext}`;
@@ -366,7 +381,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast(`Mise à jour de ${unitsToUpdate.length} image(s) en cours...`, 'info');
 
         let updatedCount = 0;
-        // On utilise une boucle for...of pour bien gérer les 'await'
         for (const unit of unitsToUpdate) {
             const imageData = await fetchImageForUnit(unit.name);
             if (imageData) {
@@ -440,8 +454,19 @@ document.addEventListener('DOMContentLoaded', () => {
             
             rowFragment.querySelector('.unit-checkbox').dataset.index = originalIndex; 
             const img = rowFragment.querySelector('.unit-image-cell img'); 
-            img.src = unit.image || `https://via.placeholder.com/50x50/304065/e0e0e0?text=?`; 
-            img.alt = unit.name; 
+            img.alt = unit.name;
+
+            if (unit.image) {
+                img.src = unit.image;
+            } else {
+                const formattedName = normalizeStringForFilename(unit.name);
+                img.src = `${imageBaseUrl}${formattedName}.webp`;
+                
+                img.onerror = () => {
+                    img.src = 'https://via.placeholder.com/50x50/304065/e0e0e0?text=?';
+                    img.onerror = null; 
+                };
+            }
             
             if (unit.rarity) { 
                 img.classList.add(`rarity-border-${unit.rarity.toLowerCase()}`); 
@@ -916,7 +941,7 @@ document.addEventListener('DOMContentLoaded', () => {
     teamSlotsContainer.addEventListener('click', (e) => { const target = e.target; const slot = target.closest('.team-slot'); if (target.classList.contains('remove-from-team-btn')) { const slotIndex = target.dataset.slotIndex; teams[activeTeamIndex].units[slotIndex] = null; saveTeams(); renderActiveTeam(); selectionModeSlotIndex = null; updateSelectionModeUI(); } else if (slot) { const clickedSlotIndex = parseInt(slot.dataset.slotIndex); if (selectionModeSlotIndex === clickedSlotIndex) { selectionModeSlotIndex = null; } else { selectionModeSlotIndex = clickedSlotIndex; } updateSelectionModeUI(); }}); 
     teamBuilderUnitList.addEventListener('click', (e) => { if (e.target.tagName === 'IMG' && selectionModeSlotIndex !== null) { const unitIndex = e.target.dataset.unitIndex; teams[activeTeamIndex].units[selectionModeSlotIndex] = units[unitIndex]; saveTeams(); renderActiveTeam(); selectionModeSlotIndex = null; updateSelectionModeUI(); }}); 
     teamSelect.addEventListener('change', () => { activeTeamIndex = parseInt(teamSelect.value); renderActiveTeam(); }); 
-    saveTeamBtn.addEventListener('click', () => { const newName = teamNameInput.value.trim(); if (newName) { teams[activeTeamIndex].name = newName; saveTeams(); renderTeamSelect(); showToast('Nom de l\'équipe sauvegardé !', 'success'); } else { showToast('Veuillez donner un nom à votre équipe.', 'info'); }}); 
+    saveTeamBtn.addEventListener('click', () => { const newName = teamNameInput.value.trim(); if (newName) { teams[activeTeamIndex].name = newName; saveTeams(); renderTeamSelect(); showToast('Nom de l'équipe sauvegardé !', 'success'); } else { showToast('Veuillez donner un nom à votre équipe.', 'info'); }}); 
     newTeamBtn.addEventListener('click', () => {  
         teams.push({ name: 'Nouvelle Équipe', units: [null, null, null, null, null], notes: '' });  
         activeTeamIndex = teams.length - 1;  

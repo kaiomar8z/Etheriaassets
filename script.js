@@ -84,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const importInput = document.getElementById('import-input'); 
     const importCsvInput = document.getElementById('import-csv-input'); 
     const exportBtn = document.getElementById('export-btn'); 
-    const updateImagesBtn = document.getElementById('update-images-btn');
 
     const showManagerBtn = document.getElementById('show-manager-btn'); 
     const showBuilderBtn = document.getElementById('show-builder-btn'); 
@@ -296,8 +295,37 @@ document.addEventListener('DOMContentLoaded', () => {
         unitNameInput.focus(); 
     }; 
     
+    const findUnitImage = async (unitName) => { 
+        if (!unitName || !unitName.trim()) return;
+        const formattedName = unitName.trim().replace(/ /g, '_').toLowerCase();
+        const extensions = ['png', 'jpg', 'jpeg', 'gif', 'webp']; 
+        let foundImageUrl = null; 
+        imagePlaceholder.innerHTML = '<span><i class="fa-solid fa-spinner fa-spin"></i> Recherche...</span>'; 
+        for (const ext of extensions) { 
+            const potentialUrl = `${imageBaseUrl}${formattedName}.${ext}`; 
+            try { 
+                const response = await fetch(potentialUrl, { method: 'HEAD', cache: 'no-cache' }); 
+                if (response.ok) { foundImageUrl = potentialUrl; break; } 
+            } catch (error) { /* Ignore fetch errors */ } 
+        } 
+        if (foundImageUrl) { 
+            const response = await fetch(foundImageUrl); 
+            const blob = await response.blob(); 
+            const reader = new FileReader(); 
+            reader.onload = (e) => { 
+                unitImageData = e.target.result; 
+                imagePlaceholder.innerHTML = `<img src="${unitImageData}" alt="${unitName}">`; 
+            }; 
+            reader.readAsDataURL(blob); 
+        } else { 
+            unitImageData = null; 
+            imagePlaceholder.innerHTML = '<span>Image non trouvée.<br>Cliquez pour uploader.</span>'; 
+        } 
+    }; 
+    
     const fetchAndFillUnitData = async (unitName) => {
         if (!unitName.trim()) return;
+        
         const dbUrl = './units_db.json';
 
         try {
@@ -318,89 +346,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Erreur lors de la récupération de la base de données d'unités:", error);
             showToast("Impossible de charger la base de données des unités.", "error");
         }
-    };
-
-    const findUnitImage = async (unitName) => { 
-        if (!unitName || !unitName.trim()) return;
-        
-        const formattedName = unitName.trim().replace(/ /g, '_').toLowerCase();
-        const extensions = ['webp', 'png', 'jpg', 'jpeg', 'gif']; 
-        let foundImageUrl = null; 
-        
-        imagePlaceholder.innerHTML = '<span><i class="fa-solid fa-spinner fa-spin"></i> Recherche...</span>'; 
-        
-        for (const ext of extensions) { 
-            const potentialUrl = `${imageBaseUrl}${formattedName}.${ext}`; 
-            try { 
-                const response = await fetch(potentialUrl, { method: 'HEAD', cache: 'no-cache' }); 
-                if (response.ok) { 
-                    foundImageUrl = potentialUrl; 
-                    break; 
-                } 
-            } catch (error) { /* Ignore */ } 
-        } 
-
-        if (foundImageUrl) { 
-            const response = await fetch(foundImageUrl); 
-            const blob = await response.blob(); 
-            const reader = new FileReader(); 
-            reader.onload = (e) => { 
-                unitImageData = e.target.result; 
-                imagePlaceholder.innerHTML = `<img src="${unitImageData}" alt="${unitName}">`; 
-            }; 
-            reader.readAsDataURL(blob); 
-        } else { 
-            unitImageData = null; 
-            imagePlaceholder.innerHTML = '<span>Image non trouvée.<br>Cliquez pour uploader.</span>'; 
-        } 
-    }; 
-    
-    const fetchImageForUnit = async (unitName) => {
-        if (!unitName || !unitName.trim()) return null;
-        const formattedName = unitName.trim().replace(/ /g, '_').toLowerCase();
-        const extensions = ['webp', 'png', 'jpg', 'jpeg', 'gif'];
-        
-        for (const ext of extensions) {
-            const potentialUrl = `${imageBaseUrl}${formattedName}.${ext}`;
-            try {
-                const response = await fetch(potentialUrl, { method: 'HEAD', cache: 'no-cache' });
-                if (response.ok) {
-                    const imageResponse = await fetch(potentialUrl);
-                    const blob = await imageResponse.blob();
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
-                    });
-                }
-            } catch (error) { /* Ignore */ }
-        }
-        return null;
-    };
-
-    const updateAllMissingImages = async () => {
-        const unitsToUpdate = units.filter(u => !u.image);
-        if (unitsToUpdate.length === 0) {
-            showToast("Toutes les unités ont déjà une image.", "info");
-            return;
-        }
-
-        updateImagesBtn.disabled = true;
-        showToast(`Mise à jour de ${unitsToUpdate.length} image(s) en cours...`, 'info');
-
-        let updatedCount = 0;
-        for (const unit of unitsToUpdate) {
-            const imageData = await fetchImageForUnit(unit.name);
-            if (imageData) {
-                unit.image = imageData;
-                updatedCount++;
-            }
-        }
-
-        saveUnits();
-        displayUnits();
-        updateImagesBtn.disabled = false;
-        showToast(`${updatedCount} image(s) mise(s) à jour avec succès !`, 'success');
     };
 
     const renderSkillLevel = (level) => { 
@@ -464,18 +409,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const img = rowFragment.querySelector('.unit-image-cell img'); 
             img.alt = unit.name;
 
+            // NOUVELLE LOGIQUE D'AFFICHAGE D'IMAGE
             if (unit.image) {
+                // Si une image a été uploadée manuellement (en base64), on l'utilise.
                 img.src = unit.image;
             } else {
+                // Sinon, on construit l'URL à partir du nom.
                 const formattedName = unit.name.trim().replace(/ /g, '_').toLowerCase();
-                if (formattedName) {
-                    img.src = `${imageBaseUrl}${formattedName}.webp`;
-                } else {
-                    img.src = 'https://via.placeholder.com/50x50/304065/e0e0e0?text=?';
-                }
+                // On essaie avec .webp par défaut, qui est le format le plus probable pour vos assets.
+                img.src = `${imageBaseUrl}${formattedName}.webp`;
                 
+                // Si l'image n'est pas trouvée (erreur 404), on met une image par défaut.
                 img.onerror = () => {
                     img.src = 'https://via.placeholder.com/50x50/304065/e0e0e0?text=?';
+                    // Important: on supprime l'événement pour éviter une boucle d'erreurs si le placeholder est cassé.
                     img.onerror = null; 
                 };
             }
@@ -787,8 +734,6 @@ document.addEventListener('DOMContentLoaded', () => {
         filterFavoritesBtn.classList.toggle('active', favoritesFilterActive); 
         displayUnits(); 
     }); 
-
-    updateImagesBtn.addEventListener('click', updateAllMissingImages);
 
     table.querySelector('thead').addEventListener('click', (event) => { 
         const header = event.target.closest('th'); 

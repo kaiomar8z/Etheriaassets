@@ -15,10 +15,6 @@
     <div class="container">
         <header>
             <h1><i class="fa-solid fa-gamepad"></i> Etheria Restart Manager</h1>
-            <div id="auth-container" style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; align-items: flex-start; gap: 5px;">
-                <span id="auth-status" style="font-size: 0.8em; color: var(--text-color-muted);"></span>
-                <span id="user-id-display" style="font-size: 0.7em; color: var(--text-color-muted); cursor: pointer;" title="Cliquez pour copier l'ID utilisateur"></span>
-            </div>
             <button id="theme-toggle-btn" class="action-btn" title="Changer de thème"></button>
             <nav class="main-nav">
                 <button id="show-manager-btn" class="nav-btn">Gestionnaire</button>
@@ -207,7 +203,7 @@
                 <span class="close-btn">&times;</span>
             </div>
             <form id="edit-unit-form">
-                <input type="hidden" id="edit-unit-id">
+                <input type="hidden" id="edit-unit-index">
                 <div class="form-grid">
                     <div class="form-group full-width"><label for="edit-unit-name">Nom de l'Unité *</label><input type="text" id="edit-unit-name" required></div>
                     <div class="form-group"><label for="edit-unit-element">Élément *</label><select id="edit-unit-element" required><option value="">Choisir...</option><option value="Rouge">Rouge</option><option value="Bleu">Bleu</option><option value="Vert">Vert</option><option value="Dark">Dark</option><option value="Light">Light</option></select></div>
@@ -270,8 +266,10 @@
             </td>
         </tr>
     </template>
-    
-    <script type="module" src="script.js"></script>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script src="script.js" defer></script>
 </body>
 </html>

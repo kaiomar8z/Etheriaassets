@@ -1,101 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { 
-    getFirestore, 
-    collection, 
-    onSnapshot, 
-    addDoc, 
-    deleteDoc, 
-    doc, 
-    updateDoc,
-    writeBatch,
-    getDocs,
-    setDoc
-} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
-import { 
-    getAuth, 
-    onAuthStateChanged, 
-    signInAnonymously,
-    signInWithCustomToken 
-} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
-
-
 document.addEventListener('DOMContentLoaded', () => { 
-
-    // #region --- CONFIGURATION FIREBASE ---
-    // Ces variables sont fournies par l'environnement d'exécution
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'etheria-manager-local';
-    const firebaseConfig =  {
-        apiKey: "AIzaSyDVVTPm80W3K0ebutcPlh-OAR28kJiaMjE",
-        authDomain: "etheria-manager.firebaseapp.com",
-        projectId: "etheria-manager",
-        storageBucket: "etheria-manager.firebasestorage.app", // Corrigé pour correspondre à la configuration d'origine
-        messagingSenderId: "247321381553",
-        appId: "1:247321381553:web:517f4fb1989ad14a8e3090"
-    };
-
-    // Initialisation Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    let userId = null;
-    let dbReady = false;
-
-    // Références aux collections
-    let unitsCollection, teamsCollection, objectivesCollection, routineDoc;
-
-    const authStatus = document.getElementById('auth-status');
-    const userIdDisplay = document.getElementById('user-id-display');
-
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            userId = user.uid;
-            console.log("Utilisateur connecté:", userId);
-            authStatus.textContent = 'Connecté';
-            userIdDisplay.textContent = `UID: ${userId.substring(0, 8)}...`;
-            
-            // Définir les chemins des collections une fois l'UID connu
-            unitsCollection = collection(db, `artifacts/${appId}/users/${userId}/units`);
-            teamsCollection = collection(db, `artifacts/${appId}/users/${userId}/teams`);
-            objectivesCollection = collection(db, `artifacts/${appId}/users/${userId}/objectives`);
-            routineDoc = doc(db, `artifacts/${appId}/users/${userId}/data/dailyRoutine`);
-
-            dbReady = true;
-            initializeAppLogic(); // Lancer la logique de l'appli
-        } else {
-            console.log("Aucun utilisateur connecté, tentative de connexion anonyme.");
-            authStatus.textContent = 'Connexion...';
-            try {
-                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Erreur de connexion anonyme:", error);
-                authStatus.textContent = 'Échec de la connexion';
-            }
-        }
-    });
-    
-    // Rendre la copie de l'ID plus robuste
-    userIdDisplay.addEventListener('click', () => {
-        if(userId) {
-            const textArea = document.createElement("textarea");
-            textArea.value = userId;
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                showToast("User ID copié dans le presse-papiers!", 'success');
-            } catch (err) {
-                showToast("Erreur lors de la copie de l'ID", 'error');
-            }
-            document.body.removeChild(textArea);
-        }
-    });
-
-    // #endregion
 
     const themeToggleBtn = document.getElementById('theme-toggle-btn'); 
     const sunIcon = '<i class="fa-solid fa-sun"></i>'; 
@@ -111,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } 
     }; 
     
-    // Le thème est toujours stocké localement, pas besoin de le synchroniser
     const savedTheme = localStorage.getItem('etheriaTheme') || 'dark'; 
     applyTheme(savedTheme); 
 
@@ -122,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyTheme(newTheme); 
     }); 
 
-    // #region --- MODULES UTILITAIRES (Notifications, Confirmations, Debounce) --- 
+    // #region --- MODULES UTILITAIRES (Notifications, Confirmations) --- 
     const toastContainer = document.getElementById('toast-container'); 
     const showToast = (message, type = 'info', duration = 3500) => { 
         const toast = document.createElement('div'); 
@@ -159,16 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmCancelBtn.onclick = () => close(false); 
             confirmCloseBtn.onclick = () => close(false); 
         }); 
-    };
-    
-    // Fonction Debounce pour éviter les écritures excessives dans la DB
-    function debounce(func, timeout = 800){
-      let timer;
-      return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => { func.apply(this, args); }, timeout);
-      };
-    }
+    }; 
     // #endregion 
     
     // #region --- SÉLECTION DES ÉLÉMENTS DU DOM --- 
@@ -217,18 +110,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const routineTrackerContent = document.getElementById('routine-tracker-content'); 
     // #endregion 
 
-    // #region --- ÉTAT DE L'APPLICATION (State) --- 
-    let units = []; 
-    let teams = []; 
-    let manualObjectives = []; 
-    let dailyRoutine = {}; 
+    // #region --- ÉTAT DE L'APPLICATION (State) ET PERSISTANCE --- 
+    let units = JSON.parse(localStorage.getItem('etheriaUnits')) || []; 
+    let teams = JSON.parse(localStorage.getItem('etheriaTeams')) || []; 
+    let manualObjectives = JSON.parse(localStorage.getItem('etheriaManualObjectives')) || []; 
+    let dailyRoutine = JSON.parse(localStorage.getItem('etheriaDailyRoutine')) || {}; 
     let unitsDB = null;
 
-    let activeTeamId = null;
+    let activeTeamIndex = 0; 
     let currentSort = { column: 'level', direction: 'desc' }; 
     let favoritesFilterActive = false; 
     let selectionModeSlotIndex = null; 
     let unitImageData = null; 
+
+    const saveUnits = () => localStorage.setItem('etheriaUnits', JSON.stringify(units)); 
+    const saveTeams = () => localStorage.setItem('etheriaTeams', JSON.stringify(teams)); 
+    const saveManualObjectives = () => localStorage.setItem('etheriaManualObjectives', JSON.stringify(manualObjectives)); 
+    const saveDailyRoutine = () => localStorage.setItem('etheriaDailyRoutine', JSON.stringify(dailyRoutine)); 
     // #endregion 
 
     // #region --- MODULE DE GESTION DE LA ROUTINE --- 
@@ -252,49 +150,40 @@ document.addEventListener('DOMContentLoaded', () => {
         return gameDate.toISOString().split('T')[0]; 
     }; 
     
-    const checkRoutineReset = async () => {
-        if (!dbReady) return;
-        const currentGameDay = getGameDay();
-        let needsUpdate = false;
-        let routineData = { ...dailyRoutine }; // Copie locale
+    const checkRoutineReset = () => { 
+        const currentGameDay = getGameDay(); 
 
-        if (!routineData.tasks) {
-            routineData.tasks = {};
-            needsUpdate = true;
-        }
+        if (!dailyRoutine.tasks) { 
+            dailyRoutine.tasks = {}; 
+        } 
 
-        ROUTINE_DEFINITION.forEach(taskDef => {
-            const taskName = taskDef.name;
-            let taskState = routineData.tasks[taskName];
+        ROUTINE_DEFINITION.forEach(taskDef => { 
+            const taskName = taskDef.name; 
+            const taskState = dailyRoutine.tasks[taskName]; 
 
-            if (!taskState) {
-                 if (taskDef.type === 'checkbox') {
-                    routineData.tasks[taskName] = { completedOn: null };
-                } else if (taskDef.type === 'counter') {
-                    routineData.tasks[taskName] = { count: 0, updatedOn: null };
-                }
-                needsUpdate = true;
-                return;
-            }
+            if (!taskState) { 
+                if (taskDef.type === 'checkbox') { 
+                    dailyRoutine.tasks[taskName] = { completedOn: null }; 
+                } else if (taskDef.type === 'counter') { 
+                    dailyRoutine.tasks[taskName] = { count: 0, updatedOn: null }; 
+                } 
+                return; 
+            } 
+            
+            if (taskDef.type === 'checkbox') { 
+                if (taskState.completedOn && taskState.completedOn !== currentGameDay) { 
+                    taskState.completedOn = null; 
+                } 
+            } else if (taskDef.type === 'counter') { 
+                if (taskState.updatedOn && taskState.updatedOn !== currentGameDay) { 
+                    taskState.count = 0; 
+                    taskState.updatedOn = null; 
+                } 
+            } 
+        }); 
 
-            if (taskDef.type === 'checkbox') {
-                if (taskState.completedOn && taskState.completedOn !== currentGameDay) {
-                    taskState.completedOn = null;
-                    needsUpdate = true;
-                }
-            } else if (taskDef.type === 'counter') {
-                if (taskState.updatedOn && taskState.updatedOn !== currentGameDay) {
-                    taskState.count = 0;
-                    taskState.updatedOn = null;
-                    needsUpdate = true;
-                }
-            }
-        });
-
-        if (needsUpdate) {
-            await setDoc(routineDoc, routineData, { merge: true });
-        }
-    };
+        saveDailyRoutine(); 
+    }; 
 
     const renderRoutineTracker = () => { 
         routineTrackerContent.innerHTML = ''; 
@@ -302,13 +191,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ROUTINE_DEFINITION.forEach(taskDef => { 
             const taskName = taskDef.name; 
-            const taskState = dailyRoutine.tasks ? dailyRoutine.tasks[taskName] : null; 
+            const taskState = dailyRoutine.tasks[taskName]; 
             const item = document.createElement('div'); 
             item.className = 'routine-item'; 
             item.dataset.taskName = taskName; 
             item.dataset.taskType = taskDef.type; 
-
-            if (!taskState) return;
 
             if (taskDef.type === 'checkbox') { 
                 const isCompleted = taskState.completedOn === currentGameDay; 
@@ -501,19 +388,17 @@ document.addEventListener('DOMContentLoaded', () => {
         updateImagesBtn.disabled = true;
         showToast(`Mise à jour de ${unitsToUpdate.length} image(s) en cours...`, 'info');
 
-        const batch = writeBatch(db);
         let updatedCount = 0;
         for (const unit of unitsToUpdate) {
             const imageData = await fetchImageForUnit(unit.name);
             if (imageData) {
-                const unitRef = doc(unitsCollection, unit.id);
-                batch.update(unitRef, { image: imageData });
+                unit.image = imageData;
                 updatedCount++;
             }
         }
-        
-        await batch.commit();
-        
+
+        saveUnits();
+        displayUnits();
         updateImagesBtn.disabled = false;
         showToast(`${updatedCount} image(s) mise(s) à jour avec succès !`, 'success');
     };
@@ -572,11 +457,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return; 
         } 
         unitsToDisplay.forEach(unit => { 
+            const originalIndex = units.findIndex(originalUnit => originalUnit === unit); 
             const rowFragment = unitRowTemplate.content.cloneNode(true); 
-            const row = rowFragment.querySelector('tr');
-            row.dataset.id = unit.id;
             
-            rowFragment.querySelector('.unit-checkbox').dataset.id = unit.id; 
+            rowFragment.querySelector('.unit-checkbox').dataset.index = originalIndex; 
             const img = rowFragment.querySelector('.unit-image-cell img'); 
             img.alt = unit.name;
 
@@ -646,6 +530,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 favoriteBtn.title = "Mettre en favori"; 
             } 
 
+            favoriteBtn.dataset.index = originalIndex; 
+            rowFragment.querySelector('.edit-btn').dataset.index = originalIndex; 
+            rowFragment.querySelector('.delete-btn').dataset.index = originalIndex; 
+
             unitListBody.appendChild(rowFragment); 
         }); 
     }; 
@@ -664,10 +552,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }); 
     }; 
 
-    function openEditModal(unitId) { 
-        const unit = units.find(u => u.id === unitId); 
-        if (!unit) return;
-        document.getElementById('edit-unit-id').value = unit.id; 
+    function openEditModal(index) { 
+        const unit = units[index]; 
+        document.getElementById('edit-unit-index').value = index; 
         document.getElementById('edit-unit-name').value = unit.name; 
         document.getElementById('edit-unit-element').value = unit.element;
         document.getElementById('edit-unit-rarity').value = unit.rarity;
@@ -710,12 +597,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // #region --- MODULE TEAM BUILDER --- 
     const renderTeamBuilderUnitList = () => { 
         teamBuilderUnitList.innerHTML = ''; 
-        units.forEach(unit => { 
+        units.forEach((unit, index) => { 
             const img = document.createElement('img'); 
             img.src = unit.image || `https://via.placeholder.com/60x60/304065/e0e0e0?text=?`; 
             img.title = unit.name; 
             img.draggable = true; 
-            img.dataset.unitId = unit.id; 
+            img.dataset.unitIndex = index; 
             teamBuilderUnitList.appendChild(img); 
         }); 
     }; 
@@ -729,74 +616,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }); 
     }; 
 
-    const renderActiveTeam = () => {
-        teamSlotsContainer.innerHTML = '';
-        const activeTeam = teams.find(t => t.id === activeTeamId);
+    const renderActiveTeam = () => { 
+        teamSlotsContainer.innerHTML = ''; 
+             if (!teams[activeTeamIndex] && teams.length > 0) { 
+                   activeTeamIndex = 0; 
+             } 
+        if (!teams[activeTeamIndex]) return; 
 
-        if (!activeTeam) {
-            teamNameInput.value = '';
-            teamNotesTextarea.value = '';
-            // Afficher des slots vides
-            for (let i = 0; i < 5; i++) {
-                const slot = document.createElement('div');
-                slot.classList.add('team-slot');
-                slot.dataset.slotIndex = i;
-                slot.innerText = `Slot ${i + 1}`;
-                teamSlotsContainer.appendChild(slot);
-            }
-            return;
-        }
+        teamNameInput.value = teams[activeTeamIndex].name; 
+        teamNotesTextarea.value = teams[activeTeamIndex].notes || ''; 
+        const currentTeamUnits = teams[activeTeamIndex].units; 
 
-        teamNameInput.value = activeTeam.name;
-        teamNotesTextarea.value = activeTeam.notes || '';
-        const currentTeamUnitIds = activeTeam.units;
+        for(let i=0; i<5; i++) { 
+            const slot = document.createElement('div'); 
+            slot.classList.add('team-slot'); 
+            slot.dataset.slotIndex = i; 
 
-        for (let i = 0; i < 5; i++) {
-            const slot = document.createElement('div');
-            slot.classList.add('team-slot');
-            slot.dataset.slotIndex = i;
-
-            const unitId = currentTeamUnitIds[i];
-            const unit = units.find(u => u.id === unitId); // Correction de la race condition ici
-
-            if (unit) {
+            const unit = currentTeamUnits[i]; 
+            if (unit) { 
                 slot.innerHTML = ` 
                     <img src="${unit.image || `https://via.placeholder.com/100x100/304065/e0e0e0?text=?`}" title="${unit.name}"> 
                     <button class="remove-from-team-btn" data-slot-index="${i}">&times;</button> 
-                `;
-            } else {
-                slot.innerText = `Slot ${i + 1}`;
-            }
-            teamSlotsContainer.appendChild(slot);
-        }
-        updateSelectionModeUI();
-    };
+                `; 
+            } else { 
+                slot.innerText = `Slot ${i + 1}`; 
+            } 
+            teamSlotsContainer.appendChild(slot); 
+        } 
+        updateSelectionModeUI(); 
+    }; 
 
-    const renderTeamSelect = async () => {
-        teamSelect.innerHTML = '';
-        if (teams.length === 0 && dbReady) {
-            // Uniquement si on a la confirmation de la DB qu'il n'y a rien
-            const newTeam = { name: 'Mon Équipe', units: [null, null, null, null, null], notes: '' };
-            const docRef = await addDoc(teamsCollection, newTeam);
-            // activeTeamId = docRef.id; // onSnapshot mettra à jour l'UI
-            return;
-        }
-
-        teams.forEach(team => {
-            const option = document.createElement('option');
-            option.value = team.id;
-            option.textContent = team.name;
-            teamSelect.appendChild(option);
-        });
-
-        if (activeTeamId && teams.some(t => t.id === activeTeamId)) {
-            teamSelect.value = activeTeamId;
-        } else if (teams.length > 0) {
-            activeTeamId = teams[0].id;
-            teamSelect.value = activeTeamId;
-        }
-        renderActiveTeam();
-    };
+    const renderTeamSelect = () => { 
+        teamSelect.innerHTML = ''; 
+        if(teams.length === 0) { 
+            teams.push({ name: 'Mon Équipe', units: [null, null, null, null, null], notes: '' }); 
+            activeTeamIndex = 0; 
+            saveTeams(); 
+        } 
+        teams.forEach((team, index) => { 
+            const option = document.createElement('option'); 
+            option.value = index; 
+            option.textContent = team.name; 
+            if(index === activeTeamIndex) { 
+                option.selected = true; 
+            } 
+            teamSelect.appendChild(option); 
+        }); 
+    }; 
     // #endregion 
 
     // #region --- MODULES DASHBOARD & IMPORT/EXPORT --- 
@@ -842,12 +708,8 @@ document.addEventListener('DOMContentLoaded', () => {
     showObjectivesBtn.addEventListener('click', () => switchView('objectives')); 
 
     // Formulaire d'ajout 
-    addForm.addEventListener('submit', async (event) => { 
+    addForm.addEventListener('submit', (event) => { 
         event.preventDefault(); 
-        if (!dbReady) {
-            showToast("La base de données n'est pas prête.", "error");
-            return;
-        }
         const newUnit = { 
             name: document.getElementById('unit-name').value, 
             image: unitImageData, 
@@ -862,14 +724,11 @@ document.addEventListener('DOMContentLoaded', () => {
             isFavorite: false, 
             notes: '' 
         }; 
-        try {
-            await addDoc(unitsCollection, newUnit);
-            resetAddForm(); 
-            showToast(`'${newUnit.name}' a été ajouté.`, 'success'); 
-        } catch (error) {
-            console.error("Erreur d'ajout de l'unité: ", error);
-            showToast("Erreur lors de l'ajout de l'unité.", "error");
-        }
+        units.push(newUnit); 
+        saveUnits(); 
+        refreshUI(); 
+        resetAddForm(); 
+        showToast(`'${newUnit.name}' a été ajouté.`, 'success'); 
     }); 
     clearFormBtn.addEventListener('click', resetAddForm); 
     
@@ -894,23 +753,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Tableau des unités (Actions, Filtres, Tri, Sélection) 
     unitListBody.addEventListener('click', async (event) => { 
-        if (!dbReady) return;
-
         const button = event.target.closest('button'); 
-        const row = event.target.closest('tr');
-        const unitId = row ? row.dataset.id : null;
-        const unit = unitId ? units.find(u => u.id === unitId) : null;
-        
-        if (button && unit) { 
-            const unitRef = doc(unitsCollection, unit.id);
+        if (button && button.dataset.index) { 
+            const index = parseInt(button.dataset.index); 
 
             if (button.classList.contains('favorite-btn')) { 
-                await updateDoc(unitRef, { isFavorite: !unit.isFavorite });
+                units[index].isFavorite = !units[index].isFavorite; 
+                saveUnits(); 
+                displayUnits(); 
             } else if (button.classList.contains('edit-btn')) { 
-                openEditModal(unit.id); 
+                openEditModal(index); 
             } else if (button.classList.contains('delete-btn')) { 
-                if (await showConfirm('Supprimer l\'unité', `Êtes-vous sûr de vouloir supprimer ${unit.name} ?`)) { 
-                    await deleteDoc(unitRef);
+                if (await showConfirm('Supprimer l\'unité', `Êtes-vous sûr de vouloir supprimer ${units[index].name} ?`)) { 
+                    units.splice(index, 1); 
+                    saveUnits(); 
+                    fullAppRefresh(); 
                     showToast('Unité supprimée.', 'info'); 
                 } 
             } 
@@ -951,27 +808,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }); 
         updateSelectionState(); 
     }); 
-
     deleteSelectedBtn.addEventListener('click', async () => { 
-        const selectedIds = Array.from(document.querySelectorAll('.unit-checkbox:checked')).map(cb => cb.dataset.id); 
-        if (selectedIds.length === 0) return; 
-        if(await showConfirm('Suppression en masse', `Êtes-vous sûr de vouloir supprimer ${selectedIds.length} unité(s) ?`)) { 
-            const batch = writeBatch(db);
-            selectedIds.forEach(id => {
-                batch.delete(doc(unitsCollection, id));
-            });
-            await batch.commit();
-            showToast(`${selectedIds.length} unité(s) supprimée(s).`, 'success'); 
+        const selectedIndices = Array.from(document.querySelectorAll('.unit-checkbox:checked')).map(cb => parseInt(cb.dataset.index)); 
+        if (selectedIndices.length === 0) return; 
+        if(await showConfirm('Suppression en masse', `Êtes-vous sûr de vouloir supprimer ${selectedIndices.length} unité(s) ?`)) { 
+            selectedIndices.sort((a, b) => b - a).forEach(index => units.splice(index, 1)); 
+            saveUnits(); 
+            fullAppRefresh(); 
+            showToast(`${selectedIndices.length} unité(s) supprimée(s).`, 'success'); 
         } 
     }); 
 
     // Modale d'édition 
-    editForm.addEventListener('submit', async (event) => { 
+    editForm.addEventListener('submit', (event) => { 
         event.preventDefault(); 
-        const unitId = document.getElementById('edit-unit-id').value;
-        if (!unitId) return;
-
-        const updatedData = { 
+        const index = parseInt(document.getElementById('edit-unit-index').value); 
+        units[index] = { 
+            ...units[index], 
             name: document.getElementById('edit-unit-name').value, 
             element: document.getElementById('edit-unit-element').value, 
             rarity: document.getElementById('edit-unit-rarity').value, 
@@ -983,8 +836,8 @@ document.addEventListener('DOMContentLoaded', () => {
             s3: parseInt(document.getElementById('edit-unit-s3').value, 10), 
             notes: document.getElementById('edit-unit-notes').value  
         }; 
-        
-        await updateDoc(doc(unitsCollection, unitId), updatedData);
+        saveUnits(); 
+        refreshUI(); 
         closeEditModal(); 
         showToast('Modifications enregistrées.', 'success'); 
     }); 
@@ -997,7 +850,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast("Il n'y a aucune donnée à exporter.", 'info'); 
             return; 
         } 
-        // L'exportation n'exporte que les données locales actuelles
         const backupData = { units, teams, manualObjectives, dailyRoutine }; 
         const dataStr = JSON.stringify(backupData, null, 2); 
         const blob = new Blob([dataStr], { type: 'application/json' }); 
@@ -1011,7 +863,6 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url); 
         showToast('Exportation réussie !', 'success'); 
     }); 
-
     importInput.addEventListener('change', (event) => { 
         const file = event.target.files[0]; if (!file) return; 
         const reader = new FileReader(); 
@@ -1019,40 +870,15 @@ document.addEventListener('DOMContentLoaded', () => {
             try { 
                 const importedData = JSON.parse(e.target.result); 
                 if (await showConfirm('Importer un fichier JSON', "Voulez-vous vraiment remplacer vos données par celles importées ? Cette action est irréversible.")) { 
-                    
-                    const batch = writeBatch(db);
-
-                    // Supprimer anciennes données
-                    const oldUnits = await getDocs(unitsCollection);
-                    oldUnits.forEach(doc => batch.delete(doc.ref));
-                    const oldTeams = await getDocs(teamsCollection);
-                    oldTeams.forEach(doc => batch.delete(doc.ref));
-                    const oldObjectives = await getDocs(objectivesCollection);
-                    oldObjectives.forEach(doc => batch.delete(doc.ref));
-                    
-                    // Ajouter nouvelles données
-                    (importedData.units || []).forEach(unit => {
-                        const newUnitRef = doc(unitsCollection); // Crée un doc avec un ID auto
-                        batch.set(newUnitRef, unit);
-                    });
-                    (importedData.teams || []).forEach(team => {
-                        const newTeamRef = doc(teamsCollection);
-                        batch.set(newTeamRef, team);
-                    });
-                    (importedData.manualObjectives || []).forEach(obj => {
-                        const newObjRef = doc(objectivesCollection);
-                        batch.set(newObjRef, obj);
-                    });
-                    if (importedData.dailyRoutine) {
-                         batch.set(routineDoc, importedData.dailyRoutine, { merge: true });
-                    }
-                    
-                    await batch.commit();
+                    units = importedData.units || []; 
+                    teams = importedData.teams || []; 
+                    manualObjectives = importedData.manualObjectives || []; 
+                    dailyRoutine = importedData.dailyRoutine || {}; 
+                    saveUnits(); saveTeams(); saveManualObjectives(); saveDailyRoutine(); 
+                    fullAppRefresh(); 
                     showToast("Importation complète réussie !", 'success'); 
                 } 
-            } catch (error) { 
-                showToast("Erreur : Le fichier est invalide ou corrompu.", 'error'); 
-                console.error("Import error:", error);
+            } catch (error) { showToast("Erreur : Le fichier est invalide ou corrompu.", 'error'); 
             } finally { importInput.value = ''; } 
         }; 
         reader.readAsText(file); 
@@ -1062,7 +888,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = event.target.files[0]; 
         if (!file) return; 
         const reader = new FileReader(); 
-        reader.onload = async (e) => { 
+        reader.onload = (e) => { 
             try { 
                 const csvContent = e.target.result; 
                 const lines = csvContent.split(/\r?\n/).filter(line => line.trim() !== ''); 
@@ -1074,8 +900,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 let updatedCount = 0; 
                 let addedCount = 0; 
                 
-                const batch = writeBatch(db);
-
                 dataLines.forEach(line => { 
                     const columns = line.split(delimiter); 
                     if (columns.length < 9) return;  
@@ -1095,19 +919,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         notes: '' 
                     }; 
 
-                    const existingUnit = units.find(u => u.name.toLowerCase() === unitData.name.toLowerCase()); 
-                    if (existingUnit) { 
-                        const unitRef = doc(unitsCollection, existingUnit.id);
-                        batch.update(unitRef, unitData);
+                    const existingUnitIndex = units.findIndex(u => u.name.toLowerCase() === unitData.name.toLowerCase()); 
+                    if (existingUnitIndex > -1) { 
+                        const existingUnit = units[existingUnitIndex]; 
+                        unitData.notes = existingUnit.notes || ''; 
+                        unitData.isFavorite = existingUnit.isFavorite || false; 
+                        units[existingUnitIndex] = { ...existingUnit, ...unitData }; 
                         updatedCount++; 
                     } else { 
-                        const newUnitRef = doc(unitsCollection);
-                        batch.set(newUnitRef, unitData);
+                        units.push(unitData); 
                         addedCount++; 
                     } 
                 }); 
-                
-                await batch.commit();
+
+                saveUnits(); 
+                fullAppRefresh(); 
                 showToast(`Importation CSV : ${addedCount} ajouté(s), ${updatedCount} mis à jour.`, 'success'); 
             } catch (error) { 
                 showToast("Erreur lors de l'importation du CSV. Vérifiez le format.", 'error'); 
@@ -1120,58 +946,65 @@ document.addEventListener('DOMContentLoaded', () => {
     }); 
 
     // Team Builder 
-    teamBuilderUnitList.addEventListener('dragstart', (e) => { if(e.target.tagName === 'IMG') e.dataTransfer.setData('text/plain', e.target.dataset.unitId); }); 
+    teamBuilderUnitList.addEventListener('dragstart', (e) => { if(e.target.tagName === 'IMG') e.dataTransfer.setData('text/plain', e.target.dataset.unitIndex); }); 
     teamSlotsContainer.addEventListener('dragover', (e) => { e.preventDefault(); const slot = e.target.closest('.team-slot'); if (slot) slot.classList.add('drag-over'); }); 
     teamSlotsContainer.addEventListener('dragleave', (e) => { const slot = e.target.closest('.team-slot'); if (slot) slot.classList.remove('drag-over'); }); 
-    teamSlotsContainer.addEventListener('drop', async (e) => { e.preventDefault(); const slot = e.target.closest('.team-slot'); if(slot) { slot.classList.remove('drag-over'); const unitId = e.dataTransfer.getData('text/plain'); const slotIndex = slot.dataset.slotIndex; const activeTeam = teams.find(t => t.id === activeTeamId); if (activeTeam) { activeTeam.units[slotIndex] = unitId; await updateDoc(doc(teamsCollection, activeTeamId), { units: activeTeam.units }); } }}); 
-    teamSlotsContainer.addEventListener('click', async (e) => { const target = e.target; const slot = target.closest('.team-slot'); const activeTeam = teams.find(t => t.id === activeTeamId); if (!activeTeam) return; if (target.classList.contains('remove-from-team-btn')) { const slotIndex = target.dataset.slotIndex; activeTeam.units[slotIndex] = null; await updateDoc(doc(teamsCollection, activeTeamId), { units: activeTeam.units }); selectionModeSlotIndex = null; updateSelectionModeUI(); } else if (slot) { const clickedSlotIndex = parseInt(slot.dataset.slotIndex); if (selectionModeSlotIndex === clickedSlotIndex) { selectionModeSlotIndex = null; } else { selectionModeSlotIndex = clickedSlotIndex; } updateSelectionModeUI(); }}); 
-    teamBuilderUnitList.addEventListener('click', async (e) => { const activeTeam = teams.find(t => t.id === activeTeamId); if (e.target.tagName === 'IMG' && selectionModeSlotIndex !== null && activeTeam) { const unitId = e.target.dataset.unitId; activeTeam.units[selectionModeSlotIndex] = unitId; await updateDoc(doc(teamsCollection, activeTeamId), { units: activeTeam.units }); selectionModeSlotIndex = null; updateSelectionModeUI(); }}); 
-    teamSelect.addEventListener('change', () => { activeTeamId = teamSelect.value; renderActiveTeam(); }); 
-    saveTeamBtn.addEventListener('click', async () => { const newName = teamNameInput.value.trim(); if (newName && activeTeamId) { await updateDoc(doc(teamsCollection, activeTeamId), { name: newName }); showToast('Nom de l\'équipe sauvegardé !', 'success'); } else { showToast('Veuillez donner un nom à votre équipe.', 'info'); }}); 
-    newTeamBtn.addEventListener('click', async () => { await addDoc(teamsCollection, { name: 'Nouvelle Équipe', units: [null, null, null, null, null], notes: '' }); }); 
-    deleteTeamBtn.addEventListener('click', async () => { if(teams.length <= 1) { showToast("Vous ne pouvez pas supprimer votre dernière équipe.", 'info'); return; } const activeTeam = teams.find(t => t.id === activeTeamId); if(activeTeam && await showConfirm('Supprimer l\'équipe', `Êtes-vous sûr de vouloir supprimer l'équipe "${activeTeam.name}" ?`)) { await deleteDoc(doc(teamsCollection, activeTeamId)); showToast('Équipe supprimée.', 'success'); }}); 
+    teamSlotsContainer.addEventListener('drop', (e) => { e.preventDefault(); const slot = e.target.closest('.team-slot'); if(slot) { slot.classList.remove('drag-over'); const unitIndex = e.dataTransfer.getData('text/plain'); const slotIndex = slot.dataset.slotIndex; teams[activeTeamIndex].units[slotIndex] = units[unitIndex]; saveTeams(); renderActiveTeam(); }}); 
+    teamSlotsContainer.addEventListener('click', (e) => { const target = e.target; const slot = target.closest('.team-slot'); if (target.classList.contains('remove-from-team-btn')) { const slotIndex = target.dataset.slotIndex; teams[activeTeamIndex].units[slotIndex] = null; saveTeams(); renderActiveTeam(); selectionModeSlotIndex = null; updateSelectionModeUI(); } else if (slot) { const clickedSlotIndex = parseInt(slot.dataset.slotIndex); if (selectionModeSlotIndex === clickedSlotIndex) { selectionModeSlotIndex = null; } else { selectionModeSlotIndex = clickedSlotIndex; } updateSelectionModeUI(); }}); 
+    teamBuilderUnitList.addEventListener('click', (e) => { if (e.target.tagName === 'IMG' && selectionModeSlotIndex !== null) { const unitIndex = e.target.dataset.unitIndex; teams[activeTeamIndex].units[selectionModeSlotIndex] = units[unitIndex]; saveTeams(); renderActiveTeam(); selectionModeSlotIndex = null; updateSelectionModeUI(); }}); 
+    teamSelect.addEventListener('change', () => { activeTeamIndex = parseInt(teamSelect.value); renderActiveTeam(); }); 
+    saveTeamBtn.addEventListener('click', () => { const newName = teamNameInput.value.trim(); if (newName) { teams[activeTeamIndex].name = newName; saveTeams(); renderTeamSelect(); showToast('Nom de l\'équipe sauvegardé !', 'success'); } else { showToast('Veuillez donner un nom à votre équipe.', 'info'); }}); 
+    newTeamBtn.addEventListener('click', () => {  
+        teams.push({ name: 'Nouvelle Équipe', units: [null, null, null, null, null], notes: '' });  
+        activeTeamIndex = teams.length - 1;  
+        saveTeams();  
+        renderTeamSelect();  
+        renderActiveTeam();  
+    }); 
+    deleteTeamBtn.addEventListener('click', async () => { if(teams.length <= 1) { showToast("Vous ne pouvez pas supprimer votre dernière équipe.", 'info'); return; } if(await showConfirm('Supprimer l\'équipe', `Êtes-vous sûr de vouloir supprimer l'équipe "${teams[activeTeamIndex].name}" ?`)) { teams.splice(activeTeamIndex, 1); activeTeamIndex = 0; saveTeams(); renderTeamSelect(); renderActiveTeam(); showToast('Équipe supprimée.', 'success'); }}); 
     
-    const saveTeamNotes = debounce(async () => {
-        if (activeTeamId) { 
-            const activeTeam = teams.find(t => t.id === activeTeamId);
-            if(activeTeam && activeTeam.notes !== teamNotesTextarea.value) {
-                await updateDoc(doc(teamsCollection, activeTeamId), { notes: teamNotesTextarea.value });
-            }
+    teamNotesTextarea.addEventListener('input', () => { 
+        if (teams[activeTeamIndex]) { 
+            teams[activeTeamIndex].notes = teamNotesTextarea.value; 
+            saveTeams(); 
         } 
-    });
-    teamNotesTextarea.addEventListener('input', saveTeamNotes);
+    }); 
 
     // Objectifs (To-Do List) 
-    addObjectiveForm.addEventListener('submit', async (e) => { 
+    addObjectiveForm.addEventListener('submit', (e) => { 
         e.preventDefault(); 
         const text = newObjectiveInput.value.trim(); 
         if (text) { 
-            await addDoc(objectivesCollection, { text: text, completed: false });
+            manualObjectives.push({ id: Date.now(), text: text, completed: false }); 
+            saveManualObjectives(); 
+            renderManualObjectives(); 
             newObjectiveInput.value = ''; 
             showToast("Objectif ajouté !", 'success'); 
         } 
     }); 
-    objectivesListContainer.addEventListener('click', async (e) => { 
+    objectivesListContainer.addEventListener('click', (e) => { 
         const target = e.target; 
         const li = target.closest('.objective-item'); 
         if (!li) return; 
-        const objectiveId = li.dataset.id;
-        const objectiveRef = doc(objectivesCollection, objectiveId);
-        
+        const objectiveId = Number(li.dataset.id); 
         if (target.classList.contains('objective-checkbox')) { 
             const objective = manualObjectives.find(obj => obj.id === objectiveId); 
             if (objective) { 
-                await updateDoc(objectiveRef, { completed: target.checked });
+                objective.completed = target.checked; 
+                saveManualObjectives(); 
+                renderManualObjectives(); 
             } 
         } 
         if (target.closest('.delete-objective-btn')) { 
-            await deleteDoc(objectiveRef);
+            manualObjectives = manualObjectives.filter(obj => obj.id !== objectiveId); 
+            saveManualObjectives(); 
+            renderManualObjectives(); 
             showToast("Objectif supprimé.", 'info'); 
         } 
     }); 
 
     // Gestionnaire d'événements pour le tracker de routine 
-    routineTrackerContent.addEventListener('click', async (e) => { 
+    routineTrackerContent.addEventListener('click', (e) => { 
         const item = e.target.closest('.routine-item'); 
         if (!item) return; 
 
@@ -1182,74 +1015,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const taskState = dailyRoutine.tasks[taskName]; 
         const currentGameDay = getGameDay(); 
-        let updatedTaskState = {...taskState};
 
         if (taskType === 'checkbox') { 
             const checkbox = item.querySelector('input[type="checkbox"]'); 
-            updatedTaskState.completedOn = checkbox.checked ? currentGameDay : null; 
+            taskState.completedOn = checkbox.checked ? currentGameDay : null; 
         } else if (taskType === 'counter') { 
             const action = e.target.dataset.action; 
-            let count = updatedTaskState.count || 0; 
+            let count = taskState.count || 0; 
             if (action === 'plus') { 
                 count = Math.min(taskDef.max, count + 1); 
             } else if (action === 'minus') { 
                 count = Math.max(0, count - 1); 
             } 
-            updatedTaskState.count = count; 
-            updatedTaskState.updatedOn = currentGameDay; 
+            taskState.count = count; 
+            taskState.updatedOn = currentGameDay; 
         } 
-        
-        const update = {};
-        update[`tasks.${taskName}`] = updatedTaskState;
-        await setDoc(routineDoc, update, { merge: true });
+        saveDailyRoutine(); 
+        renderRoutineTracker(); 
     }); 
 
     // #endregion 
 
     // #region --- INITIALISATION DE L'APPLICATION --- 
-    function initializeAppLogic() {
-        if (!dbReady) return;
+    const fullAppRefresh = () => { 
+        refreshUI(); 
+        renderTeamSelect(); 
+        renderActiveTeam(); 
+    }; 
 
-        onSnapshot(unitsCollection, (snapshot) => {
-            units = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            refreshUI();
-            renderTeamBuilderUnitList();
-            // ** CORRECTION CRITIQUE **
-            // Re-render l'équipe active quand les unités changent pour résoudre la race condition
-            renderActiveTeam(); 
-        });
-
-        onSnapshot(teamsCollection, (snapshot) => {
-            let justCreatedFirstTeam = teams.length === 0 && snapshot.docs.length > 0;
-            teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
-            // Logique pour sélectionner l'équipe active
-            if (justCreatedFirstTeam) {
-                 activeTeamId = teams[0].id;
-            } else if (!activeTeamId || !teams.some(t => t.id === activeTeamId)) {
-                activeTeamId = teams.length > 0 ? teams[0].id : null;
-            }
-            
-            renderTeamSelect();
-        });
-
-        onSnapshot(objectivesCollection, (snapshot) => {
-            manualObjectives = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderManualObjectives();
-        });
-
-        onSnapshot(routineDoc, (doc) => {
-            dailyRoutine = doc.exists() ? doc.data() : {};
-            checkRoutineReset().then(renderRoutineTracker);
-        });
-        
-        switchView('manager'); 
-    }
-    
     const refreshUI = () => { 
+        checkRoutineReset(); 
+        renderRoutineTracker(); 
         displayUnits(); 
         updateDashboard(); 
         updateSelectionState(); 
     }; 
+    
+    fullAppRefresh(); 
+    switchView('manager'); 
     // #endregion 
 });

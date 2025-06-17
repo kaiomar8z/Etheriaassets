@@ -15,6 +15,10 @@
     <div class="container">
         <header>
             <h1><i class="fa-solid fa-gamepad"></i> Etheria Restart Manager</h1>
+            <div id="auth-container" style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; align-items: flex-start; gap: 5px;">
+                <span id="auth-status" style="font-size: 0.8em; color: var(--text-color-muted);"></span>
+                <span id="user-id-display" style="font-size: 0.7em; color: var(--text-color-muted); cursor: pointer;" title="Cliquez pour copier l'ID utilisateur"></span>
+            </div>
             <button id="theme-toggle-btn" class="action-btn" title="Changer de thème"></button>
             <nav class="main-nav">
                 <button id="show-manager-btn" class="nav-btn">Gestionnaire</button>
@@ -266,14 +270,8 @@
             </td>
         </tr>
     </template>
-
-    <!-- ========= MODIFICATION ICI : Scripts Firebase mis à jour ========= -->
-    <!-- On utilise la version 9+ modulaire de Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     
-    <!-- On ajoute type="module" pour pouvoir utiliser "import" dans script.js -->
-    <script src="script.js" type="module" defer></script>
+    <script type="module" src="script.js"></script>
+
 </body>
 </html>

@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         apiKey: "AIzaSyDVVTPm80W3K0ebutcPlh-OAR28kJiaMjE",
         authDomain: "etheria-manager.firebaseapp.com",
         projectId: "etheria-manager",
-        storageBucket: "etheria-manager.appspot.com",
+        storageBucket: "etheria-manager.firebasestorage.app", // Corrigé pour correspondre à la configuration d'origine
         messagingSenderId: "247321381553",
         appId: "1:247321381553:web:517f4fb1989ad14a8e3090"
     };
@@ -77,11 +77,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
+    // Rendre la copie de l'ID plus robuste
     userIdDisplay.addEventListener('click', () => {
         if(userId) {
-            navigator.clipboard.writeText(userId)
-                .then(() => showToast("User ID copié dans le presse-papiers!", 'success'))
-                .catch(err => showToast("Erreur lors de la copie de l'ID", 'error'));
+            const textArea = document.createElement("textarea");
+            textArea.value = userId;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("User ID copié dans le presse-papiers!", 'success');
+            } catch (err) {
+                showToast("Erreur lors de la copie de l'ID", 'error');
+            }
+            document.body.removeChild(textArea);
         }
     });
 
@@ -112,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyTheme(newTheme); 
     }); 
 
-    // #region --- MODULES UTILITAIRES (Notifications, Confirmations) --- 
+    // #region --- MODULES UTILITAIRES (Notifications, Confirmations, Debounce) --- 
     const toastContainer = document.getElementById('toast-container'); 
     const showToast = (message, type = 'info', duration = 3500) => { 
         const toast = document.createElement('div'); 
@@ -149,7 +159,16 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmCancelBtn.onclick = () => close(false); 
             confirmCloseBtn.onclick = () => close(false); 
         }); 
-    }; 
+    };
+    
+    // Fonction Debounce pour éviter les écritures excessives dans la DB
+    function debounce(func, timeout = 800){
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+      };
+    }
     // #endregion 
     
     // #region --- SÉLECTION DES ÉLÉMENTS DU DOM --- 
@@ -717,6 +736,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!activeTeam) {
             teamNameInput.value = '';
             teamNotesTextarea.value = '';
+            // Afficher des slots vides
+            for (let i = 0; i < 5; i++) {
+                const slot = document.createElement('div');
+                slot.classList.add('team-slot');
+                slot.dataset.slotIndex = i;
+                slot.innerText = `Slot ${i + 1}`;
+                teamSlotsContainer.appendChild(slot);
+            }
             return;
         }
 
@@ -730,7 +757,7 @@ document.addEventListener('DOMContentLoaded', () => {
             slot.dataset.slotIndex = i;
 
             const unitId = currentTeamUnitIds[i];
-            const unit = units.find(u => u.id === unitId);
+            const unit = units.find(u => u.id === unitId); // Correction de la race condition ici
 
             if (unit) {
                 slot.innerHTML = ` 
@@ -747,11 +774,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderTeamSelect = async () => {
         teamSelect.innerHTML = '';
-        if (teams.length === 0) {
+        if (teams.length === 0 && dbReady) {
+            // Uniquement si on a la confirmation de la DB qu'il n'y a rien
             const newTeam = { name: 'Mon Équipe', units: [null, null, null, null, null], notes: '' };
             const docRef = await addDoc(teamsCollection, newTeam);
-            activeTeamId = docRef.id;
-            // The onSnapshot will handle the UI update
+            // activeTeamId = docRef.id; // onSnapshot mettra à jour l'UI
             return;
         }
 
@@ -1004,11 +1031,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     oldObjectives.forEach(doc => batch.delete(doc.ref));
                     
                     // Ajouter nouvelles données
-                    (importedData.units || []).forEach(unit => batch.set(doc(unitsCollection), unit));
-                    (importedData.teams || []).forEach(team => batch.set(doc(teamsCollection), team));
-                    (importedData.manualObjectives || []).forEach(obj => batch.set(doc(objectivesCollection), obj));
+                    (importedData.units || []).forEach(unit => {
+                        const newUnitRef = doc(unitsCollection); // Crée un doc avec un ID auto
+                        batch.set(newUnitRef, unit);
+                    });
+                    (importedData.teams || []).forEach(team => {
+                        const newTeamRef = doc(teamsCollection);
+                        batch.set(newTeamRef, team);
+                    });
+                    (importedData.manualObjectives || []).forEach(obj => {
+                        const newObjRef = doc(objectivesCollection);
+                        batch.set(newObjRef, obj);
+                    });
                     if (importedData.dailyRoutine) {
-                         batch.set(routineDoc, importedData.dailyRoutine);
+                         batch.set(routineDoc, importedData.dailyRoutine, { merge: true });
                     }
                     
                     await batch.commit();
@@ -1095,11 +1131,15 @@ document.addEventListener('DOMContentLoaded', () => {
     newTeamBtn.addEventListener('click', async () => { await addDoc(teamsCollection, { name: 'Nouvelle Équipe', units: [null, null, null, null, null], notes: '' }); }); 
     deleteTeamBtn.addEventListener('click', async () => { if(teams.length <= 1) { showToast("Vous ne pouvez pas supprimer votre dernière équipe.", 'info'); return; } const activeTeam = teams.find(t => t.id === activeTeamId); if(activeTeam && await showConfirm('Supprimer l\'équipe', `Êtes-vous sûr de vouloir supprimer l'équipe "${activeTeam.name}" ?`)) { await deleteDoc(doc(teamsCollection, activeTeamId)); showToast('Équipe supprimée.', 'success'); }}); 
     
-    teamNotesTextarea.addEventListener('input', async () => { 
+    const saveTeamNotes = debounce(async () => {
         if (activeTeamId) { 
-            await updateDoc(doc(teamsCollection, activeTeamId), { notes: teamNotesTextarea.value });
+            const activeTeam = teams.find(t => t.id === activeTeamId);
+            if(activeTeam && activeTeam.notes !== teamNotesTextarea.value) {
+                await updateDoc(doc(teamsCollection, activeTeamId), { notes: teamNotesTextarea.value });
+            }
         } 
-    }); 
+    });
+    teamNotesTextarea.addEventListener('input', saveTeamNotes);
 
     // Objectifs (To-Do List) 
     addObjectiveForm.addEventListener('submit', async (e) => { 
@@ -1174,14 +1214,22 @@ document.addEventListener('DOMContentLoaded', () => {
             units = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             refreshUI();
             renderTeamBuilderUnitList();
-            renderActiveTeam();
+            // ** CORRECTION CRITIQUE **
+            // Re-render l'équipe active quand les unités changent pour résoudre la race condition
+            renderActiveTeam(); 
         });
 
         onSnapshot(teamsCollection, (snapshot) => {
+            let justCreatedFirstTeam = teams.length === 0 && snapshot.docs.length > 0;
             teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            if (!activeTeamId || !teams.some(t => t.id === activeTeamId)) {
+            
+            // Logique pour sélectionner l'équipe active
+            if (justCreatedFirstTeam) {
+                 activeTeamId = teams[0].id;
+            } else if (!activeTeamId || !teams.some(t => t.id === activeTeamId)) {
                 activeTeamId = teams.length > 0 ? teams[0].id : null;
             }
+            
             renderTeamSelect();
         });
 

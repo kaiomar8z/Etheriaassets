@@ -20,14 +20,6 @@
             <h1><i class="fa-solid fa-gamepad"></i> Etheria Restart Manager</h1>
             <button id="theme-toggle-btn" class="action-btn" title="Changer de thème"></button>
             
-            <div class="auth-section" style="position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 5px;">
-                <div id="auth-status">Chargement de l'authentification...</div>
-                <input type="email" id="auth-email" placeholder="Email" style="padding: 5px; width: 200px; display: none;">
-                <input type="password" id="auth-password" placeholder="Mot de passe" style="padding: 5px; width: 200px; display: none;">
-                <button id="auth-signin-btn" class="action-btn" style="padding: 5px 10px; font-size: 0.8em; display: none;">Se connecter</button>
-                <button id="auth-signup-btn" class="action-btn" style="padding: 5px 10px; font-size: 0.8em; display: none;">S'inscrire</button>
-                <button id="auth-signout-btn" class="action-btn" style="padding: 5px 10px; font-size: 0.8em; background-color: var(--danger-color); display: none;">Se déconnecter</button>
-            </div>
             <nav class="main-nav">
                 <button id="show-manager-btn" class="nav-btn">Gestionnaire</button>
                 <button id="show-builder-btn" class="nav-btn">Équipes</button>
@@ -276,9 +268,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+        // Nous n'avons pas besoin d'Auth si pas de connexion/inscription
         import { getDatabase, ref, set, onValue, off } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
-
+        
         // Votre configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDVVTPm80W3K0ebutcPlh-OAR28kJiaMjE",
@@ -292,22 +284,22 @@
         // Initialiser Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const auth = getAuth(app);
+        // Pas besoin de l'objet 'auth' si pas d'authentification
 
         // Rendre les objets Firebase disponibles globalement ou les passer à script.js
         // Puisque script.js est un script normal et non un module, on les attache à window.
-        // C'est une solution simple mais attention aux "pollution" du scope global.
         window.firebaseApp = app;
         window.firebaseDatabase = database;
-        window.firebaseAuth = auth;
+        // window.firebaseAuth = auth; // Retire cet objet
         window.firebaseRef = ref; // Pour Realtime Database
         window.firebaseSet = set;
         window.firebaseOnValue = onValue;
         window.firebaseOff = off;
-        window.firebaseCreateUserWithEmailAndPassword = createUserWithEmailAndPassword;
-        window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
-        window.firebaseSignOut = signOut;
-        window.firebaseOnAuthStateChanged = onAuthStateChanged;
+        // Retire toutes les fonctions d'authentification
+        // window.firebaseCreateUserWithEmailAndPassword = createUserWithEmailWithPassword;
+        // window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
+        // window.firebaseSignOut = signOut;
+        // window.firebaseOnAuthStateChanged = onAuthStateChanged;
 
     </script>
     <script src="script.js" defer></script>

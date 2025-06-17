@@ -126,72 +126,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Firebase instances (made global in index.html for easier access)
     const database = window.firebaseDatabase;
-    const auth = window.firebaseAuth;
     const dbRef = window.firebaseRef;
     const dbSet = window.firebaseSet;
     const dbOnValue = window.firebaseOnValue;
     const dbOff = window.firebaseOff;
-    const authCreateUserWithEmailAndPassword = window.firebaseCreateUserWithEmailAndPassword;
-    const authSignInWithEmailAndPassword = window.firebaseSignInWithEmailAndPassword;
-    const authSignOut = window.firebaseSignOut;
-    const authOnAuthStateChanged = window.firebaseOnAuthStateChanged;
 
-    let currentUser = null; // Pour stocker l'utilisateur connecté
+    // Chemin fixe pour les données de l'utilisateur unique
+    const USER_DATA_PATH = 'my_etheria_data'; // Vous pouvez changer ce chemin si vous voulez
 
     // --- Fonctions de sauvegarde et chargement des données via Firebase ---
     const saveUserData = () => {
-        if (currentUser) {
-            dbSet(dbRef(database, 'users/' + currentUser.uid + '/data'), {
-                units: units,
-                teams: teams,
-                manualObjectives: manualObjectives,
-                dailyRoutine: dailyRoutine
-            }).then(() => {
-                // console.log("Données sauvegardées sur Firebase !");
-            }).catch(error => {
-                console.error("Erreur lors de la sauvegarde Firebase:", error);
-                showToast("Erreur de sauvegarde des données.", "error");
-            });
-        } else {
-            showToast("Veuillez vous connecter pour sauvegarder vos données.", "info");
-        }
+        dbSet(dbRef(database, USER_DATA_PATH), {
+            units: units,
+            teams: teams,
+            manualObjectives: manualObjectives,
+            dailyRoutine: dailyRoutine
+        }).then(() => {
+            console.log("Données sauvegardées sur Firebase !");
+            showToast("Données sauvegardées sur le cloud.", "success");
+        }).catch(error => {
+            console.error("Erreur lors de la sauvegarde Firebase:", error);
+            showToast("Erreur de sauvegarde des données.", "error");
+        });
     };
 
     const loadUserData = () => {
-        if (currentUser) {
-            // Détacher tout écouteur précédent pour éviter les doublons
-            dbOff(dbRef(database, 'users/' + currentUser.uid + '/data')); 
-            // Attacher un nouvel écouteur pour les mises à jour en temps réel
-            dbOnValue(dbRef(database, 'users/' + currentUser.uid + '/data'), (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    units = data.units || [];
-                    teams = data.teams || [];
-                    manualObjectives = data.manualObjectives || [];
-                    dailyRoutine = data.dailyRoutine || {};
-                    console.log("Données chargées depuis Firebase !");
-                } else {
-                    // Si pas de données, initialiser avec des valeurs par défaut pour un nouvel utilisateur
-                    units = [];
-                    // S'assurer qu'il y a toujours au moins une équipe par défaut
-                    teams = [{ name: 'Mon Équipe', units: [null, null, null, null, null], notes: '' }];
-                    manualObjectives = [];
-                    dailyRoutine = {};
-                    saveUserData(); // Sauvegarder les valeurs par défaut immédiatement
-                }
-                fullAppRefresh(); // Rafraîchir l'interface après le chargement ou la mise à jour
-            }, (error) => {
-                console.error("Erreur lors du chargement Firebase:", error);
-                showToast("Erreur de chargement des données.", "error");
-            });
-        } else {
-            // Si pas d'utilisateur connecté, vider les données locales et rafraîchir
-            units = [];
-            teams = [];
-            manualObjectives = [];
-            dailyRoutine = {};
-            fullAppRefresh();
-        }
+        // Détacher tout écouteur précédent pour éviter les doublons
+        dbOff(dbRef(database, USER_DATA_PATH)); 
+        // Attacher un nouvel écouteur pour les mises à jour en temps réel
+        dbOnValue(dbRef(database, USER_DATA_PATH), (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                units = data.units || [];
+                teams = data.teams || [];
+                manualObjectives = data.manualObjectives || [];
+                dailyRoutine = data.dailyRoutine || {};
+                console.log("Données chargées depuis Firebase !");
+                // showToast("Données chargées depuis le cloud.", "info"); // Peut être trop fréquent
+            } else {
+                // Si pas de données, initialiser avec des valeurs par défaut
+                units = [];
+                // S'assurer qu'il y a toujours au moins une équipe par défaut
+                teams = [{ name: 'Mon Équipe', units: [null, null, null, null, null], notes: '' }];
+                manualObjectives = [];
+                dailyRoutine = {};
+                saveUserData(); // Sauvegarder les valeurs par défaut immédiatement
+            }
+            fullAppRefresh(); // Rafraîchir l'interface après le chargement ou la mise à jour
+        }, (error) => {
+            console.error("Erreur lors du chargement Firebase:", error);
+            showToast("Erreur de chargement des données.", "error");
+        });
     };
 
     // Remplacer les fonctions de sauvegarde locale par l'appel à saveUserData
@@ -266,7 +251,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const taskName = taskDef.name; 
             // S'assurer que taskState existe
             if (!dailyRoutine.tasks || !dailyRoutine.tasks[taskName]) {
-                checkRoutineReset(); // Assure l'initialisation si manquante
+                // Initialise les tâches manquantes si elles n'existent pas
+                dailyRoutine.tasks = dailyRoutine.tasks || {};
+                if (taskDef.type === 'checkbox') { 
+                    dailyRoutine.tasks[taskName] = { completedOn: null }; 
+                } else if (taskDef.type === 'counter') { 
+                    dailyRoutine.tasks[taskName] = { count: 0, updatedOn: null }; 
+                } 
+                saveDailyRoutine(); // Sauvegarde immédiatement après l'initialisation
             }
             const taskState = dailyRoutine.tasks[taskName]; 
 
@@ -482,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } 
         unitsToDisplay.forEach(unit => { 
             // Trouver l'index original dans le tableau `units` global, pas `unitsToDisplay`
-            const originalIndex = units.findIndex(originalUnit => originalUnit.name === unit.name && originalUnit.element === unit.element && originalUnit.rarity === unit.rarity); 
+            const originalIndex = units.findIndex(originalUnit => originalUnit === unit); 
             // Assurez-vous que l'unité est trouvée pour éviter les erreurs
             if (originalIndex === -1) {
                 console.warn("Unité non trouvée dans le tableau global lors du rendu:", unit);
@@ -756,11 +748,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Formulaire d'ajout 
     addForm.addEventListener('submit', (event) => { 
         event.preventDefault(); 
-        if (!currentUser) {
-            showToast("Veuillez vous connecter pour ajouter des unités.", "info");
-            return;
-        }
-
         const newUnit = { 
             name: document.getElementById('unit-name').value, 
             image: unitImageData, 
@@ -810,7 +797,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index < 0 || index >= units.length) {
                 console.error("Index d'unité invalide:", index);
                 showToast("Erreur: Unité non trouvée.", "error");
-                return;
             }
 
             if (button.classList.contains('favorite-btn')) { 
@@ -821,10 +807,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (button.classList.contains('edit-btn')) { 
                 openEditModal(index); 
             } else if (button.classList.contains('delete-btn')) { 
-                if (!currentUser) {
-                    showToast("Veuillez vous connecter pour supprimer des unités.", "info");
-                    return;
-                }
                 if (await showConfirm('Supprimer l\'unité', `Êtes-vous sûr de vouloir supprimer ${units[index].name} ?`)) { 
                     units.splice(index, 1); 
                     saveUnits(); 
@@ -868,10 +850,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSelectionState(); 
     }); 
     deleteSelectedBtn.addEventListener('click', async () => { 
-        if (!currentUser) {
-            showToast("Veuillez vous connecter pour supprimer des unités.", "info");
-            return;
-        }
         const selectedIndices = Array.from(document.querySelectorAll('.unit-checkbox:checked')).map(cb => parseInt(cb.dataset.index)); 
         if (selectedIndices.length === 0) return; 
         if(await showConfirm('Suppression en masse', `Êtes-vous sûr de vouloir supprimer ${selectedIndices.length} unité(s) ?`)) { 
@@ -885,11 +863,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Modale d'édition 
     editForm.addEventListener('submit', (event) => { 
         event.preventDefault(); 
-        if (!currentUser) {
-            showToast("Veuillez vous connecter pour modifier des unités.", "info");
-            return;
-        }
-
         const index = parseInt(document.getElementById('edit-unit-index').value); 
         if (index < 0 || index >= units.length) {
             showToast("Erreur: Impossible de modifier une unité inexistante.", "error");
@@ -943,10 +916,6 @@ document.addEventListener('DOMContentLoaded', () => {
             try { 
                 const importedData = JSON.parse(e.target.result); 
                 if (await showConfirm('Importer un fichier JSON', "Voulez-vous vraiment remplacer vos données par celles importées ? Cette action est irréversible.")) { 
-                    if (!currentUser) {
-                        showToast("Veuillez vous connecter pour importer des données.", "info");
-                        return;
-                    }
                     units = importedData.units || []; 
                     teams = importedData.teams || [{ name: 'Mon Équipe', units: [null, null, null, null, null], notes: '' }]; // Assurer au moins une équipe
                     manualObjectives = importedData.manualObjectives || []; 
@@ -968,10 +937,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader(); 
         reader.onload = async (e) => { 
             try { 
-                if (!currentUser) {
-                    showToast("Veuillez vous connecter pour importer des données CSV.", "info");
-                    return;
-                }
                 const csvContent = e.target.result; 
                 const lines = csvContent.split(/\r?\n/).filter(line => line.trim() !== ''); 
                 if (lines.length <= 1) throw new Error("Le fichier CSV est vide ou ne contient que l'en-tête."); 
@@ -1029,26 +994,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Team Builder 
     teamBuilderUnitList.addEventListener('dragstart', (e) => { 
-        if (!currentUser) {
-            e.preventDefault();
-            showToast("Veuillez vous connecter pour modifier les équipes.", "info");
-            return;
-        }
         if(e.target.tagName === 'IMG') e.dataTransfer.setData('text/plain', e.target.dataset.unitIndex); 
     }); 
     teamSlotsContainer.addEventListener('dragover', (e) => { e.preventDefault(); const slot = e.target.closest('.team-slot'); if (slot) slot.classList.add('drag-over'); }); 
     teamSlotsContainer.addEventListener('dragleave', (e) => { const slot = e.target.closest('.team-slot'); if (slot) slot.classList.remove('drag-over'); }); 
     teamSlotsContainer.addEventListener('drop', (e) => { 
         e.preventDefault(); 
-        if (!currentUser) {
-            showToast("Veuillez vous connecter pour modifier les équipes.", "info");
-            return;
-        }
         const slot = e.target.closest('.team-slot'); 
         if(slot) { 
             slot.classList.remove('drag-over'); 
             const unitIndex = e.dataTransfer.getData('text/plain'); 
-            const slotIndex = slot.dataset.slotIndex; 
             teams[activeTeamIndex].units[slotIndex] = units[unitIndex]; 
             saveTeams(); 
             renderActiveTeam(); 
@@ -1058,10 +1013,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const target = e.target; 
         const slot = target.closest('.team-slot'); 
         if (target.classList.contains('remove-from-team-btn')) { 
-            if (!currentUser) {
-                showToast("Veuillez vous connecter pour modifier les équipes.", "info");
-                return;
-            }
             const slotIndex = target.dataset.slotIndex; 
             teams[activeTeamIndex].units[slotIndex] = null; 
             saveTeams(); 
@@ -1080,10 +1031,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }); 
     teamBuilderUnitList.addEventListener('click', (e) => { 
         if (e.target.tagName === 'IMG' && selectionModeSlotIndex !== null) { 
-            if (!currentUser) {
-                showToast("Veuillez vous connecter pour modifier les équipes.", "info");
-                return;
-            }
             const unitIndex = e.target.dataset.unitIndex; 
             teams[activeTeamIndex].units[selectionModeSlotIndex] = units[unitIndex]; 
             saveTeams(); 
@@ -1097,10 +1044,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderActiveTeam(); 
     }); 
     saveTeamBtn.addEventListener('click', () => { 
-        if (!currentUser) {
-            showToast("Veuillez vous connecter pour sauvegarder les équipes.", "info");
-            return;
-        }
         const newName = teamNameInput.value.trim(); 
         if (newName) { 
             teams[activeTeamIndex].name = newName; 
@@ -1112,10 +1055,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }); 
     newTeamBtn.addEventListener('click', () => {  
-        if (!currentUser) {
-            showToast("Veuillez vous connecter pour créer une nouvelle équipe.", "info");
-            return;
-        }
         teams.push({ name: 'Nouvelle Équipe', units: [null, null, null, null, null], notes: '' });  
         activeTeamIndex = teams.length - 1;  
         saveTeams();  
@@ -1123,10 +1062,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderActiveTeam();  
     }); 
     deleteTeamBtn.addEventListener('click', async () => { 
-        if (!currentUser) {
-            showToast("Veuillez vous connecter pour supprimer les équipes.", "info");
-            return;
-        }
         if(teams.length <= 1) { 
             showToast("Vous ne pouvez pas supprimer votre dernière équipe.", 'info'); 
             return; 
@@ -1142,10 +1077,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }); 
     
     teamNotesTextarea.addEventListener('input', () => { 
-        if (!currentUser) {
-            showToast("Veuillez vous connecter pour modifier les notes.", "info");
-            return;
-        }
         if (teams[activeTeamIndex]) { 
             teams[activeTeamIndex].notes = teamNotesTextarea.value; 
             saveTeams(); 
@@ -1155,10 +1086,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Objectifs (To-Do List) 
     addObjectiveForm.addEventListener('submit', (e) => { 
         e.preventDefault(); 
-        if (!currentUser) {
-            showToast("Veuillez vous connecter pour ajouter des objectifs.", "info");
-            return;
-        }
         const text = newObjectiveInput.value.trim(); 
         if (text) { 
             manualObjectives.push({ id: Date.now(), text: text, completed: false }); 
@@ -1175,11 +1102,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const objectiveId = Number(li.dataset.id); 
         
         if (target.classList.contains('objective-checkbox')) { 
-            if (!currentUser) {
-                showToast("Veuillez vous connecter pour modifier les objectifs.", "info");
-                e.preventDefault(); // Empêcher le changement d'état visuel
-                return;
-            }
             const objective = manualObjectives.find(obj => obj.id === objectiveId); 
             if (objective) { 
                 objective.completed = target.checked; 
@@ -1188,10 +1110,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } 
         } 
         if (target.closest('.delete-objective-btn')) { 
-            if (!currentUser) {
-                showToast("Veuillez vous connecter pour supprimer les objectifs.", "info");
-                return;
-            }
             manualObjectives = manualObjectives.filter(obj => obj.id !== objectiveId); 
             saveManualObjectives(); 
             renderManualObjectives(); 
@@ -1203,12 +1121,6 @@ document.addEventListener('DOMContentLoaded', () => {
     routineTrackerContent.addEventListener('click', (e) => { 
         const item = e.target.closest('.routine-item'); 
         if (!item) return; 
-
-        if (!currentUser) {
-            showToast("Veuillez vous connecter pour modifier la routine.", "info");
-            e.preventDefault(); // Empêcher le changement d'état visuel pour les checkboxes/boutons
-            return;
-        }
 
         const taskName = item.dataset.taskName; 
         const taskType = item.dataset.taskType; 
@@ -1243,80 +1155,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // #endregion 
 
-    // #region --- GESTION DE L'AUTHENTIFICATION UI ---
-    const authStatusDiv = document.getElementById('auth-status');
-    const authEmailInput = document.getElementById('auth-email');
-    const authPasswordInput = document.getElementById('auth-password');
-    const authSignInBtn = document.getElementById('auth-signin-btn');
-    const authSignUpBtn = document.getElementById('auth-signup-btn');
-    const authSignOutBtn = document.getElementById('auth-signout-btn');
-
-    // Écouteur d'état d'authentification Firebase
-    authOnAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUser = user;
-            authStatusDiv.textContent = `Connecté: ${user.email}`;
-            authEmailInput.style.display = 'none';
-            authPasswordInput.style.display = 'none';
-            authSignInBtn.style.display = 'none';
-            authSignUpBtn.style.display = 'none';
-            authSignOutBtn.style.display = 'inline-block';
-            loadUserData(); // Charger les données de l'utilisateur après la connexion
-        } else {
-            currentUser = null;
-            authStatusDiv.textContent = `Non connecté`;
-            authEmailInput.style.display = 'block';
-            authPasswordInput.style.display = 'block';
-            authSignInBtn.style.display = 'inline-block';
-            authSignUpBtn.style.display = 'inline-block';
-            authSignOutBtn.style.display = 'none';
-            showToast("Veuillez vous connecter ou vous inscrire.", "info", 5000);
-            
-            // Vider les données locales et rafraîchir l'UI si déconnecté
-            units = [];
-            teams = [];
-            manualObjectives = [];
-            dailyRoutine = {};
-            fullAppRefresh(); 
-        }
-    });
-
-    // Event Listeners pour les boutons d'authentification
-    authSignInBtn.addEventListener('click', async () => {
-        const email = authEmailInput.value;
-        const password = authPasswordInput.value;
-        try {
-            await authSignInWithEmailAndPassword(auth, email, password);
-            showToast("Connexion réussie !", "success");
-        } catch (error) {
-            console.error("Erreur de connexion:", error.code, error.message);
-            showToast(`Erreur de connexion: ${error.message}`, "error");
-        }
-    });
-
-    authSignUpBtn.addEventListener('click', async () => {
-        const email = authEmailInput.value;
-        const password = authPasswordInput.value;
-        try {
-            await authCreateUserWithEmailAndPassword(auth, email, password);
-            showToast("Compte créé et connecté !", "success");
-        } catch (error) {
-            console.error("Erreur d'inscription:", error.code, error.message);
-            showToast(`Erreur d'inscription: ${error.message}`, "error");
-        }
-    });
-
-    authSignOutBtn.addEventListener('click', async () => {
-        try {
-            await authSignOut(auth);
-            showToast("Déconnexion réussie.", "info");
-        } catch (error) {
-            console.error("Erreur de déconnexion:", error.code, error.message);
-            showToast(`Erreur de déconnexion: ${error.message}`, "error");
-        }
-    });
-    // #endregion
-
     // #region --- INITIALISATION DE L'APPLICATION --- 
     const fullAppRefresh = () => { 
         refreshUI(); 
@@ -1332,8 +1170,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSelectionState(); 
     }; 
     
-    // L'initialisation de la récupération des données se fait via authOnAuthStateChanged
-    // et loadUserData, donc pas besoin d'appeler fullAppRefresh ici directement.
-    switchView('manager'); // Afficher le gestionnaire par défaut
+    // Charger les données au démarrage de l'application
+    loadUserData(); 
+    switchView('manager'); 
     // #endregion 
 });

@@ -268,7 +268,28 @@
     </template>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+   <script>
+        // --> INSTRUCTIONS IMPORTANTES <--
+        // Collez votre objet de configuration Firebase ici.
+        // Vous le trouverez dans les paramètres de votre projet sur la console Firebase.
+        const firebaseConfig = {
+            apiKey: "AIzaSyDVVTPm80W3K0ebutcPlh-OAR28kJiaMjE",
+            authDomain: "etheria-manager.firebaseapp.com",
+            projectId: "etheria-manager",
+            storageBucket: "etheria-manager.firebasestorage.app",
+            messagingSenderId: "247321381553",
+            appId: "1:247321381553:web:517f4fb1989ad14a8e3090"
+        };
+
+        // Initialisation de Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+
 
     <script src="script.js" defer></script>
 </body>

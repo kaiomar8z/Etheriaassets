@@ -203,7 +203,7 @@
                 <span class="close-btn">&times;</span>
             </div>
             <form id="edit-unit-form">
-                <input type="hidden" id="edit-unit-index">
+                <input type="hidden" id="edit-unit-id">
                 <div class="form-grid">
                     <div class="form-group full-width"><label for="edit-unit-name">Nom de l'Unité *</label><input type="text" id="edit-unit-name" required></div>
                     <div class="form-group"><label for="edit-unit-element">Élément *</label><select id="edit-unit-element" required><option value="">Choisir...</option><option value="Rouge">Rouge</option><option value="Bleu">Bleu</option><option value="Vert">Vert</option><option value="Dark">Dark</option><option value="Light">Light</option></select></div>
@@ -267,9 +267,13 @@
         </tr>
     </template>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-    <script src="script.js" defer></script>
+    <!-- ========= MODIFICATION ICI : Scripts Firebase mis à jour ========= -->
+    <!-- On utilise la version 9+ modulaire de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    
+    <!-- On ajoute type="module" pour pouvoir utiliser "import" dans script.js -->
+    <script src="script.js" type="module" defer></script>
 </body>
 </html>

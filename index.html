@@ -12,6 +12,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Overlay de chargement pour l'initialisation de Firebase -->
+    <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.5em; flex-direction: column; gap: 20px;">
+        <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+        <p>Chargement des données...</p>
+    </div>
+
     <div class="container">
         <header>
             <h1><i class="fa-solid fa-gamepad"></i> Etheria Restart Manager</h1>
@@ -203,7 +209,7 @@
                 <span class="close-btn">&times;</span>
             </div>
             <form id="edit-unit-form">
-                <input type="hidden" id="edit-unit-index">
+                <input type="hidden" id="edit-unit-id">
                 <div class="form-grid">
                     <div class="form-group full-width"><label for="edit-unit-name">Nom de l'Unité *</label><input type="text" id="edit-unit-name" required></div>
                     <div class="form-group"><label for="edit-unit-element">Élément *</label><select id="edit-unit-element" required><option value="">Choisir...</option><option value="Rouge">Rouge</option><option value="Bleu">Bleu</option><option value="Vert">Vert</option><option value="Dark">Dark</option><option value="Light">Light</option></select></div>
@@ -267,30 +273,7 @@
         </tr>
     </template>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-   <script>
-        // --> INSTRUCTIONS IMPORTANTES <--
-        // Collez votre objet de configuration Firebase ici.
-        // Vous le trouverez dans les paramètres de votre projet sur la console Firebase.
-        const firebaseConfig = {
-            apiKey: "AIzaSyDVVTPm80W3K0ebutcPlh-OAR28kJiaMjE",
-            authDomain: "etheria-manager.firebaseapp.com",
-            projectId: "etheria-manager",
-            storageBucket: "etheria-manager.firebasestorage.app",
-            messagingSenderId: "247321381553",
-            appId: "1:247321381553:web:517f4fb1989ad14a8e3090"
-        };
-
-        // Initialisation de Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-    </script>
-
-
-    <script src="script.js" defer></script>
+    <!-- Firebase SDK - Utilisation des modules pour une approche moderne -->
+    <script src="script.js" type="module" defer></script>
 </body>
 </html>

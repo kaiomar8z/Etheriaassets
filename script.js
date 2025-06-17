@@ -606,7 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
         checkRoutineReset(); 
         renderRoutineTracker(); 
         displayUnits(); 
-        updateDashboard(); 
+        updateDashboard();
         updateSelectionState(); 
     }; 
     

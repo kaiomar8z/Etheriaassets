@@ -201,8 +201,7 @@
                 <span class="close-btn">&times;</span>
             </div>
             <form id="edit-unit-form">
-                <input type="hidden" id="edit-unit-index">
-                <div class="form-grid">
+                <input type="hidden" id="edit-unit-id"> <div class="form-grid">
                     <div class="form-group full-width"><label for="edit-unit-name">Nom de l'Unité *</label><input type="text" id="edit-unit-name" required></div>
                     <div class="form-group"><label for="edit-unit-element">Élément *</label><select id="edit-unit-element" required><option value="">Choisir...</option><option value="Rouge">Rouge</option><option value="Bleu">Bleu</option><option value="Vert">Vert</option><option value="Dark">Dark</option><option value="Light">Light</option></select></div>
                     <div class="form-group"><label for="edit-unit-rarity">Rareté *</label><select id="edit-unit-rarity" required><option value="">Choisir...</option><option value="R">R</option><option value="SR">SR</option><option value="SSR">SSR</option></select></div>
@@ -265,6 +264,8 @@
         </tr>
     </template>
 
-    <script src="script.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script> <script src="script.js" defer></script>
 </body>
 </html>

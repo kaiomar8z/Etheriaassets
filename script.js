@@ -797,6 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index < 0 || index >= units.length) {
                 console.error("Index d'unité invalide:", index);
                 showToast("Erreur: Unité non trouvée.", "error");
+                return;
             }
 
             if (button.classList.contains('favorite-btn')) { 
@@ -1004,7 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(slot) { 
             slot.classList.remove('drag-over'); 
             const unitIndex = e.dataTransfer.getData('text/plain'); 
-            teams[activeTeamIndex].units[slotIndex] = units[unitIndex]; 
+            teams[activeTeamIndex].units[slot.dataset.slotIndex] = units[unitIndex]; // Utilisez dataset.slotIndex directement
             saveTeams(); 
             renderActiveTeam(); 
         }

@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } 
     }; 
     
-    // Le thème est toujours géré localement, pas besoin de Firebase pour ça 
     const savedTheme = localStorage.getItem('etheriaTheme') || 'dark'; 
     applyTheme(savedTheme); 
 
@@ -131,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dbOnValue = window.firebaseOnValue;
     const dbOff = window.firebaseOff;
 
-    // Chemin fixe pour les données de l'utilisateur unique
+    // Chemin fixe pour les données de l'utilisateur unique (PAS D'AUTHENTIFICATION)
     const USER_DATA_PATH = 'my_etheria_data'; // Vous pouvez changer ce chemin si vous voulez
 
     // --- Fonctions de sauvegarde et chargement des données via Firebase ---
@@ -162,11 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 manualObjectives = data.manualObjectives || [];
                 dailyRoutine = data.dailyRoutine || {};
                 console.log("Données chargées depuis Firebase !");
-                // showToast("Données chargées depuis le cloud.", "info"); // Peut être trop fréquent
             } else {
                 // Si pas de données, initialiser avec des valeurs par défaut
                 units = [];
-                // S'assurer qu'il y a toujours au moins une équipe par défaut
                 teams = [{ name: 'Mon Équipe', units: [null, null, null, null, null], notes: '' }];
                 manualObjectives = [];
                 dailyRoutine = {};
@@ -239,7 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } 
         }); 
 
-        // Sauvegarder la routine après la vérification de réinitialisation
         saveDailyRoutine(); 
     }; 
 
@@ -251,14 +247,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const taskName = taskDef.name; 
             // S'assurer que taskState existe
             if (!dailyRoutine.tasks || !dailyRoutine.tasks[taskName]) {
-                // Initialise les tâches manquantes si elles n'existent pas
                 dailyRoutine.tasks = dailyRoutine.tasks || {};
                 if (taskDef.type === 'checkbox') { 
                     dailyRoutine.tasks[taskName] = { completedOn: null }; 
                 } else if (taskDef.type === 'counter') { 
                     dailyRoutine.tasks[taskName] = { count: 0, updatedOn: null }; 
                 } 
-                saveDailyRoutine(); // Sauvegarde immédiatement après l'initialisation
+                saveDailyRoutine();
             }
             const taskState = dailyRoutine.tasks[taskName]; 
 
@@ -473,14 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return; 
         } 
         unitsToDisplay.forEach(unit => { 
-            // Trouver l'index original dans le tableau `units` global, pas `unitsToDisplay`
             const originalIndex = units.findIndex(originalUnit => originalUnit === unit); 
-            // Assurez-vous que l'unité est trouvée pour éviter les erreurs
-            if (originalIndex === -1) {
-                console.warn("Unité non trouvée dans le tableau global lors du rendu:", unit);
-                return;
-            }
-
             const rowFragment = unitRowTemplate.content.cloneNode(true); 
             
             rowFragment.querySelector('.unit-checkbox').dataset.index = originalIndex; 
@@ -1005,7 +993,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(slot) { 
             slot.classList.remove('drag-over'); 
             const unitIndex = e.dataTransfer.getData('text/plain'); 
-            teams[activeTeamIndex].units[slot.dataset.slotIndex] = units[unitIndex]; // Utilisez dataset.slotIndex directement
+            teams[activeTeamIndex].units[slot.dataset.slotIndex] = units[unitIndex];
             saveTeams(); 
             renderActiveTeam(); 
         }

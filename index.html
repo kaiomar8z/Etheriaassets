@@ -115,9 +115,11 @@
                     <div class="filter-controls" style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
                         <input type="search" id="search-input" placeholder="Rechercher par nom..." style="flex: 2; min-width: 180px;">
                         <select id="filter-element" style="flex: 1; min-width: 140px;">
-                            <option value="">Tous les éléments</option><option value="Rouge">Rouge</option><option value="Bleu">Bleu</option><option value="Vert">Vert</option><option value="Dark">Dark</option><option value="Light">Light</option></select>
+                            <option value="">Tous les éléments</option><option value="Rouge">Rouge</option><option value="Bleu">Bleu</option><option value="Vert">Vert</option><option value="Dark">Dark</option><option value="Light">Light</option>
+                        </select>
                         <select id="filter-rarity" style="flex: 1; min-width: 140px;">
-                            <option value="">Toutes les raretés</option><option value="R">R</option><option value="SR">SR</option><option value="SSR">SSR</option></select>
+                            <option value="">Toutes les raretés</option><option value="R">R</option><option value="SR">SR</option><option value="SSR">SSR</option>
+                        </select>
                         <button id="filter-favorites-btn" class="filter-btn" title="Afficher uniquement les favoris">
                             <i class="fa-solid fa-star"></i> Favoris
                         </button>
@@ -263,34 +265,6 @@
         </tr>
     </template>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-        // Nous n'avons pas besoin d'Auth si pas de connexion/inscription
-        import { getDatabase, ref, set, onValue, off } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
-        
-        // Votre configuration Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDVVTPm80W3K0ebutcPlh-OAR28kJiaMjE",
-            authDomain: "etheria-manager.firebaseapp.com",
-            projectId: "etheria-manager",
-            storageBucket: "etheria-manager.firebasestorage.app",
-            messagingSenderId: "247321381553",
-            appId: "1:247321381553:web:517f4fb1989ad14a8e3090"
-        };
-
-        // Initialiser Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        // Rendre les objets Firebase disponibles globalement
-        window.firebaseApp = app;
-        window.firebaseDatabase = database;
-        window.firebaseRef = ref;
-        window.firebaseSet = set;
-        window.firebaseOnValue = onValue;
-        window.firebaseOff = off;
-
-    </script>
     <script src="script.js" defer></script>
 </body>
 </html>

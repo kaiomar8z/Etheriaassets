@@ -414,6 +414,143 @@ th.sorted .sort-arrow { opacity: 1; }
     header h1 { font-size: 1.8em; text-align: center; }
     #theme-toggle-btn { position: static; transform: none; }
     .form-grid { grid-template-columns: 1fr; }
+
+    /* Styles spécifiques pour la vue "carte" du tableau sur mobile */
+    .table-wrapper {
+        overflow-x: hidden; /* Désactive le défilement horizontal */
+    }
+
+    table, thead, tbody, th, td, tr {
+        display: block; /* Transforme les éléments du tableau en blocs */
+    }
+
+    thead {
+        display: none; /* Cache l'en-tête du tableau sur mobile */
+    }
+
+    tr {
+        margin-bottom: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 10px;
+        background: var(--card-background); /* Chaque ligne devient une carte */
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        position: relative; /* Pour positionner les labels et actions */
+    }
+
+    tbody tr:nth-child(even) { /* Ajuste les bandes zébrées pour la vue carte */
+        background-color: var(--card-background); /* Les cartes ont toutes le même fond */
+    }
+    body.light-theme tbody tr:nth-child(even) {
+        background-color: var(--card-background);
+    }
+    tbody tr:hover {
+        background-color: var(--hover-background);
+    }
+    tbody tr.selected-row {
+        background-color: var(--selected-row-background);
+    }
+
+
+    td {
+        border: none; /* Supprime les bordures de cellule internes */
+        position: relative;
+        padding-left: 45%; /* Espace pour le label */
+        text-align: right; /* Aligne la valeur à droite */
+        width: 100%; /* Chaque cellule prend toute la largeur de la carte par défaut */
+        box-sizing: border-box;
+        padding: 8px 10px;
+        display: flex; /* Permet un alignement flex pour label/valeur */
+        justify-content: space-between; /* Pour que le label soit à gauche et la valeur à droite */
+        align-items: center;
+    }
+
+    td:before {
+        content: attr(data-label); /* Utilise l'attribut data-label comme titre */
+        position: absolute;
+        left: 10px;
+        width: 40%; /* Largeur du label */
+        text-align: left;
+        font-weight: 500;
+        color: var(--text-color-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Ajustements spécifiques aux cellules pour la vue carte */
+    .checkbox-cell {
+        order: 0; /* Place la checkbox tout en haut à gauche */
+        width: auto;
+        padding-left: 10px;
+        text-align: left !important;
+        flex-grow: 0;
+        margin-right: 10px; /* Espace après la checkbox */
+    }
+    .checkbox-cell:before { content: none; } /* Pas de label pour la checkbox */
+
+    .unit-image-cell {
+        order: 1; /* Place l'image et le nom juste après la checkbox */
+        width: calc(100% - 60px); /* Prend le reste de la largeur de la première ligne */
+        padding-left: 0;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .unit-image-cell:before { content: none; } /* Pas de label pour la cellule image/nom */
+    .unit-image-cell span.unit-name-cell {
+        white-space: normal; /* Permet au nom de s'enrouler sur plusieurs lignes */
+        overflow: visible;
+        text-overflow: clip;
+        flex-grow: 1;
+    }
+
+    .action-buttons {
+        order: 99; /* Place les actions tout en bas de la carte */
+        width: 100%;
+        text-align: center;
+        padding-left: 0;
+        border-top: 1px solid var(--border-color); /* Séparateur visuel */
+        margin-top: 10px;
+        padding-top: 10px;
+        justify-content: center; /* Centre les boutons d'action */
+    }
+    .action-buttons:before { content: none; }
+
+    /* Ajustement des autres cellules pour s'afficher sur deux colonnes par "ligne" de carte */
+    .unit-element-cell, .unit-rarity-cell, .stars, .unit-level-cell, .unit-doublon-cell,
+    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
+        width: 50%; /* Chaque info prend 50% de la largeur de la carte */
+        box-sizing: border-box;
+        padding: 8px 10px;
+        border-bottom: none; /* Supprime les bordures internes */
+    }
+
+    .unit-element-cell .table-icon,
+    .unit-rarity-cell .table-icon {
+        float: right; /* Aligne les icônes à droite */
+        margin-left: 5px;
+    }
+    .unit-element-cell span, .unit-rarity-cell span {
+        display: none; /* Cache le texte de l'élément/rareté si l'icône est affichée */
+    }
+
+    /* Corrige l'alignement des points de compétence et étoiles */
+    .skill-dots-cell, .stars {
+        text-align: right;
+    }
+    .skill-dots-cell span, .stars .fa-star {
+        float: right;
+    }
+    .skill-dots-cell span.empty, .stars .fa-star:not(.fa-solid) {
+        float: right;
+    }
+    .skill-dots-cell span.filled {
+        float: right;
+    }
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }
-

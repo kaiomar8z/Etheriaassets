@@ -607,28 +607,44 @@ th.sorted .sort-arrow { opacity: 1; }
     }
 
     /* Assurer que les étoiles et les points sont bien visibles et alignés */
-    .stars > *, /* Cible toutes les étoiles */
-    .unit-doublon-cell > *, /* Cible tous les points de doublon */
-    .unit-s1-cell > *, .unit-s2-cell > *, .unit-s3-cell > * { /* Cible tous les points de compétence */
-        flex-shrink: 0; /* Empêche les éléments individuels (étoiles/points) de rétrécir */
-        margin-left: 0.2px; /* Très très petit espacement entre les étoiles/points */
-        font-size: 1em; /* Assure une taille standard pour les icônes de points */
+    .stars, .unit-doublon-cell, .skill-dots-cell {
+        /* Aligner leur contenu à gauche pour qu'ils soient compacts quand pas au max */
+        justify-content: flex-start;
+        /* Padding droit des cellules contenant les étoiles/points */
+        padding-right: 5px;
     }
 
-    /* Ajustement pour coller le nombre de Level et les icônes/points au bord droit de leur *propre contenu* */
-    .unit-level-cell > *:not(:first-child), /* La valeur numérique du Level */
-    .unit-element-cell > *:not(:first-child), /* Les éléments Element */
-    .unit-rarity-cell > *:not(:first-child) { /* Les éléments Rareté */
-        margin-left: auto; /* Pousse le contenu (valeur) à l'extrême droite de l'espace restant */
-        /* Cela annulera le flex-grow: 1; précédent pour ces éléments spécifiques
-           et les collera au bord droit de leur cellule sans s'étirer. */
-    }
-
+    /* Styles pour les étoiles, doublons, et points de compétence (les icônes/points eux-mêmes) */
     .stars .fa-star,
     .unit-doublon-cell span,
-    .skill-dots-cell span {
-        margin-left: 2px; /* Ajuste l'espace entre les points/étoiles */
-        font-size: 1.1em; /* Laisse la taille des points/étoiles un peu plus grande */
+    .skill-dots-cell .filled,
+    .skill-dots-cell .empty {
+        /* Réduire encore plus l'espace entre chaque icône/point */
+        margin-left: 0.1px; /* Espacement minime */
+        margin-right: 0.1px; /* Espacement minime */
+        font-size: 1.1em; /* Garder une taille visible */
+        flex-shrink: 0; /* Toujours empêcher de rétrécir */
+    }
+
+    /* Rapprocher le nombre de "Level" de son label */
+    .unit-level-cell {
+        /* Utilisez justify-content: flex-start; pour pousser le label à gauche
+           et la valeur à droite, puis ajustez la marge droite de la valeur. */
+        justify-content: space-between; /* Maintenir label et valeur aux extrémités */
+        padding-right: 10px; /* Conserve un padding normal pour le bord droit de la cellule */
+    }
+
+    .unit-level-cell > *:not(:first-child) { /* Cible le chiffre du Level */
+        margin-left: auto; /* Pousse le chiffre Level à l'extrême droite du contenu */
+        flex-shrink: 0; /* Empêche le chiffre de se compresser */
+        white-space: nowrap; /* Empêche le chiffre de passer à la ligne */
+        text-align: right; /* Assure l'alignement à droite */
+    }
+
+    /* Final Adjustments: Réduire les paddings généraux des TD si l'espace est encore trop serré. */
+    td {
+        padding-left: 8px;
+        padding-right: 8px;
     }
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

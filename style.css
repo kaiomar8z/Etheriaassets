@@ -16,6 +16,12 @@
     --hover-background: rgba(255, 255, 255, 0.05);
     --option-background: #2a3b5a;
     --selected-row-background: rgba(0, 170, 255, 0.08); /* Nouvelle variable pour ligne sélectionnée */
+
+    /* Couleurs pour les doublons inspirées du jeu */
+    --doublon-node-bg: rgba(255, 255, 255, 0.1);
+    --doublon-node-border: rgba(255, 255, 255, 0.2);
+    --doublon-node-filled: #00aaff; /* Couleur remplie, primaire */
+    --doublon-node-glow: rgba(0, 170, 255, 0.5); /* Effet de glow */
 }
 
 body.light-theme {
@@ -31,6 +37,11 @@ body.light-theme {
     --hover-background: rgba(0, 0, 0, 0.05);
     --option-background: #e9ecef;
     --selected-row-background: rgba(0, 123, 255, 0.08); /* Nouvelle variable pour ligne sélectionnée*/
+
+    --doublon-node-bg: rgba(0, 0, 0, 0.05);
+    --doublon-node-border: rgba(0, 0, 0, 0.1);
+    --doublon-node-filled: #007bff;
+    --doublon-node-glow: rgba(0, 123, 255, 0.3);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -77,9 +88,8 @@ body.light-theme .main-logo {
     filter: none; /* Rétablit la couleur d'origine pour le thème clair */
 }
 
-.app-tagline { /* Style de l'ancienne tagline, qui ne sera plus utilisée */
-    display: none; /* Cache complètement si encore présent par erreur */
-}
+/* Suppression des styles de .app-tagline car l'élément est retiré de l'HTML */
+/* .app-tagline { display: none; } */
 
 
 #theme-toggle-btn {
@@ -231,6 +241,56 @@ h3 { margin-bottom: 20px; }
 .form-buttons { display: flex; gap: 10px; grid-column: 1 / -1; margin-top: 15px; }
 label { margin-bottom: 8px; font-weight: 500; font-size: 0.9em; color: var(--text-color-muted); }
  
+.input-with-controls { /* Conteneur pour input et boutons */
+    display: flex;
+    flex-direction: column;
+}
+.input-with-controls input[type="number"], .input-with-controls select {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--input-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1em;
+    color: var(--text-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    -moz-appearance: textfield; /* Cache les flèches par défaut de Firefox */
+}
+.input-with-controls input[type="number"]::-webkit-outer-spin-button,
+.input-with-controls input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; /* Cache les flèches par défaut de Chrome/Safari */
+    margin: 0;
+}
+
+.number-controls {
+    display: flex;
+    margin-top: 5px; /* Espace entre input et boutons */
+    justify-content: flex-end; /* Aligne les boutons à droite */
+    gap: 5px;
+}
+.number-controls button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    padding: 0;
+}
+.number-controls button:hover {
+    background-color: var(--primary-color-hover);
+}
+.number-controls button:active {
+    transform: translateY(1px);
+}
+
 input, select, textarea {
     width: 100%; padding: 12px; background-color: var(--input-background);
     border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; color: var(--text-color);
@@ -283,6 +343,14 @@ textarea {
     border-color: var(--star-color); 
     background-color: rgba(241, 196, 15, 0.1); 
     color: var(--star-color);
+}
+#toggle-compact-view-btn {
+    background-color: var(--info-color); /* Nouvelle couleur ou existante */
+    color: white;
+    /* transition: all 0.3s ease; */
+}
+#toggle-compact-view-btn.active {
+    background-color: var(--primary-color-hover); /* ou une autre couleur pour indiquer l'état actif */
 }
  
 .table-wrapper { overflow-x: auto; } 
@@ -355,6 +423,45 @@ th.sorted .sort-arrow { opacity: 1; }
 } 
 .stars .fa-star { color: var(--star-color); } 
  
+/* NOUVEAU: Styles pour le visuel des doublons inspiré du jeu */
+.doublon-display-cell {
+    display: flex;
+    gap: 2px; /* Espace entre les nœuds de doublon */
+    align-items: center;
+    justify-content: flex-end; /* Aligner à droite par défaut */
+    padding-right: 5px; /* Pour éviter de coller au bord */
+}
+.doublon-node {
+    width: 18px; /* Taille des cercles/nœuds */
+    height: 18px;
+    border-radius: 50%; /* Rendre circulaire */
+    background-color: var(--doublon-node-bg);
+    border: 1px solid var(--doublon-node-border);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8em; /* Taille de l'icône si on en ajoute */
+    font-weight: bold;
+    color: var(--text-color-muted);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden; /* Cache tout ce qui dépasse si on utilise un pseudo-élément */
+}
+.doublon-node.filled {
+    background-color: var(--doublon-node-filled);
+    border-color: var(--doublon-node-filled);
+    box-shadow: 0 0 8px var(--doublon-node-glow), inset 0 0 5px rgba(255, 255, 255, 0.5); /* Effet de glow et lumière interne */
+}
+/* OPTIONNEL: Si vous voulez des icônes différentes pour chaque nœud ou un gradient subtil */
+/* .doublon-node.filled:after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.2) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
+    border-radius: 50%;
+} */
+
+
 .action-buttons {  
     display: flex;  
     gap: 8px;  
@@ -440,6 +547,59 @@ th.sorted .sort-arrow { opacity: 1; }
     vertical-align: middle;
 }
 
+/* NOUVEAU: Styles pour le mode compact */
+body.compact-view .table-wrapper table {
+    margin-top: 10px; /* Réduit la marge du tableau */
+}
+body.compact-view tbody tr {
+    padding: 5px; /* Réduit le padding des cartes en mode compact */
+    margin-bottom: 8px; /* Réduit la marge entre les cartes */
+}
+body.compact-view td {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    min-height: auto; /* Permet aux cellules de se compresser plus */
+}
+body.compact-view .unit-image-cell {
+    margin-bottom: 5px; /* Réduit la marge sous l'image */
+}
+body.compact-view .unit-image-cell img {
+    width: 30px; /* Réduit la taille des images en mode compact */
+    height: 30px;
+}
+body.compact-view .unit-image-cell span.unit-name-cell {
+    font-size: 0.9em; /* Réduit la taille du nom */
+}
+body.compact-view td:before {
+    font-size: 0.8em; /* Réduit la taille des labels */
+}
+/* Cacher certaines informations en mode compact pour maximiser l'espace */
+body.compact-view .unit-level-cell,
+body.compact-view .unit-s1-cell,
+body.compact-view .unit-s2-cell,
+body.compact-view .unit-s3-cell {
+    display: none; /* Cache ces colonnes en mode compacte */
+}
+/* Assure que les colonnes qui restent s'étalent correctement */
+body.compact-view .checkbox-cell,
+body.compact-view .unit-image-cell,
+body.compact-view .unit-element-cell,
+body.compact-view .unit-rarity-cell,
+body.compact-view .stars,
+body.compact-view .doublon-display-cell,
+body.compact-view .action-buttons {
+    width: auto; /* Laisse flexbox gérer la largeur */
+    flex-basis: auto; /* Laisse flexbox gérer la base de la flex */
+    flex-grow: 1; /* Permet de grandir pour remplir l'espace */
+}
+body.compact-view .checkbox-cell { order: 0; flex-grow: 0; width: 30px; } /* checkbox fixe petite */
+body.compact-view .unit-image-cell { order: 1; flex-grow: 2; width: auto; } /* nom + image prend plus de place */
+body.compact-view .unit-element-cell { order: 2; flex-grow: 0; width: auto; } /* élément, petite place */
+body.compact-view .unit-rarity-cell { order: 3; flex-grow: 0; width: auto; } /* rareté, petite place */
+body.compact-view .stars { order: 4; flex-grow: 1; width: auto; } /* étoiles flexibles */
+body.compact-view .doublon-display-cell { order: 5; flex-grow: 1; width: auto; } /* doublons flexibles */
+body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; } /* actions, petite place */
+
 @media (max-width: 992px) { 
     .main-content, .team-builder-container { 
         flex-direction: column; 
@@ -457,9 +617,8 @@ th.sorted .sort-arrow { opacity: 1; }
         max-width: 250px; /* Adapte la taille du logo sur mobile */
     }
     /* Styles pour la tagline (si elle était encore présente, mais on l'a retirée dans HTML) */
-    .app-tagline { 
-        display: none; /* S'assurer qu'elle n'apparaît pas du tout sur mobile si on la supprime pas */
-    }
+    /* .app-tagline { display: none; } */ /* Pas nécessaire si l'élément est déjà supprimé de l'HTML */
+
     #theme-toggle-btn { 
         position: static; 
         transform: none; 
@@ -606,7 +765,7 @@ th.sorted .sort-arrow { opacity: 1; }
     }
 
     /* Les étoiles et doublons prennent toute la largeur (100%) */
-    .stars, .unit-doublon-cell {
+    .stars, .doublon-display-cell { /* Utilisation de la nouvelle classe */
         width: 100%; /* Ces éléments prennent toute la largeur pour avoir de la place */
         padding-right: 10px; /* Conserve un bon padding droit */
         justify-content: flex-start; /* Aligne le groupe d'éléments à GAUCHE pour les étoiles/doublons */
@@ -622,7 +781,7 @@ th.sorted .sort-arrow { opacity: 1; }
     .unit-rarity-cell > *:not(:first-child),
     .stars > *:not(:first-child),
     .unit-level-cell > *:not(:first-child),
-    .unit-doublon-cell > *:not(:first-child),
+    .doublon-display-cell > *:not(:first-child), /* Utilisation de la nouvelle classe */
     .unit-s1-cell > *:not(:first-child),
     .unit-s2-cell > *:not(:first-child),
     .unit-s3-cell > *:not(:first-child) {
@@ -657,7 +816,7 @@ th.sorted .sort-arrow { opacity: 1; }
 
     /* Assurer que les étoiles et les points sont bien visibles et alignés */
     .stars .fa-star,
-    .unit-doublon-cell span,
+    .doublon-display-cell .doublon-node, /* Cible les nœuds de doublons */
     .skill-dots-cell .filled,
     .skill-dots-cell .empty {
         margin-left: 1px; /* Espacement minime entre les points/étoiles */

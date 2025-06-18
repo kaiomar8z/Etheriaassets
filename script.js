@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             themeToggleBtn.innerHTML = sunIcon;
         }
     };
-    
+
     // Theme is still stored locally as it's a UI preference, not data.
     const savedTheme = localStorage.getItem('etheriaTheme') || 'dark';
     applyTheme(savedTheme);
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     // #endregion
-    
+
     // #region --- SÉLECTION DES ÉLÉMENTS DU DOM ---
     const imageBaseUrl = 'https://raw.githubusercontent.com/kaiomar8z/Etheriaassets/main/';
     const addForm = document.getElementById('add-unit-form');
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editModal = document.getElementById('edit-modal');
     const editForm = document.getElementById('edit-unit-form');
     const closeModalBtn = document.querySelector('#edit-modal .close-btn');
-    
+
     const searchInput = document.getElementById('search-input');
     const filterElement = document.getElementById('filter-element');
     const filterRarity = document.getElementById('filter-rarity');
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const managerView = document.getElementById('manager-view');
     const builderView = document.getElementById('builder-view');
     const objectivesView = document.getElementById('objectives-view');
-    
+
     const teamBuilderUnitList = document.getElementById('team-builder-unit-list');
     const teamSlotsContainer = document.querySelector('.team-slots');
     const teamSelect = document.getElementById('team-select');
@@ -122,11 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const newTeamBtn = document.getElementById('new-team-btn');
     const deleteTeamBtn = document.getElementById('delete-team-btn');
     const teamNotesTextarea = document.getElementById('team-notes-textarea');
-    
+
     const clearFormBtn = document.getElementById('clear-form-btn');
     const selectAllCheckbox = document.getElementById('select-all-checkbox');
     const deleteSelectedBtn = document.getElementById('delete-selected-btn');
-    
+
     const unitRowTemplate = document.getElementById('unit-row-template');
     const routineTrackerContent = document.getElementById('routine-tracker-content');
     // #endregion
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return gameDate.toISOString().split('T')[0];
     };
-    
+
     const checkRoutineReset = async () => {
         const currentGameDay = getGameDay();
         let routineToSave = { ...dailyRoutine }; // Create a copy to modify
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 needsSave = true;
                 return;
             }
-            
+
             if (taskDef.type === 'checkbox') {
                 if (taskState.completedOn && taskState.completedOn !== currentGameDay) {
                     taskState.completedOn = null;
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         managerView.classList.remove('active');
         builderView.classList.remove('active', 'flex');
         objectivesView.classList.remove('active');
-        
+
         showManagerBtn.classList.remove('active');
         showBuilderBtn.classList.remove('active');
         showObjectivesBtn.classList.remove('active');
@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     // #endregion
-    
+
     // #region --- MODULE GESTIONNAIRE D'OBJECTIFS (To-Do List) ---
     const addObjectiveForm = document.getElementById('add-objective-form');
     const newObjectiveInput = document.getElementById('new-objective-input');
@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             li.className = `objective-item ${obj.completed ? 'completed' : ''}`;
             li.dataset.id = obj.id; // Firebase doc ID
-            
+
             li.innerHTML = `
                 <input type="checkbox" class="objective-checkbox" ${obj.completed ? 'checked' : ''}>
                 <span class="objective-text">${obj.text}</span>
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         imageInput.value = '';
         unitNameInput.focus();
     };
-    
+
     // Function to fetch and display image placeholder, not upload it yet
     const findUnitImage = async (unitName) => {
         if (!unitName || !unitName.trim()) {
@@ -364,10 +364,10 @@ document.addEventListener('DOMContentLoaded', () => {
             imagePlaceholder.innerHTML = '<span>Image non trouvée.<br>Cliquez pour uploader.</span>';
         }
     };
-    
+
     const fetchAndFillUnitData = async (unitName) => {
         if (!unitName.trim()) return;
-        
+
         const dbUrl = './units_db.json';
 
         try {
@@ -409,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerm = searchInput.value.toLowerCase();
         const selectedElement = filterElement.value;
         const selectedRarity = filterRarity.value;
-        
+
         let processedUnits = units.filter(unit => { // 'units' is now from Firestore listener
             const matchesSearch = unit.name.toLowerCase().includes(searchTerm);
             const matchesElement = !selectedElement || unit.element === selectedElement;
@@ -421,11 +421,11 @@ document.addEventListener('DOMContentLoaded', () => {
         processedUnits.sort((a, b) => {
             if (a.isFavorite && !b.isFavorite) return -1;
             if (!a.isFavorite && b.isFavorite) return 1;
-            
+
             const valA = a[currentSort.column];
             const valB = b[currentSort.column];
             const direction = currentSort.direction === 'asc' ? 1 : -1;
-            
+
             if (typeof valA === 'string') {
                 return valA.localeCompare(valB) * direction;
             } else {
@@ -444,14 +444,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         unitsToDisplay.forEach(unit => {
-            // No more originalIndex, directly use unit.id from Firebase
             const rowFragment = unitRowTemplate.content.cloneNode(true);
-            
-            rowFragment.querySelector('.unit-checkbox').dataset.id = unit.id;
+            const row = rowFragment.querySelector('tr'); // Get the row element
+
+            const checkbox = rowFragment.querySelector('.unit-checkbox');
+            checkbox.dataset.id = unit.id;
+            checkbox.checked = document.getElementById('select-all-checkbox').checked || (
+                Array.from(document.querySelectorAll('.unit-checkbox')).some(cb => cb.dataset.id === unit.id && cb.checked)
+            );
+
+            // Add/remove 'selected-row' class based on checkbox state
+            if (checkbox.checked) {
+                row.classList.add('selected-row');
+            } else {
+                row.classList.remove('selected-row');
+            }
+
             const img = rowFragment.querySelector('.unit-image-cell img');
             img.alt = unit.name;
 
-            // Image handling for display (from Firebase Storage URL or base image URL)
             if (unit.image) {
                 img.src = unit.image;
             } else {
@@ -462,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     img.onerror = null;
                 };
             }
-            
+
             if (unit.rarity) {
                 img.classList.add(`rarity-border-${unit.rarity.toLowerCase()}`);
             }
@@ -470,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const nameCell = rowFragment.querySelector('.unit-name-cell');
             nameCell.textContent = unit.name;
             nameCell.title = unit.name;
-            
+
             if (unit.notes && unit.notes.trim() !== '') {
                 const noteIcon = document.createElement('span');
                 noteIcon.className = 'unit-has-notes-icon';
@@ -497,11 +508,11 @@ document.addEventListener('DOMContentLoaded', () => {
             rowFragment.querySelector('.stars').innerHTML = renderStars(unit.stars);
             rowFragment.querySelector('.unit-level-cell').textContent = unit.level;
             rowFragment.querySelector('.unit-doublon-cell').innerHTML = renderDoublons(unit.doublon);
-            
+
             rowFragment.querySelector('.unit-s1-cell').innerHTML = renderSkillLevel(unit.s1);
             rowFragment.querySelector('.unit-s2-cell').innerHTML = renderSkillLevel(unit.s2);
             rowFragment.querySelector('.unit-s3-cell').innerHTML = renderSkillLevel(unit.s3);
-            
+
             const favoriteBtn = rowFragment.querySelector('.favorite-btn');
             if (unit.isFavorite) {
                 favoriteBtn.classList.add('is-favorite');
@@ -561,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateSelectionState = () => {
         const allCheckboxes = document.querySelectorAll('.unit-checkbox');
         const checkedCheckboxes = document.querySelectorAll('.unit-checkbox:checked');
-        
+
         if (checkedCheckboxes.length > 0) {
             deleteSelectedBtn.style.display = 'inline-flex';
             deleteSelectedBtn.textContent = `Supprimer (${checkedCheckboxes.length})`;
@@ -579,6 +590,16 @@ document.addEventListener('DOMContentLoaded', () => {
             selectAllCheckbox.checked = false;
             selectAllCheckbox.indeterminate = false;
         }
+
+        // Update row background based on individual checkbox state
+        allCheckboxes.forEach(checkbox => {
+            const row = checkbox.closest('tr');
+            if (checkbox.checked) {
+                row.classList.add('selected-row');
+            } else {
+                row.classList.remove('selected-row');
+            }
+        });
     };
     // #endregion
 
@@ -594,7 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
             teamBuilderUnitList.appendChild(img);
         });
     };
-    
+
     const updateSelectionModeUI = () => {
         document.querySelectorAll('.team-slot').forEach(slot => {
             slot.classList.remove('is-selecting');
@@ -757,7 +778,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     clearFormBtn.addEventListener('click', resetAddForm);
-    
+
     unitNameInput.addEventListener('blur', () => {
         const name = unitNameInput.value;
         findUnitImage(name);
@@ -781,6 +802,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Tableau des unités (Actions, Filtres, Tri, Sélection)
     unitListBody.addEventListener('click', async (event) => {
         const button = event.target.closest('button');
+        const checkbox = event.target.closest('.unit-checkbox');
+
         if (button && button.dataset.id) { // Use dataset.id
             const unitId = button.dataset.id; // Get Firebase Document ID
 
@@ -810,16 +833,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        
-        if (event.target.classList.contains('unit-checkbox')) {
+
+        if (checkbox) {
             updateSelectionState();
         }
     });
-    
+
     searchInput.addEventListener('input', displayUnits);
     filterElement.addEventListener('change', displayUnits);
     filterRarity.addEventListener('change', displayUnits);
-    
+
     filterFavoritesBtn.addEventListener('click', () => {
         favoritesFilterActive = !favoritesFilterActive;
         filterFavoritesBtn.classList.toggle('active', favoritesFilterActive);
@@ -962,7 +985,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         reader.readAsText(file);
     });
-    
+
     importCsvInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -972,11 +995,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const csvContent = e.target.result;
                 const lines = csvContent.split(/\r?\n/).filter(line => line.trim() !== '');
                 if (lines.length <= 1) throw new Error("Le fichier CSV est vide ou ne contient que l'en-tête.");
-                
+
                 const header = lines[0];
                 const delimiter = header.includes(';') ? ';' : ',';
                 const dataLines = lines.slice(1);
-                
+
                 let updatedCount = 0;
                 let addedCount = 0;
                 const batch = db.batch();
@@ -1006,8 +1029,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         unitData.notes = existingUnit.notes || ''; // Keep existing notes
                         unitData.isFavorite = existingUnit.isFavorite || false; // Keep existing favorite status
                         // Important: Keep existing image if no new one is provided in CSV logic
-                        unitData.image = existingUnit.image || null; 
-                        
+                        unitData.image = existingUnit.image || null;
+
                         batch.update(unitsCol.doc(existingUnit.id), unitData);
                         updatedCount++;
                     } else {
@@ -1045,8 +1068,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if(slot) {
             slot.classList.remove('drag-over');
             const unitId = e.dataTransfer.getData('text/plain'); // Get Firebase Unit ID
-            const slotIndex = parseInt(slot.dataset.slotIndex);
-            
+
+            // Ensure slot index is correctly retrieved from the actual slot element
+            // If dropping on an image inside a slot, get the parent slot
+            const targetSlot = e.target.classList.contains('team-slot') ? e.target : e.target.closest('.team-slot');
+            const slotIndex = parseInt(targetSlot.dataset.slotIndex);
+
+
             const unitToAdd = units.find(u => u.id === unitId); // Find the full unit object
             if (unitToAdd && activeTeamId) {
                 const activeTeam = teams.find(t => t.id === activeTeamId);
@@ -1171,7 +1199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-    
+
     teamNotesTextarea.addEventListener('input', async () => { // Make async
         if (activeTeamId) {
             try {
@@ -1285,7 +1313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Teams Listener
         teamsCol.orderBy('name').onSnapshot(snapshot => {
             teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
+
             // If activeTeamId is not set or the active team was deleted, set a new active team
             if (!activeTeamId || !teams.some(team => team.id === activeTeamId)) {
                 if (teams.length > 0) {
@@ -1335,9 +1363,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Routine check/render is handled by its own listener
         displayUnits();
         updateDashboard();
-        updateSelectionState();
+        updateSelectionState(); // Call updateSelectionState to handle row highlighting
     };
-    
+
     // Start listening to Firestore data
     setupFirestoreListeners();
 
@@ -1345,3 +1373,6 @@ document.addEventListener('DOMContentLoaded', () => {
     switchView('manager');
     // #endregion
 });
+
+
+        

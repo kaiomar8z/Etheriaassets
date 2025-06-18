@@ -460,7 +460,7 @@ th.sorted .sort-arrow { opacity: 1; }
         padding-left: 10px; /* Réduit le padding-left car le label est flex item */
         padding-right: 10px; /* Garde un padding à droite */
         text-align: right; /* Aligne la valeur à droite */
-        width: 50%; /* Chaque cellule prend 50% de la largeur de la carte */
+        /* width: 50%; <-- Supprimé pour permettre des largeurs différentes */
         box-sizing: border-box;
         padding-top: 8px;
         padding-bottom: 8px;
@@ -547,15 +547,23 @@ th.sorted .sort-arrow { opacity: 1; }
     .action-buttons:before { content: none; } /* Pas de label pour les actions */
 
 
-    /* Ajustement des autres cellules pour s'afficher sur deux colonnes par "ligne" de carte */
-    .unit-element-cell, .unit-rarity-cell, .stars, .unit-level-cell, .unit-doublon-cell,
-    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
-        width: 50%; /* Chaque info prend 50% de la largeur de la carte */
-        box-sizing: border-box;
-        padding: 8px 10px;
-        border-bottom: none; /* Supprime les bordures internes */
+    /* --------------- Ajustements pour les cellules problématiques --------------- */
+
+    /* Toutes les cellules standard, par défaut, sont sur 2 colonnes (50% de large) */
+    .unit-element-cell, .unit-rarity-cell, .unit-level-cell {
+        width: 50%;
     }
 
+    /* Les étoiles et doublons prennent toute la largeur (100%) */
+    .stars, .unit-doublon-cell {
+        width: 100%; /* Ces éléments prennent toute la largeur pour avoir de la place */
+    }
+
+    /* Les compétences S1, S2, S3 restent sur 2 colonnes (50% de large) */
+    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
+        width: 50%;
+    }
+    
     /* Styles pour les éléments de valeur à l'intérieur des cellules (hors label) */
     .unit-element-cell > *:not(:first-child),
     .unit-rarity-cell > *:not(:first-child),
@@ -568,7 +576,6 @@ th.sorted .sort-arrow { opacity: 1; }
         flex-grow: 1; /* Permet au contenu de prendre l'espace restant après le label */
         text-align: right; /* Assure que le contenu s'aligne à droite */
         float: none; /* Supprime les float précédemment ajoutés car on est en flexbox */
-        /* IMPORTANT: Assurez-vous que ces éléments n'ont pas de max-width ou overflow: hidden qui les coupent */
         overflow: visible; /* Assure que le contenu n'est pas coupé */
         white-space: normal; /* Permet le retour à la ligne si nécessaire, mais attention aux points */
     }
@@ -601,16 +608,13 @@ th.sorted .sort-arrow { opacity: 1; }
     .skill-dots-cell > * { /* Cible tous les points de compétence */
         flex-shrink: 0; /* Empêche les éléments individuels (étoiles/points) de rétrécir */
         margin-left: 1px; /* Espacement minimal entre eux */
-        /* Supprime toute propriété qui pourrait les faire passer à la ligne ou les couper */
         white-space: nowrap; /* Essaye de garder tous les points sur une ligne */
     }
 
-    /* Centrer le bloc des étoiles/doublons/skills dans l'espace disponible de la td */
+    /* Aligner le contenu (étoiles/points) à droite dans leur cellule */
     .stars, .unit-doublon-cell, .skill-dots-cell {
         justify-content: flex-end; /* Aligne le groupe d'éléments à droite */
-        /* Si cela coupe encore, cela signifie que la `td` elle-même n'a pas assez de place.
-           Nous pourrions augmenter la `width` de `td` ou réduire le `padding-right` de la `td`. */
-        padding-right: 5px; /* Réduit le padding droit pour donner plus d'espace au contenu */
+        padding-right: 5px; /* Garde un petit padding pour ne pas coller au bord */
     }
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

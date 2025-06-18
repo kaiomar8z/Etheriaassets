@@ -113,6 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const managerView = document.getElementById('manager-view');
     const builderView = document.getElementById('builder-view');
     const objectivesView = document.getElementById('objectives-view');
+    
+    const toggleCompactViewBtn = document.getElementById('toggle-compact-view-btn'); // Nouveau bouton
 
     const teamBuilderUnitList = document.getElementById('team-builder-unit-list');
     const teamSlotsContainer = document.querySelector('.team-slots');
@@ -145,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectionModeSlotIndex = null;
     let unitImageData = null; // Base64 or URL for the image during add/edit process
     let currentImageFile = null; // Store the actual file object for upload
-
+    let isCompactView = localStorage.getItem('isCompactView') === 'true'; // État de la vue compacte
     // #endregion
 
     // #region --- MODULE DE GESTION DE LA ROUTINE ---
@@ -402,8 +404,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderDoublons = (count) => {
         const numericCount = parseInt(count, 10) || 0;
-        return `<span style="color: hsl(${(numericCount * 20)}, 100%, 60%); font-weight: bold; font-size: 1.5em">${'●'.repeat(numericCount)}</span><span style="opacity:0.3;">${'●'.repeat(5 - numericCount)}</span>`;
+        let html = '';
+        for (let i = 0; i < 5; i++) { // Max 5 doublons
+            if (i < numericCount) {
+                html += '<div class="doublon-node filled"></div>';
+            } else {
+                html += '<div class="doublon-node"></div>';
+            }
+        }
+        return html;
     };
+
 
     const displayUnits = () => {
         const searchTerm = searchInput.value.toLowerCase();
@@ -507,8 +518,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             rowFragment.querySelector('.stars').innerHTML = renderStars(unit.stars);
             rowFragment.querySelector('.unit-level-cell').textContent = unit.level;
-            rowFragment.querySelector('.unit-doublon-cell').innerHTML = renderDoublons(unit.doublon);
-
+            rowFragment.querySelector('.doublon-display-cell').innerHTML = renderDoublons(unit.doublon); // Nouvelle classe de cellule
+            
             rowFragment.querySelector('.unit-s1-cell').innerHTML = renderSkillLevel(unit.s1);
             rowFragment.querySelector('.unit-s2-cell').innerHTML = renderSkillLevel(unit.s2);
             rowFragment.querySelector('.unit-s3-cell').innerHTML = renderSkillLevel(unit.s3);
@@ -799,6 +810,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Handle number controls (+/- buttons)
+    document.querySelectorAll('.number-controls button').forEach(button => {
+        button.addEventListener('click', (event) => {
+            const inputGroup = event.target.closest('.input-with-controls');
+            const input = inputGroup.querySelector('input[type="number"]');
+            const select = inputGroup.querySelector('select'); // Handle select for doublon
+            
+            let currentValue;
+            let min, max;
+            if (input) {
+                currentValue = parseInt(input.value, 10);
+                min = parseInt(input.min, 10);
+                max = parseInt(input.max, 10);
+            } else if (select) { // Handle select for doublon
+                currentValue = parseInt(select.value, 10);
+                min = parseInt(select.querySelector('option:first-child').value, 10);
+                max = parseInt(select.querySelector('option:last-child').value, 10);
+            } else {
+                return;
+            }
+
+
+            if (event.target.classList.contains('minus-btn')) {
+                currentValue = Math.max(min, currentValue - 1);
+            } else if (event.target.classList.contains('plus-btn')) {
+                currentValue = Math.min(max, currentValue + 1);
+            }
+
+            if (input) {
+                input.value = currentValue;
+            } else if (select) {
+                select.value = currentValue;
+            }
+        });
+    });
+
     // Tableau des unités (Actions, Filtres, Tri, Sélection)
     unitListBody.addEventListener('click', async (event) => {
         const button = event.target.closest('button');
@@ -872,7 +919,7 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteSelectedBtn.addEventListener('click', async () => {
         const selectedIds = Array.from(document.querySelectorAll('.unit-checkbox:checked')).map(cb => cb.dataset.id);
         if (selectedIds.length === 0) return;
-        if(await showConfirm('Suppression en masse', `Êtes-vous sûr de vouloir supprimer ${selectedIds.length} unité(s) ?`)) {
+        if(await showConfirm('Supprimer en masse', `Êtes-vous sûr de vouloir supprimer ${selectedIds.length} unité(s) ?`)) {
             try {
                 const batch = db.batch();
                 selectedIds.forEach(id => {
@@ -1364,7 +1411,17 @@ document.addEventListener('DOMContentLoaded', () => {
         displayUnits();
         updateDashboard();
         updateSelectionState(); // Call updateSelectionState to handle row highlighting
+        // Apply compact view state on refresh
+        document.body.classList.toggle('compact-view', isCompactView);
+        toggleCompactViewBtn.classList.toggle('active', isCompactView);
     };
+
+    // Toggle compact view
+    toggleCompactViewBtn.addEventListener('click', () => {
+        isCompactView = !isCompactView;
+        localStorage.setItem('isCompactView', isCompactView);
+        refreshUI(); // Re-render table and apply class
+    });
 
     // Start listening to Firestore data
     setupFirestoreListeners();

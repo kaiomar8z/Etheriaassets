@@ -436,7 +436,7 @@ th.sorted .sort-arrow { opacity: 1; }
         background: var(--card-background); /* Chaque ligne devient une carte */
         display: flex;
         flex-wrap: wrap;
-        align-items: center;
+        align-items: flex-start; /* Aligne les éléments en haut de la carte */
         position: relative; /* Pour positionner les labels et actions */
     }
 
@@ -446,11 +446,11 @@ th.sorted .sort-arrow { opacity: 1; }
     body.light-theme tbody tr:nth-child(even) {
         background-color: var(--card-background);
     }
-    tbody tr:hover {
-        background-color: var(--hover-background);
-    }
     tbody tr.selected-row {
         background-color: var(--selected-row-background);
+    }
+    tbody tr:hover {
+        background-color: var(--hover-background);
     }
 
 
@@ -464,7 +464,7 @@ th.sorted .sort-arrow { opacity: 1; }
         padding: 8px 10px;
         display: flex; /* Permet un alignement flex pour label/valeur */
         justify-content: space-between; /* Pour que le label soit à gauche et la valeur à droite */
-        align-items: center;
+        align-items: center; /* Centre verticalement les éléments dans la cellule */
     }
 
     td:before {
@@ -488,26 +488,45 @@ th.sorted .sort-arrow { opacity: 1; }
         text-align: left !important;
         flex-grow: 0;
         margin-right: 10px; /* Espace après la checkbox */
+        align-self: center; /* Centre la checkbox verticalement avec l'image */
+        padding-right: 0; /* Pas de padding droit pour éviter l'écart */
     }
     .checkbox-cell:before { content: none; } /* Pas de label pour la checkbox */
+    .checkbox-cell input[type="checkbox"] {
+        margin: 0; /* Supprime les marges par défaut des checkbox */
+    }
+
 
     .unit-image-cell {
         order: 1; /* Place l'image et le nom juste après la checkbox */
-        width: calc(100% - 60px); /* Prend le reste de la largeur de la première ligne */
+        width: calc(100% - 60px); /* Prend le reste de la largeur de la première ligne, en tenant compte de la checkbox */
         padding-left: 0;
         text-align: left;
         display: flex;
         align-items: center;
         gap: 10px;
         margin-bottom: 10px;
+        padding-top: 0; /* Réduire le padding top */
+        padding-bottom: 0; /* Réduire le padding bottom */
     }
     .unit-image-cell:before { content: none; } /* Pas de label pour la cellule image/nom */
+    .unit-image-cell img {
+        width: 40px; /* Ajuster la taille de l'image pour les petites cartes */
+        height: 40px;
+        border-width: 2px; /* Réduire la bordure */
+    }
     .unit-image-cell span.unit-name-cell {
         white-space: normal; /* Permet au nom de s'enrouler sur plusieurs lignes */
         overflow: visible;
         text-overflow: clip;
         flex-grow: 1;
+        font-size: 1.1em; /* Légèrement plus grand pour le nom */
     }
+    .unit-has-notes-icon {
+        margin-left: 5px; /* Ajuster la marge */
+        font-size: 0.8em; /* Réduire la taille de l'icône de note */
+    }
+
 
     .action-buttons {
         order: 99; /* Place les actions tout en bas de la carte */
@@ -518,8 +537,10 @@ th.sorted .sort-arrow { opacity: 1; }
         margin-top: 10px;
         padding-top: 10px;
         justify-content: center; /* Centre les boutons d'action */
+        gap: 15px; /* Plus d'espace entre les boutons */
     }
-    .action-buttons:before { content: none; }
+    .action-buttons:before { content: none; } /* Pas de label pour les actions */
+
 
     /* Ajustement des autres cellules pour s'afficher sur deux colonnes par "ligne" de carte */
     .unit-element-cell, .unit-rarity-cell, .stars, .unit-level-cell, .unit-doublon-cell,
@@ -530,27 +551,59 @@ th.sorted .sort-arrow { opacity: 1; }
         border-bottom: none; /* Supprime les bordures internes */
     }
 
-    .unit-element-cell .table-icon,
-    .unit-rarity-cell .table-icon {
-        float: right; /* Aligne les icônes à droite */
-        margin-left: 5px;
+    /* Corriger la superposition des icônes et du texte */
+    .unit-element-cell img,
+    .unit-rarity-cell img {
+        margin-left: auto; /* Pousse l'icône à droite de la valeur */
+        display: block; /* S'assure que l'image est un bloc pour le margin-left: auto */
+        flex-shrink: 0; /* Empêche l'icône de rétrécir */
     }
-    .unit-element-cell span, .unit-rarity-cell span {
-        display: none; /* Cache le texte de l'élément/rareté si l'icône est affichée */
+    /* Les valeurs réelles des cellules (texte) doivent être poussées à gauche */
+    .unit-element-cell, .unit-rarity-cell {
+        justify-content: flex-end; /* Aligne le contenu (valeur) à droite */
+    }
+    .unit-element-cell:before, .unit-rarity-cell:before {
+        left: 10px; /* Positionne le label à gauche */
+        text-align: left;
+        width: 40%;
+    }
+    /* Ajustements pour les valeurs elles-mêmes si elles sont des spans ou du texte direct */
+    .unit-element-cell > *:not(:first-child):not(.table-icon),
+    .unit-rarity-cell > *:not(:first-child):not(.table-icon) {
+        margin-left: 5px; /* Crée un petit espace entre le texte de la valeur et l'icône */
     }
 
-    /* Corrige l'alignement des points de compétence et étoiles */
-    .skill-dots-cell, .stars {
-        text-align: right;
+
+    /* Correction pour les étoiles et doublons */
+    .stars, .unit-doublon-cell {
+        display: flex;
+        justify-content: flex-end; /* Aligner les étoiles/doublons à droite */
+        align-items: center;
+        padding-right: 10px; /* Ajouter un peu de padding à droite */
     }
-    .skill-dots-cell span, .stars .fa-star {
-        float: right;
+    .stars .fa-star, .unit-doublon-cell span {
+        margin-left: 2px; /* Espacement entre les étoiles/points */
     }
-    .skill-dots-cell span.empty, .stars .fa-star:not(.fa-solid) {
-        float: right;
+    .stars:before, .unit-doublon-cell:before {
+        left: 10px;
+        text-align: left;
+        width: 40%;
     }
-    .skill-dots-cell span.filled {
-        float: right;
+
+    /* Correction pour les skills S1, S2, S3 */
+    .skill-dots-cell {
+        display: flex;
+        justify-content: flex-end; /* Aligner les points de compétence à droite */
+        align-items: center;
+        padding-right: 10px;
+    }
+    .skill-dots-cell .filled, .skill-dots-cell .empty {
+        margin-left: 1px; /* Espacement minimal entre les points */
+    }
+    .skill-dots-cell:before {
+        left: 10px;
+        text-align: left;
+        width: 40%;
     }
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

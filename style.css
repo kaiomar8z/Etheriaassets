@@ -473,7 +473,8 @@ th.sorted .sort-arrow { opacity: 1; }
     td:before {
         content: attr(data-label); /* Utilise l'attribut data-label comme titre */
         flex-shrink: 0; /* Empêche le label de rétrécir */
-        margin-right: 10px; /* Espace entre le label et la valeur */
+        /* Ajustement de la marge droite du label pour donner plus de place */
+        margin-right: 5px; /* Réduit la marge entre le label et la valeur */
         text-align: left;
         font-weight: 500;
         color: var(--text-color-muted);
@@ -557,6 +558,8 @@ th.sorted .sort-arrow { opacity: 1; }
     /* Les étoiles et doublons prennent toute la largeur (100%) */
     .stars, .unit-doublon-cell {
         width: 100%; /* Ces éléments prennent toute la largeur pour avoir de la place */
+        /* Ajuster le padding pour donner plus d'espace au contenu */
+        padding-right: 10px; /* Augmente un peu le padding droit total */
     }
 
     /* Les compétences S1, S2, S3 restent sur 2 colonnes (50% de large) */
@@ -577,7 +580,7 @@ th.sorted .sort-arrow { opacity: 1; }
         text-align: right; /* Assure que le contenu s'aligne à droite */
         float: none; /* Supprime les float précédemment ajoutés car on est en flexbox */
         overflow: visible; /* Assure que le contenu n'est pas coupé */
-        white-space: normal; /* Permet le retour à la ligne si nécessaire, mais attention aux points */
+        white-space: nowrap; /* Tente de garder tout sur une ligne pour étoiles/points */
     }
 
     /* Ajustements pour les icônes d'élément et de rareté */
@@ -607,8 +610,8 @@ th.sorted .sort-arrow { opacity: 1; }
     .unit-doublon-cell > *, /* Cible tous les points de doublon */
     .skill-dots-cell > * { /* Cible tous les points de compétence */
         flex-shrink: 0; /* Empêche les éléments individuels (étoiles/points) de rétrécir */
-        margin-left: 1px; /* Espacement minimal entre eux */
-        white-space: nowrap; /* Essaye de garder tous les points sur une ligne */
+        /* Réduit l'espace entre les éléments pour maximiser l'affichage */
+        margin-left: 0.5px; /* Très petit espacement entre les étoiles/points */
     }
 
     /* Aligner le contenu (étoiles/points) à droite dans leur cellule */

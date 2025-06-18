@@ -1373,6 +1373,3 @@ document.addEventListener('DOMContentLoaded', () => {
     switchView('manager');
     // #endregion
 });
-
-
-        

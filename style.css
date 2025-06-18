@@ -465,6 +465,7 @@ th.sorted .sort-arrow { opacity: 1; }
         display: flex; /* Permet un alignement flex pour label/valeur */
         justify-content: space-between; /* Pour que le label soit à gauche et la valeur à droite */
         align-items: center; /* Centre verticalement les éléments dans la cellule */
+        min-height: 36px; /* Ajoute une hauteur minimale pour éviter l'écrasement */
     }
 
     td:before {
@@ -488,8 +489,9 @@ th.sorted .sort-arrow { opacity: 1; }
         text-align: left !important;
         flex-grow: 0;
         margin-right: 10px; /* Espace après la checkbox */
-        align-self: center; /* Centre la checkbox verticalement avec l'image */
+        align-self: flex-start; /* Aligne la checkbox en haut de l'image/nom */
         padding-right: 0; /* Pas de padding droit pour éviter l'écart */
+        min-height: auto; /* Supprime la hauteur minimale */
     }
     .checkbox-cell:before { content: none; } /* Pas de label pour la checkbox */
     .checkbox-cell input[type="checkbox"] {
@@ -508,6 +510,7 @@ th.sorted .sort-arrow { opacity: 1; }
         margin-bottom: 10px;
         padding-top: 0; /* Réduire le padding top */
         padding-bottom: 0; /* Réduire le padding bottom */
+        min-height: auto; /* Supprime la hauteur minimale */
     }
     .unit-image-cell:before { content: none; } /* Pas de label pour la cellule image/nom */
     .unit-image-cell img {
@@ -538,6 +541,7 @@ th.sorted .sort-arrow { opacity: 1; }
         padding-top: 10px;
         justify-content: center; /* Centre les boutons d'action */
         gap: 15px; /* Plus d'espace entre les boutons */
+        min-height: auto; /* Supprime la hauteur minimale */
     }
     .action-buttons:before { content: none; } /* Pas de label pour les actions */
 
@@ -552,58 +556,76 @@ th.sorted .sort-arrow { opacity: 1; }
     }
 
     /* Corriger la superposition des icônes et du texte */
-    .unit-element-cell img,
-    .unit-rarity-cell img {
-        margin-left: auto; /* Pousse l'icône à droite de la valeur */
-        display: block; /* S'assure que l'image est un bloc pour le margin-left: auto */
-        flex-shrink: 0; /* Empêche l'icône de rétrécir */
+    .unit-element-cell .table-icon,
+    .unit-rarity-cell .table-icon {
+        margin-left: 5px; /* Petit espace entre la valeur et l'icône */
+        display: inline-block; /* S'assure que l'icône est en ligne */
+        vertical-align: middle; /* Aligne l'icône avec le texte (s'il y en a) */
+        width: 20px; /* Taille fixe pour l'icône */
+        height: 20px;
     }
-    /* Les valeurs réelles des cellules (texte) doivent être poussées à gauche */
-    .unit-element-cell, .unit-rarity-cell {
-        justify-content: flex-end; /* Aligne le contenu (valeur) à droite */
+
+    /* Les valeurs réelles des cellules (texte) doivent être poussées à gauche ou ajustées */
+    /* Pour .unit-element-cell et .unit-rarity-cell, si on a du texte EN PLUS de l'icône */
+    .unit-element-cell span:not(.table-icon),
+    .unit-rarity-cell span:not(.table-icon) {
+        /* Ici, vous pouvez ajouter des styles si vous voulez du texte en plus des icônes */
+        /* Par exemple, display: none; si vous voulez que seul l'icône apparaisse */
+        /* ou un font-size plus petit */
     }
-    .unit-element-cell:before, .unit-rarity-cell:before {
-        left: 10px; /* Positionne le label à gauche */
+
+    /* Important: Pour les cellules Élément et Rareté, si elles ne contiennent QUE des icônes,
+       alors il faut ajuster le flex pour que l'icône soit bien positionnée par rapport au label.
+       On va faire en sorte que le label et l'icône/valeur soient côte à côte, alignés. */
+    .unit-element-cell, .unit-rarity-cell, .stars, .unit-level-cell, .unit-doublon-cell,
+    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
+        display: flex; /* Utilise flexbox pour l'alignement */
+        justify-content: space-between; /* Pousse le label à gauche, la valeur à droite */
+        align-items: center; /* Centre verticalement */
+        padding-left: 10px; /* Réduit le padding-left pour mieux coller au label */
+        padding-right: 10px; /* Ajoute padding-right pour l'espace à droite */
+    }
+    td:before { /* Ajuste le label pour qu'il prenne moins de place mais soit visible */
+        position: static; /* Ne plus le positionner absolument */
+        width: auto; /* Largeur automatique */
+        flex-shrink: 0; /* Empêche le label de rétrécir */
+        margin-right: 10px; /* Espace entre le label et la valeur */
         text-align: left;
-        width: 40%;
     }
-    /* Ajustements pour les valeurs elles-mêmes si elles sont des spans ou du texte direct */
-    .unit-element-cell > *:not(:first-child):not(.table-icon),
-    .unit-rarity-cell > *:not(:first-child):not(.table-icon) {
-        margin-left: 5px; /* Crée un petit espace entre le texte de la valeur et l'icône */
+
+    /* Correction spécifique pour le texte de rareté "SSR" */
+    .unit-rarity-cell span {
+        font-size: 1.2em; /* Augmente la taille si c'est du texte */
+        font-weight: bold;
+    }
+    .unit-rarity-cell img.table-icon {
+        width: 40px; /* Rendre l'icône de rareté plus grande si pas de texte */
+        height: auto;
+    }
+    .unit-rarity-cell {
+        /* Si l'icône est dominante, ajuster le flex pour qu'elle soit bien visible */
+        justify-content: flex-end; /* Pousse le contenu (icône) vers la droite */
+        /* La valeur SSR est une image, pas juste du texte, donc on gère son affichage */
     }
 
 
     /* Correction pour les étoiles et doublons */
-    .stars, .unit-doublon-cell {
-        display: flex;
-        justify-content: flex-end; /* Aligner les étoiles/doublons à droite */
-        align-items: center;
-        padding-right: 10px; /* Ajouter un peu de padding à droite */
-    }
     .stars .fa-star, .unit-doublon-cell span {
         margin-left: 2px; /* Espacement entre les étoiles/points */
-    }
-    .stars:before, .unit-doublon-cell:before {
-        left: 10px;
-        text-align: left;
-        width: 40%;
-    }
-
-    /* Correction pour les skills S1, S2, S3 */
-    .skill-dots-cell {
-        display: flex;
-        justify-content: flex-end; /* Aligner les points de compétence à droite */
-        align-items: center;
-        padding-right: 10px;
+        float: none; /* Supprimer les float qui posent problème avec flexbox */
     }
     .skill-dots-cell .filled, .skill-dots-cell .empty {
         margin-left: 1px; /* Espacement minimal entre les points */
+        float: none; /* Supprimer les float */
     }
-    .skill-dots-cell:before {
-        left: 10px;
-        text-align: left;
-        width: 40%;
+
+    /* Le texte "Level" et "Doublon" et "S1", "S2", "S3" est le data-label,
+       leurs valeurs sont le contenu de la td. On s'assure qu'ils sont bien séparés. */
+    .unit-level-cell, .unit-doublon-cell, .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
+        /* Ils sont déjà en display: flex et justify-content: space-between */
+        /* Assurons-nous que le contenu (les chiffres ou points) ne dépasse pas */
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

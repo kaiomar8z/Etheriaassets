@@ -55,7 +55,7 @@ header {
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px; /* Réduit l'espace entre le logo et la nav */
+    gap: 10px; /* Espace entre les éléments du header */
     text-align: center;
     margin-bottom: 20px;
     position: relative;
@@ -64,25 +64,21 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 10px; /* Espace sous le logo */
+    margin-bottom: 0; /* Pas de marge en bas, c'est app-tagline (maintenant retirée) qui gérait */
 }
 .main-logo {
     max-width: 500px; /* Augmenté la taille du logo pour PC */
     height: auto;
     filter: brightness(0) invert(1); /* Rend le logo blanc pour le thème sombre */
-    margin: 0;
+    margin-bottom: 0; /* Assure qu'il n'y a pas de marge sous l'image elle-même */
+    display: block; /* S'assure qu'il est un bloc pour les marges */
 }
 body.light-theme .main-logo {
     filter: none; /* Rétablit la couleur d'origine pour le thème clair */
 }
 
-.tagline {
-    color: var(--text-color-muted);
-    font-size: 1.5em; /* Agrandit un peu la tagline */
-    font-weight: 500;
-    margin-top: -30px; /* Rapproche le tagline du logo, ajustement précis */
-    letter-spacing: 0.15em; /* Augmente l'espacement des lettres pour une meilleure lisibilité */
-    text-transform: uppercase;
+.app-tagline { /* Style de l'ancienne tagline, qui ne sera plus utilisée */
+    display: none; /* Cache complètement si encore présent par erreur */
 }
 
 
@@ -460,8 +456,9 @@ th.sorted .sort-arrow { opacity: 1; }
     .main-logo {
         max-width: 250px; /* Adapte la taille du logo sur mobile */
     }
-    .tagline {
-        font-size: 0.9em;
+    /* Styles pour la tagline (si elle était encore présente, mais on l'a retirée dans HTML) */
+    .app-tagline { 
+        display: none; /* S'assurer qu'elle n'apparaît pas du tout sur mobile si on la supprime pas */
     }
     #theme-toggle-btn { 
         position: static; 

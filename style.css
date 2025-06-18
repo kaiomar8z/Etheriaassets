@@ -558,8 +558,9 @@ th.sorted .sort-arrow { opacity: 1; }
     /* Les étoiles et doublons prennent toute la largeur (100%) */
     .stars, .unit-doublon-cell {
         width: 100%; /* Ces éléments prennent toute la largeur pour avoir de la place */
-        /* Ajuster le padding pour donner plus d'espace au contenu */
-        padding-right: 10px; /* Augmente un peu le padding droit total */
+        padding-right: 10px; /* Conserve un bon padding droit */
+        /* IMPORTANT: align-items: flex-end pour coller la valeur au bord droit */
+        justify-content: flex-end; /* Aligne le groupe d'éléments à droite */
     }
 
     /* Les compétences S1, S2, S3 restent sur 2 colonnes (50% de large) */
@@ -576,11 +577,14 @@ th.sorted .sort-arrow { opacity: 1; }
     .unit-s1-cell > *:not(:first-child),
     .unit-s2-cell > *:not(:first-child),
     .unit-s3-cell > *:not(:first-child) {
-        flex-grow: 1; /* Permet au contenu de prendre l'espace restant après le label */
+        flex-grow: 0; /* Ne pas laisser le contenu grandir et pousser le label */
+        /* Ajuste la largeur pour que le contenu des points/étoiles se tienne */
+        /* C'est là que réside le problème le plus délicat. Forçons une largeur si nécessaire. */
+        /* Pour étoiles et doublons (max 6 ou 5 éléments) */
+        min-width: 80px; /* Estimation: 5 éléments de 16px + 2px marge = 90px minimum */
         text-align: right; /* Assure que le contenu s'aligne à droite */
-        float: none; /* Supprime les float précédemment ajoutés car on est en flexbox */
         overflow: visible; /* Assure que le contenu n'est pas coupé */
-        white-space: nowrap; /* Tente de garder tout sur une ligne pour étoiles/points */
+        white-space: nowrap; /* Essaye de garder tout sur une ligne pour étoiles/points */
     }
 
     /* Ajustements pour les icônes d'élément et de rareté */
@@ -608,16 +612,22 @@ th.sorted .sort-arrow { opacity: 1; }
     /* Assurer que les étoiles et les points sont bien visibles et alignés */
     .stars > *, /* Cible toutes les étoiles */
     .unit-doublon-cell > *, /* Cible tous les points de doublon */
-    .skill-dots-cell > * { /* Cible tous les points de compétence */
+    .unit-s1-cell > *, .unit-s2-cell > *, .unit-s3-cell > * { /* Cible tous les points de compétence */
         flex-shrink: 0; /* Empêche les éléments individuels (étoiles/points) de rétrécir */
-        /* Réduit l'espace entre les éléments pour maximiser l'affichage */
-        margin-left: 0.5px; /* Très petit espacement entre les étoiles/points */
+        /* On va réduire drastiquement la marge entre les points/étoiles */
+        margin-left: 0.2px; /* Très très petit espacement entre les étoiles/points */
+        font-size: 1em; /* Assure une taille standard pour les icônes de points */
     }
 
-    /* Aligner le contenu (étoiles/points) à droite dans leur cellule */
+    /* Ajustement pour coller le nombre de Level et les icônes/points à droite de leur cellule */
+    .unit-level-cell, .unit-element-cell, .unit-rarity-cell {
+        /* Ces cellules ont déjà justify-content: space-between */
+        /* Pour rapprocher le contenu de droite du bord, on peut réduire le padding-right */
+        padding-right: 5px;
+    }
     .stars, .unit-doublon-cell, .skill-dots-cell {
-        justify-content: flex-end; /* Aligne le groupe d'éléments à droite */
-        padding-right: 5px; /* Garde un petit padding pour ne pas coller au bord */
+        /* Ces cellules sont déjà en justify-content: flex-end */
+        padding-right: 5px; /* Garde ce padding pour alignement général */
     }
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

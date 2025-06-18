@@ -30,7 +30,7 @@ body.light-theme {
     --input-background: rgba(0,0,0,0.05);
     --hover-background: rgba(0, 0, 0, 0.05);
     --option-background: #e9ecef;
-    --selected-row-background: rgba(0, 123, 255, 0.08); /* Nouvelle variable pour ligne sélectionnée */
+    --selected-row-background: rgba(0, 123, 255, 0.08); /* Nouvelle variable pour ligne sélectionnée*/
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -275,7 +275,7 @@ thead th:last-child { border-radius: 0 8px 0 0; }
 tbody tr:hover { background-color: var(--hover-background); }
 tbody tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); } /* Bandes zébrées */
 body.light-theme tbody tr:nth-child(even) { background-color: rgba(0, 0, 0, 0.02); } /* Bandes zébrées light theme */
-tbody tr.selected-row { /* Nouvelle classe pour la ligne sélectionnée */
+tbody tr.selected-row { /* Nouvelle classe pour la ligne sélectionnée*/
     background-color: var(--selected-row-background);
 }
 
@@ -457,9 +457,10 @@ th.sorted .sort-arrow { opacity: 1; }
     td {
         border: none; /* Supprime les bordures de cellule internes */
         position: relative;
-        padding-left: 45%; /* Espace pour le label */
+        /* Padding-left ajusté car le label n'est plus en position absolue */
+        padding-left: 10px; /* Moins de padding car le label est flex item */
         text-align: right; /* Aligne la valeur à droite */
-        width: 100%; /* Chaque cellule prend toute la largeur de la carte par défaut */
+        width: 50%; /* Chaque cellule prend 50% de la largeur de la carte */
         box-sizing: border-box;
         padding: 8px 10px;
         display: flex; /* Permet un alignement flex pour label/valeur */
@@ -469,10 +470,10 @@ th.sorted .sort-arrow { opacity: 1; }
     }
 
     td:before {
+        /* Plus de positionnement absolu pour le label */
         content: attr(data-label); /* Utilise l'attribut data-label comme titre */
-        position: absolute;
-        left: 10px;
-        width: 40%; /* Largeur du label */
+        flex-shrink: 0; /* Empêche le label de rétrécir */
+        margin-right: 10px; /* Espace entre le label et la valeur */
         text-align: left;
         font-weight: 500;
         color: var(--text-color-muted);
@@ -547,85 +548,69 @@ th.sorted .sort-arrow { opacity: 1; }
 
 
     /* Ajustement des autres cellules pour s'afficher sur deux colonnes par "ligne" de carte */
+    /* Ces cellules seront toujours en `display: flex` avec `justify-content: space-between` */
     .unit-element-cell, .unit-rarity-cell, .stars, .unit-level-cell, .unit-doublon-cell,
     .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
         width: 50%; /* Chaque info prend 50% de la largeur de la carte */
         box-sizing: border-box;
         padding: 8px 10px;
         border-bottom: none; /* Supprime les bordures internes */
+        /* Retiré: overflow: hidden; text-overflow: ellipsis; pour ne pas couper les étoiles/doublons */
     }
 
-    /* Corriger la superposition des icônes et du texte */
+    /* Styles pour les éléments de valeur à l'intérieur des cellules (hors label) */
+    .unit-element-cell > *:not(:first-child),
+    .unit-rarity-cell > *:not(:first-child),
+    .stars > *:not(:first-child),
+    .unit-level-cell > *:not(:first-child),
+    .unit-doublon-cell > *:not(:first-child),
+    .unit-s1-cell > *:not(:first-child),
+    .unit-s2-cell > *:not(:first-child),
+    .unit-s3-cell > *:not(:first-child) {
+        flex-grow: 1; /* Permet au contenu de prendre l'espace restant après le label */
+        text-align: right; /* Assure que le contenu s'aligne à droite */
+        /* Supprime les float précédemment ajoutés car on est en flexbox */
+        float: none;
+    }
+
+    /* Ajustements pour les icônes d'élément et de rareté */
     .unit-element-cell .table-icon,
     .unit-rarity-cell .table-icon {
-        margin-left: 5px; /* Petit espace entre la valeur et l'icône */
-        display: inline-block; /* S'assure que l'icône est en ligne */
-        vertical-align: middle; /* Aligne l'icône avec le texte (s'il y en a) */
+        margin-left: 5px; /* Petit espace entre le texte et l'icône si le texte est présent */
         width: 20px; /* Taille fixe pour l'icône */
         height: 20px;
     }
-
-    /* Les valeurs réelles des cellules (texte) doivent être poussées à gauche ou ajustées */
-    /* Pour .unit-element-cell et .unit-rarity-cell, si on a du texte EN PLUS de l'icône */
-    .unit-element-cell span:not(.table-icon),
-    .unit-rarity-cell span:not(.table-icon) {
-        /* Ici, vous pouvez ajouter des styles si vous voulez du texte en plus des icônes */
-        /* Par exemple, display: none; si vous voulez que seul l'icône apparaisse */
-        /* ou un font-size plus petit */
+    /* S'il n'y a QUE l'icône et pas de texte de valeur */
+    .unit-element-cell .table-icon,
+    .unit-rarity-cell .table-icon {
+        /* Si l'icône doit être la seule valeur affichée, centrez-la ou positionnez-la */
+        /* Pour l'instant, justify-content: space-between gère l'alignement avec le label */
+        /* Mais si le label est absent ou positionné différemment, ces styles peuvent être affinés */
+        margin-left: auto; /* Poussera l'icône à l'extrême droite de l'espace restant */
     }
 
-    /* Important: Pour les cellules Élément et Rareté, si elles ne contiennent QUE des icônes,
-       alors il faut ajuster le flex pour que l'icône soit bien positionnée par rapport au label.
-       On va faire en sorte que le label et l'icône/valeur soient côte à côte, alignés. */
-    .unit-element-cell, .unit-rarity-cell, .stars, .unit-level-cell, .unit-doublon-cell,
-    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
-        display: flex; /* Utilise flexbox pour l'alignement */
-        justify-content: space-between; /* Pousse le label à gauche, la valeur à droite */
-        align-items: center; /* Centre verticalement */
-        padding-left: 10px; /* Réduit le padding-left pour mieux coller au label */
-        padding-right: 10px; /* Ajoute padding-right pour l'espace à droite */
-    }
-    td:before { /* Ajuste le label pour qu'il prenne moins de place mais soit visible */
-        position: static; /* Ne plus le positionner absolument */
-        width: auto; /* Largeur automatique */
-        flex-shrink: 0; /* Empêche le label de rétrécir */
-        margin-right: 10px; /* Espace entre le label et la valeur */
-        text-align: left;
-    }
-
-    /* Correction spécifique pour le texte de rareté "SSR" */
+    /* Correction pour le texte de rareté "SSR" */
     .unit-rarity-cell span {
-        font-size: 1.2em; /* Augmente la taille si c'est du texte */
+        font-size: 1.1em; /* Ajusté la taille */
         font-weight: bold;
+        /* margin-left: auto;  Peut être utile si pas d'icône pour pousser le texte à droite */
     }
     .unit-rarity-cell img.table-icon {
-        width: 40px; /* Rendre l'icône de rareté plus grande si pas de texte */
+        width: 30px; /* Rendre l'icône de rareté plus grande si pas de texte */
         height: auto;
-    }
-    .unit-rarity-cell {
-        /* Si l'icône est dominante, ajuster le flex pour qu'elle soit bien visible */
-        justify-content: flex-end; /* Pousse le contenu (icône) vers la droite */
-        /* La valeur SSR est une image, pas juste du texte, donc on gère son affichage */
+        margin-left: 5px; /* Espace entre le texte SSR et l'icône rarity.webp */
     }
 
-
-    /* Correction pour les étoiles et doublons */
-    .stars .fa-star, .unit-doublon-cell span {
-        margin-left: 2px; /* Espacement entre les étoiles/points */
-        float: none; /* Supprimer les float qui posent problème avec flexbox */
-    }
-    .skill-dots-cell .filled, .skill-dots-cell .empty {
-        margin-left: 1px; /* Espacement minimal entre les points */
-        float: none; /* Supprimer les float */
+    /* Assurer que les étoiles et les points sont bien visibles */
+    .stars, .unit-doublon-cell, .skill-dots-cell {
+        /* Ces cellules ont déjà display: flex et justify-content: space-between */
+        /* et align-items: center */
+        /* Leur contenu direct sont les spans des points ou les i des étoiles */
     }
 
-    /* Le texte "Level" et "Doublon" et "S1", "S2", "S3" est le data-label,
-       leurs valeurs sont le contenu de la td. On s'assure qu'ils sont bien séparés. */
-    .unit-level-cell, .unit-doublon-cell, .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
-        /* Ils sont déjà en display: flex et justify-content: space-between */
-        /* Assurons-nous que le contenu (les chiffres ou points) ne dépasse pas */
-        overflow: hidden;
-        text-overflow: ellipsis;
+    .stars .fa-star, .unit-doublon-cell span, .skill-dots-cell span {
+        flex-shrink: 0; /* Empêche les éléments individuels (étoiles/points) de rétrécir */
+        margin-left: 1px; /* Espace minimal entre eux */
     }
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

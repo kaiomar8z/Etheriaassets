@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Etheria Restart Manager</title>
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,7 +40,7 @@
                         <div class="rarity-r" title="R"><i class="fa-solid fa-star"></i> <span id="stat-r-count">0</span></div>
                     </div>
                 </div>
-                
+
                 <div class="stat-card card span-2 routine-tracker-card">
                     <h3><i class="fa-solid fa-clock-rotate-left"></i> Routine Quotidienne</h3>
                     <div class="card-content" id="routine-tracker-content">
@@ -111,7 +111,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="filter-controls" style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
                         <input type="search" id="search-input" placeholder="Rechercher par nom..." style="flex: 2; min-width: 180px;">
                         <select id="filter-element" style="flex: 1; min-width: 140px;">
@@ -165,7 +165,7 @@
                         <button id="delete-team-btn" class="action-btn" title="Supprimer l'équipe" style="background-color: var(--danger-color); border:none; color:white;"><i class="fa-solid fa-trash"></i></button>
                     </div>
                     <div class="team-slots"></div>
-                    
+
                     <div class="team-notes-container">
                         <h3 style="margin-top: 20px; margin-bottom: 10px;">Bloc-notes de l'équipe</h3>
                         <textarea id="team-notes-textarea" placeholder="Prenez des notes sur la stratégie de cette équipe, les équipements à viser, etc..."></textarea>
@@ -180,7 +180,7 @@
                 <div class="list-header">
                     <h2>Ma To-Do List</h2>
                 </div>
-                
+
                 <form id="add-objective-form">
                     <input type="text" id="new-objective-input" placeholder="Nouvel objectif..." required>
                     <button type="submit" class="submit-btn" style="flex-grow: 0; width: auto; font-size: 1em;">
@@ -211,7 +211,7 @@
                     <div class="form-group"><label for="edit-unit-s1">S1 * (1-5)</label><input type="number" id="edit-unit-s1" min="1" max="5" required></div>
                     <div class="form-group"><label for="edit-unit-s2">S2 * (1-5)</label><input type="number" id="edit-unit-s2" min="1" max="5" required></div>
                     <div class="form-group"><label for="edit-unit-s3">S3 * (1-5)</label><input type="number" id="edit-unit-s3" min="1" max="5" required></div>
-                    
+
                     <div class="form-group full-width">
                         <label for="edit-unit-notes">Notes Personnelles</label>
                         <textarea id="edit-unit-notes" placeholder="Builds, synergies, rappels..."></textarea>
@@ -222,7 +222,7 @@
             </form>
         </div>
     </div>
-    
+
     <div id="toast-container"></div>
 
     <div id="confirm-modal" class="modal">
@@ -241,22 +241,22 @@
 
     <template id="unit-row-template">
         <tr>
-            <td class="checkbox-cell">
+            <td class="checkbox-cell" data-label="Sélection">
                 <input type="checkbox" class="unit-checkbox">
             </td>
-            <td class="unit-image-cell">
+            <td class="unit-image-cell" data-label="Unité">
                 <img src="" alt="">
                 <span class="unit-name-cell"></span>
             </td>
-            <td class="unit-element-cell"></td>
-            <td class="unit-rarity-cell"></td>
-            <td class="stars"></td>
-            <td class="unit-level-cell"></td>
-            <td class="unit-doublon-cell"></td>
-            <td class="unit-s1-cell skill-dots-cell"></td>
-            <td class="unit-s2-cell skill-dots-cell"></td>
-            <td class="unit-s3-cell skill-dots-cell"></td>
-            <td class="action-buttons column-actions">
+            <td class="unit-element-cell" data-label="Élément"></td>
+            <td class="unit-rarity-cell" data-label="Rareté"></td>
+            <td class="stars" data-label="Étoiles"></td>
+            <td class="unit-level-cell" data-label="Level"></td>
+            <td class="unit-doublon-cell" data-label="Doublon"></td>
+            <td class="unit-s1-cell skill-dots-cell" data-label="S1"></td>
+            <td class="unit-s2-cell skill-dots-cell" data-label="S2"></td>
+            <td class="unit-s3-cell skill-dots-cell" data-label="S3"></td>
+            <td class="action-buttons column-actions" data-label="Actions">
                 <button class="favorite-btn" title="Mettre en favori"><i class="fa-regular fa-star"></i></button>
                 <button class="edit-btn" title="Modifier"><i class="fa-solid fa-pencil"></i></button>
                 <button class="delete-btn" title="Supprimer"><i class="fa-solid fa-trash"></i></button>

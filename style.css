@@ -457,12 +457,13 @@ th.sorted .sort-arrow { opacity: 1; }
     td {
         border: none; /* Supprime les bordures de cellule internes */
         position: relative;
-        /* Padding-left ajusté car le label n'est plus en position absolue */
-        padding-left: 10px; /* Moins de padding car le label est flex item */
+        padding-left: 10px; /* Réduit le padding-left car le label est flex item */
+        padding-right: 10px; /* Garde un padding à droite */
         text-align: right; /* Aligne la valeur à droite */
         width: 50%; /* Chaque cellule prend 50% de la largeur de la carte */
         box-sizing: border-box;
-        padding: 8px 10px;
+        padding-top: 8px;
+        padding-bottom: 8px;
         display: flex; /* Permet un alignement flex pour label/valeur */
         justify-content: space-between; /* Pour que le label soit à gauche et la valeur à droite */
         align-items: center; /* Centre verticalement les éléments dans la cellule */
@@ -470,7 +471,6 @@ th.sorted .sort-arrow { opacity: 1; }
     }
 
     td:before {
-        /* Plus de positionnement absolu pour le label */
         content: attr(data-label); /* Utilise l'attribut data-label comme titre */
         flex-shrink: 0; /* Empêche le label de rétrécir */
         margin-right: 10px; /* Espace entre le label et la valeur */
@@ -548,14 +548,12 @@ th.sorted .sort-arrow { opacity: 1; }
 
 
     /* Ajustement des autres cellules pour s'afficher sur deux colonnes par "ligne" de carte */
-    /* Ces cellules seront toujours en `display: flex` avec `justify-content: space-between` */
     .unit-element-cell, .unit-rarity-cell, .stars, .unit-level-cell, .unit-doublon-cell,
     .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
         width: 50%; /* Chaque info prend 50% de la largeur de la carte */
         box-sizing: border-box;
         padding: 8px 10px;
         border-bottom: none; /* Supprime les bordures internes */
-        /* Retiré: overflow: hidden; text-overflow: ellipsis; pour ne pas couper les étoiles/doublons */
     }
 
     /* Styles pour les éléments de valeur à l'intérieur des cellules (hors label) */
@@ -569,8 +567,10 @@ th.sorted .sort-arrow { opacity: 1; }
     .unit-s3-cell > *:not(:first-child) {
         flex-grow: 1; /* Permet au contenu de prendre l'espace restant après le label */
         text-align: right; /* Assure que le contenu s'aligne à droite */
-        /* Supprime les float précédemment ajoutés car on est en flexbox */
-        float: none;
+        float: none; /* Supprime les float précédemment ajoutés car on est en flexbox */
+        /* IMPORTANT: Assurez-vous que ces éléments n'ont pas de max-width ou overflow: hidden qui les coupent */
+        overflow: visible; /* Assure que le contenu n'est pas coupé */
+        white-space: normal; /* Permet le retour à la ligne si nécessaire, mais attention aux points */
     }
 
     /* Ajustements pour les icônes d'élément et de rareté */
@@ -579,21 +579,15 @@ th.sorted .sort-arrow { opacity: 1; }
         margin-left: 5px; /* Petit espace entre le texte et l'icône si le texte est présent */
         width: 20px; /* Taille fixe pour l'icône */
         height: 20px;
+        flex-shrink: 0; /* Empêche l'icône de rétrécir si l'espace est limité */
     }
-    /* S'il n'y a QUE l'icône et pas de texte de valeur */
-    .unit-element-cell .table-icon,
-    .unit-rarity-cell .table-icon {
-        /* Si l'icône doit être la seule valeur affichée, centrez-la ou positionnez-la */
-        /* Pour l'instant, justify-content: space-between gère l'alignement avec le label */
-        /* Mais si le label est absent ou positionné différemment, ces styles peuvent être affinés */
-        margin-left: auto; /* Poussera l'icône à l'extrême droite de l'espace restant */
-    }
-
-    /* Correction pour le texte de rareté "SSR" */
-    .unit-rarity-cell span {
+    
+    /* Correction spécifique pour le texte de rareté "SSR" ou autres */
+    .unit-rarity-cell span:not(.table-icon) { /* Cible le span du texte "SSR" */
         font-size: 1.1em; /* Ajusté la taille */
         font-weight: bold;
-        /* margin-left: auto;  Peut être utile si pas d'icône pour pousser le texte à droite */
+        white-space: nowrap; /* Empêche le texte SSR de passer à la ligne */
+        flex-shrink: 0; /* Empêche le texte de rétrécir */
     }
     .unit-rarity-cell img.table-icon {
         width: 30px; /* Rendre l'icône de rareté plus grande si pas de texte */
@@ -601,16 +595,22 @@ th.sorted .sort-arrow { opacity: 1; }
         margin-left: 5px; /* Espace entre le texte SSR et l'icône rarity.webp */
     }
 
-    /* Assurer que les étoiles et les points sont bien visibles */
-    .stars, .unit-doublon-cell, .skill-dots-cell {
-        /* Ces cellules ont déjà display: flex et justify-content: space-between */
-        /* et align-items: center */
-        /* Leur contenu direct sont les spans des points ou les i des étoiles */
+    /* Assurer que les étoiles et les points sont bien visibles et alignés */
+    .stars > *, /* Cible toutes les étoiles */
+    .unit-doublon-cell > *, /* Cible tous les points de doublon */
+    .skill-dots-cell > * { /* Cible tous les points de compétence */
+        flex-shrink: 0; /* Empêche les éléments individuels (étoiles/points) de rétrécir */
+        margin-left: 1px; /* Espacement minimal entre eux */
+        /* Supprime toute propriété qui pourrait les faire passer à la ligne ou les couper */
+        white-space: nowrap; /* Essaye de garder tous les points sur une ligne */
     }
 
-    .stars .fa-star, .unit-doublon-cell span, .skill-dots-cell span {
-        flex-shrink: 0; /* Empêche les éléments individuels (étoiles/points) de rétrécir */
-        margin-left: 1px; /* Espace minimal entre eux */
+    /* Centrer le bloc des étoiles/doublons/skills dans l'espace disponible de la td */
+    .stars, .unit-doublon-cell, .skill-dots-cell {
+        justify-content: flex-end; /* Aligne le groupe d'éléments à droite */
+        /* Si cela coupe encore, cela signifie que la `td` elle-même n'a pas assez de place.
+           Nous pourrions augmenter la `width` de `td` ou réduire le `padding-right` de la `td`. */
+        padding-right: 5px; /* Réduit le padding droit pour donner plus d'espace au contenu */
     }
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

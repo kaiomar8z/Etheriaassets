@@ -67,7 +67,7 @@ header {
     margin-bottom: 10px; /* Espace sous le logo */
 }
 .main-logo {
-    max-width: 300px; /* Ajustez la taille selon l'image réelle */
+    max-width: 400px; /* Augmenté la taille du logo pour PC */
     height: auto;
     filter: brightness(0) invert(1); /* Rend le logo blanc pour le thème sombre */
     margin: 0;
@@ -78,10 +78,10 @@ body.light-theme .main-logo {
 
 .tagline {
     color: var(--text-color-muted);
-    font-size: 1.1em;
+    font-size: 1.5em; /* Agrandit un peu la tagline */
     font-weight: 500;
-    margin-top: -10px; /* Rapproche le tagline du logo */
-    letter-spacing: 0.1em;
+    margin-top: -15px; /* Rapproche le tagline du logo, ajustement précis */
+    letter-spacing: 0.15em; /* Augmente l'espacement des lettres pour une meilleure lisibilité */
     text-transform: uppercase;
 }
 
@@ -610,12 +610,16 @@ th.sorted .sort-arrow { opacity: 1; }
 
     /* Les étoiles et doublons prennent toute la largeur (100%) */
     .stars, .unit-doublon-cell {
-        width: 100%;
+        width: 100%; /* Ces éléments prennent toute la largeur pour avoir de la place */
         padding-right: 10px; /* Conserve un bon padding droit */
-        /* Aligner les points/étoiles au centre de leur espace quand pas au max */
-        justify-content: center; /* Centre le contenu des étoiles/doublons */
+        justify-content: flex-start; /* Aligne le groupe d'éléments à GAUCHE pour les étoiles/doublons */
     }
 
+    /* Les compétences S1, S2, S3 restent sur 2 colonnes (50% de large) */
+    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
+        width: 50%;
+    }
+    
     /* Styles pour les éléments de valeur à l'intérieur des cellules (hors label) */
     .unit-element-cell > *:not(:first-child),
     .unit-rarity-cell > *:not(:first-child),
@@ -625,20 +629,20 @@ th.sorted .sort-arrow { opacity: 1; }
     .unit-s1-cell > *:not(:first-child),
     .unit-s2-cell > *:not(:first-child),
     .unit-s3-cell > *:not(:first-child) {
-        flex-grow: 0; 
-        text-align: right; 
-        float: none; 
-        overflow: visible; 
-        white-space: nowrap; 
+        flex-grow: 1; /* Permet au contenu de prendre l'espace restant après le label */
+        text-align: right; /* Assure que le contenu s'aligne à droite par défaut */
+        float: none; /* Supprime les float précédemment ajoutés car on est en flexbox */
+        overflow: visible; /* Assure que le contenu n'est pas coupé */
+        white-space: nowrap; /* Tente de garder tout sur une ligne pour étoiles/points */
     }
 
     /* Ajustements pour les icônes d'élément et de rareté */
     .unit-element-cell .table-icon,
     .unit-rarity-cell .table-icon {
-        margin-left: 5px; 
-        width: 20px; 
+        margin-left: 5px; /* Petit espace entre le texte et l'icône si le texte est présent */
+        width: 20px; /* Taille fixe pour l'icône */
         height: 20px;
-        flex-shrink: 0; 
+        flex-shrink: 0; /* Empêche l'icône de rétrécir si l'espace est limité */
     }
     
     /* Correction spécifique pour le texte de rareté "SSR" ou autres */
@@ -666,10 +670,6 @@ th.sorted .sort-arrow { opacity: 1; }
     }
 
     /* Rapprocher le nombre de "Level" de son label */
-    .unit-level-cell {
-        justify-content: space-between;
-        padding-right: 10px;
-    }
     .unit-level-cell > *:not(:first-child) { /* Cible le chiffre du Level */
         margin-left: auto; /* Pousse le chiffre Level à l'extrême droite de l'espace restant */
         flex-shrink: 0; /* Empêche le chiffre de se compresser */
@@ -679,16 +679,14 @@ th.sorted .sort-arrow { opacity: 1; }
 
     /* Centrer les contenus des compétences S1, S2, S3 */
     .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
-        justify-content: center; /* Centre les points de compétence */
+        justify-content: flex-start; /* Aligne les points de compétence à gauche */
+        padding-right: 5px; /* Réduit le padding droit pour les points de compétence */
     }
-    /* S'il faut que le label soit à gauche et les points au centre de l'autre moitié */
-    /* Cela nécessiterait de scinder la td en deux conteneurs enfants flex ou d'utiliser grid */
-    /* Pour l'instant, justify-content: center; alignera l'ensemble (label + points) au centre de la moitié de la carte */
-    /* Si les labels restent à gauche et les points sont au centre, il faudrait un flex-wrap sur td */
-    /* Ou positionner absolument le label à gauche et centrer le reste du contenu */
-    /* Vu que les labels sont "flex-shrink: 0", ils sont toujours présents à gauche dans la TD.
-       justify-content: center; centrera l'ensemble LABEL + VALEUR.
-       Si on veut LABEL à gauche et VALEUR centrée dans l'espace restant, c'est plus complexe.
-       Pour l'instant, on centre l'ensemble. */
+
+    /* Final Adjustments: Réduire les paddings généraux des TD si l'espace est encore trop serré. */
+    td {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

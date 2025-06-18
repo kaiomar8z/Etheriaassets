@@ -51,20 +51,40 @@ body.light-theme {
 .container { max-width: 1600px; margin: auto; }
 header {
     display: flex;
+    flex-direction: column; /* Organise le logo et la nav verticalement */
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 10px; /* Réduit l'espace entre le logo et la nav */
     text-align: center;
     margin-bottom: 20px;
     position: relative;
 }
-header h1 {
-    color: var(--text-color); font-size: 2.5em; font-weight: 700; display: inline-flex;
-    align-items: center; gap: 20px; text-shadow: 0 0 15px rgba(0, 170, 255, 0.5); margin: 0;
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px; /* Espace sous le logo */
 }
-body.light-theme header h1 { text-shadow: none; }
-header h1 .fa-gamepad { color: var(--primary-color); }
+.main-logo {
+    max-width: 300px; /* Ajustez la taille selon l'image réelle */
+    height: auto;
+    filter: brightness(0) invert(1); /* Rend le logo blanc pour le thème sombre */
+    margin: 0;
+}
+body.light-theme .main-logo {
+    filter: none; /* Rétablit la couleur d'origine pour le thème clair */
+}
+
+.tagline {
+    color: var(--text-color-muted);
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-top: -10px; /* Rapproche le tagline du logo */
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
 
 #theme-toggle-btn {
     position: absolute;
@@ -79,10 +99,13 @@ header h1 .fa-gamepad { color: var(--primary-color); }
     border-radius: 50%;
     font-size: 1.2em;
     padding: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Ombre pour effet de relief */
+    transition: all 0.3s ease;
 }
 #theme-toggle-btn:hover {
     color: var(--primary-color);
     border-color: var(--primary-color);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4); /* Ombre plus prononcée au survol */
 }
 
 .main-nav {
@@ -102,8 +125,13 @@ body.light-theme .nav-btn.active { color: white; }
 .view.active.flex { display: flex; flex-wrap: wrap; }
 .card {
     background: var(--card-background); backdrop-filter: blur(15px); padding: 30px; border-radius: 16px; border: 1px solid var(--border-color);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.05); /* Ombre plus complexe */
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
+.card:hover {
+    box-shadow: 0 10px 20px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.08); /* Ombre au survol */
+}
+
 .dashboard-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -187,7 +215,7 @@ body.light-theme .nav-btn.active { color: white; }
     border: 1px solid var(--border-color);
     box-shadow: 0 8px 32px 0 var(--shadow-color);
 }
-
+ 
 .form-container {
     flex: 0 0 350px;
 }
@@ -195,18 +223,18 @@ body.light-theme .nav-btn.active { color: white; }
     flex: 1 1 auto;
     min-width: 0;
 }
-
+ 
 .list-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; }
 .list-header h2 { border: none; padding: 0; margin: 0; }
 h2, h3 { margin-top: 0; color: var(--text-color); font-weight: 600; }
 h3 { margin-bottom: 20px; }
-
+ 
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .form-group { display: flex; flex-direction: column; }
 .full-width { grid-column: 1 / -1; }
 .form-buttons { display: flex; gap: 10px; grid-column: 1 / -1; margin-top: 15px; }
 label { margin-bottom: 8px; font-weight: 500; font-size: 0.9em; color: var(--text-color-muted); }
-
+ 
 input, select, textarea {
     width: 100%; padding: 12px; background-color: var(--input-background);
     border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; color: var(--text-color);
@@ -228,191 +256,218 @@ textarea {
 }
 .image-placeholder:hover { border-color: var(--primary-color); background-color: rgba(0, 170, 255, 0.05); }
 .image-placeholder img { width: 100%; height: 100%; object-fit: cover; }
-
+ 
 .submit-btn, .action-btn, .filter-btn {
     background: var(--primary-color); color: white; border: none; padding: 10px 20px; font-size: 0.9em;
-    font-weight: bold; border-radius: 8px; cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
+    font-weight: bold; border-radius: 8px; cursor: pointer; 
+    transition: background-color 0.3s ease, transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* Ajout box-shadow transition */
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre de base pour les boutons */
 }
 .submit-btn:active, .action-btn:active, .filter-btn:active { /* Ajout du feedback au clic */
     transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Ombre réduite au clic */
 }
 .submit-btn { width: 100%; padding: 15px; font-size: 1.1em; flex-grow: 2;}
-.submit-btn:hover, .action-btn:hover, .filter-btn:hover { background-color: var(--primary-color-hover); transform: translateY(-2px); }
-.action-btn.import-btn { background-color: var(--success-color); }
-.action-btn.clear-btn { background-color: var(--text-color-muted); flex-grow: 1; }
-.action-btn.delete-selected-btn { background-color: var(--danger-color); }
+.submit-btn:hover, .action-btn:hover, .filter-btn:hover { 
+    background-color: var(--primary-color-hover); transform: translateY(-2px); 
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Ombre plus prononcée au survol */
+}
+.action-btn.import-btn { background-color: var(--success-color); box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3); } 
+.action-btn.clear-btn { background-color: var(--text-color-muted); flex-grow: 1; box-shadow: 0 4px 8px rgba(160, 160, 160, 0.2); } 
+.action-btn.delete-selected-btn { background-color: var(--danger-color); box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3); } 
 
 .filter-btn {
-    background-color: transparent;
-    border: 1px solid var(--border-color);
-    color: var(--text-color-muted);
+    background-color: transparent; 
+    border: 1px solid var(--border-color); 
+    color: var(--text-color-muted); 
     padding: 12px;
 }
 .filter-btn.active {
-    border-color: var(--star-color);
-    background-color: rgba(241, 196, 15, 0.1);
+    border-color: var(--star-color); 
+    background-color: rgba(241, 196, 15, 0.1); 
     color: var(--star-color);
 }
-
-.table-wrapper { overflow-x: auto; }
+ 
+.table-wrapper { overflow-x: auto; } 
 table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; }
-
-th, td {
-    padding: 8px 15px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    vertical-align: middle;
-    transition: background-color 0.3s ease;
+ 
+th, td {  
+    padding: 8px 15px;  
+    text-align: left;  
+    border-bottom: 1px solid var(--border-color);  
+    vertical-align: middle;  
+    transition: background-color 0.3s ease;  
 }
+ 
+thead th { background-color: rgba(30, 40, 65, 0.8); color: white; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 10; } 
+body.light-theme thead th { background-color: #e9ecef; color: #495057; } 
 
-thead th { background-color: rgba(30, 40, 65, 0.8); color: white; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 10; }
-body.light-theme thead th { background-color: #e9ecef; color: #495057; }
-
-thead th:first-child { border-radius: 8px 0 0 0; }
-thead th:last-child { border-radius: 0 8px 0 0; }
-tbody tr:hover { background-color: var(--hover-background); }
+thead th:first-child { border-radius: 8px 0 0 0; } 
+thead th:last-child { border-radius: 0 8px 0 0; } 
+tbody tr:hover { background-color: var(--hover-background); } 
 tbody tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); } /* Bandes zébrées */
 body.light-theme tbody tr:nth-child(even) { background-color: rgba(0, 0, 0, 0.02); } /* Bandes zébrées light theme */
-tbody tr.selected-row { /* Nouvelle classe pour la ligne sélectionnée*/
-    background-color: var(--selected-row-background);
+tbody tr.selected-row { /* Nouvelle classe pour la ligne sélectionnée*/ 
+    background-color: var(--selected-row-background); 
 }
-
-
-.sortable { cursor: pointer; user-select: none; }
-.sortable:hover { background-color: rgba(0, 170, 255, 0.2); }
-.sort-arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 1.1em; color: var(--primary-color); opacity: 0; transition: opacity 0.2s ease; }
-th.sorted .sort-arrow { opacity: 1; }
-
-.unit-image-cell {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    font-weight: 500;
-    max-width: 220px;
+ 
+.sortable { cursor: pointer; user-select: none; } 
+.sortable:hover { background-color: rgba(0, 170, 255, 0.2); } 
+.sort-arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 1.1em; color: var(--primary-color); opacity: 0; transition: opacity 0.2s ease; } 
+th.sorted .sort-arrow { opacity: 1; } 
+ 
+.unit-image-cell {  
+    display: flex;  
+    align-items: center;  
+    gap: 15px;  
+    font-weight: 500;  
+    max-width: 220px; 
 }
-
-.unit-image-cell img {
-    width: 50px;
-    height: 50px;
-    border-radius: 6px;
-    object-fit: cover;
-    border: 3px solid var(--border-color);
-    flex-shrink: 0;
-    transition: border-color 0.3s ease;
+ 
+.unit-image-cell img {  
+    width: 50px;  
+    height: 50px;  
+    border-radius: 6px;  
+    object-fit: cover;  
+    border: 3px solid var(--border-color);  
+    flex-shrink: 0;  
+    transition: border-color 0.3s ease; 
 }
 .unit-image-cell span.unit-name-cell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ 
+.unit-has-notes-icon { 
+    color: var(--text-color-muted); 
+    margin-left: 8px; 
+    font-size: 0.9em; 
+    opacity: 0.7; 
+}
+ 
+.unit-image-cell img.rarity-border-ssr { border-color: #ffe2aa; } 
+.unit-image-cell img.rarity-border-sr { border-color: #d799f5; } 
+.unit-image-cell img.rarity-border-r  { border-color: #b9c5eb; } 
 
-.unit-has-notes-icon {
-    color: var(--text-color-muted);
-    margin-left: 8px;
-    font-size: 0.9em;
-    opacity: 0.7;
+.skill-dots-cell { 
+    text-align: center; 
+    white-space: nowrap; 
+} 
+.skill-dots-cell .filled { color: var(--primary-color); font-size: 1.1em; } 
+.skill-dots-cell .empty { color: var(--border-color); opacity: 0.5; font-size: 1.1em; } 
+ 
+.stars { 
+    white-space: nowrap; 
+} 
+.stars .fa-star { color: var(--star-color); } 
+ 
+.action-buttons {  
+    display: flex;  
+    gap: 8px;  
+    justify-content: flex-start; 
+}
+ 
+.column-actions { 
+    width: 1%; 
+    white-space: nowrap; 
+}
+ 
+.action-buttons button { 
+    background: none; border: none; cursor: pointer; font-size: 1.3em; padding: 5px; border-radius: 50%; 
+    width: 35px; height: 35px; display: inline-flex; justify-content: center; align-items: center; 
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease; 
+} 
+.edit-btn { color: var(--edit-color); } 
+.delete-btn { color: var(--danger-color); } 
+.favorite-btn { color: var(--text-color-muted); } 
+.favorite-btn.is-favorite { color: var(--star-color); transform: scale(1.1); } 
+.action-buttons button:hover { background-color: var(--hover-background); } 
+/* Animation de l'icône au survol/clic */
+.action-buttons button .fa-solid, .action-buttons button .fa-regular {
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+.action-buttons button:hover .fa-solid, .action-buttons button:hover .fa-regular {
+    transform: scale(1.2);
+}
+.favorite-btn.is-favorite:hover .fa-star { /* Ajuste le scale du favori au survol */
+    transform: scale(1.3);
 }
 
-.unit-image-cell img.rarity-border-ssr { border-color: #ffe2aa; }
-.unit-image-cell img.rarity-border-sr { border-color: #d799f5; }
-.unit-image-cell img.rarity-border-r  { border-color: #b9c5eb; }
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); animation: fadeIn 0.4s ease; } 
+.modal-content { margin: 5% auto; max-width: 600px; width: 90%; animation: slideInUp 0.5s ease-out; } 
+.modal-header { display: flex; justify-content: space-between; align-items: center; } 
+.close-btn { color: var(--text-color-muted); font-size: 32px; font-weight: bold; cursor: pointer; transition: color 0.3s ease; } 
+.close-btn:hover { color: var(--text-color); } 
+ 
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } 
+@keyframes slideInUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } 
+::-webkit-scrollbar { width: 8px; } 
+::-webkit-scrollbar-track { background: var(--background-color); } 
+::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 4px; } 
+::-webkit-scrollbar-thumb:hover { background: var(--primary-color-hover); } 
+ 
+#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; } 
+.toast { 
+    padding: 15px 25px; border-radius: 8px; color: white; font-weight: 500; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); backdrop-filter: blur(10px); 
+    animation: toastIn 0.4s ease, toastOut 0.4s ease 3s forwards; 
+    border-left: 5px solid; 
+} 
+.toast.success { background: rgba(46, 204, 113, 0.5); border-color: var(--success-color); } 
+.toast.error { background: rgba(231, 76, 60, 0.5); border-color: var(--danger-color); } 
+.toast.info { background: rgba(52, 152, 219, 0.5); border-color: var(--info-color); } 
 
-.skill-dots-cell {
-    text-align: center;
-    white-space: nowrap;
-}
-.skill-dots-cell .filled { color: var(--primary-color); font-size: 1.1em; }
-.skill-dots-cell .empty { color: var(--border-color); opacity: 0.5; font-size: 1.1em; }
+@keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } 
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; } } 
 
-.stars {
-    white-space: nowrap;
-}
-.stars .fa-star { color: var(--star-color); }
-
-.action-buttons {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-start;
-}
-
-.column-actions {
-    width: 1%;
-    white-space: nowrap;
-}
-
-.action-buttons button {
-    background: none; border: none; cursor: pointer; font-size: 1.3em; padding: 5px; border-radius: 50%;
-    width: 35px; height: 35px; display: inline-flex; justify-content: center; align-items: center;
-    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-.edit-btn { color: var(--edit-color); }
-.delete-btn { color: var(--danger-color); }
-.favorite-btn { color: var(--text-color-muted); }
-.favorite-btn.is-favorite { color: var(--star-color); transform: scale(1.1); }
-.action-buttons button:hover { background-color: var(--hover-background); }
-
-.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); animation: fadeIn 0.4s ease; }
-.modal-content { margin: 5% auto; max-width: 600px; width: 90%; animation: slideInUp 0.5s ease-out; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; }
-.close-btn { color: var(--text-color-muted); font-size: 32px; font-weight: bold; cursor: pointer; transition: color 0.3s ease; }
-.close-btn:hover { color: var(--text-color); }
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideInUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--background-color); }
-::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--primary-color-hover); }
-
-#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
-.toast {
-    padding: 15px 25px; border-radius: 8px; color: white; font-weight: 500;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3); backdrop-filter: blur(10px);
-    animation: toastIn 0.4s ease, toastOut 0.4s ease 3s forwards;
-    border-left: 5px solid;
-}
-.toast.success { background: rgba(46, 204, 113, 0.5); border-color: var(--success-color); }
-.toast.error { background: rgba(231, 76, 60, 0.5); border-color: var(--danger-color); }
-.toast.info { background: rgba(52, 152, 219, 0.5); border-color: var(--info-color); }
-
-@keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
-
-#confirm-modal { z-index: 1500; }
-#confirm-modal .modal-content { max-width: 450px; }
-#confirm-modal p { margin: 20px 0 30px; line-height: 1.6; }
-#confirm-modal .modal-actions { display: flex; justify-content: flex-end; gap: 15px; }
-.checkbox-cell { text-align: center !important; }
-
-#objectives-view .card { max-width: 800px; margin: auto; }
-#add-objective-form { display: flex; gap: 15px; margin-bottom: 30px; }
-#new-objective-input { flex-grow: 1; }
-#objectives-list { list-style: none; padding: 0; }
-.objective-item {
-    display: flex; align-items: center; gap: 15px; background-color: var(--hover-background);
-    padding: 15px; border-radius: 8px; margin-bottom: 12px; transition: all 0.3s;
-}
-.objective-item.completed { background-color: rgba(46, 204, 113, 0.1); }
-.objective-item input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--primary-color); }
-.objective-item .objective-text { flex-grow: 1; }
-.objective-item.completed .objective-text { text-decoration: line-through; color: var(--text-color-muted); }
-.objective-item .delete-objective-btn { background: none; border: none; color: var(--text-color-muted); font-size: 1.2em; cursor: pointer; transition: color 0.2s; }
-.objective-item .delete-objective-btn:hover { color: var(--danger-color); }
+#confirm-modal { z-index: 1500; } 
+#confirm-modal .modal-content { max-width: 450px; } 
+#confirm-modal p { margin: 20px 0 30px; line-height: 1.6; } 
+#confirm-modal .modal-actions { display: flex; justify-content: flex-end; gap: 15px; } 
+.checkbox-cell { text-align: center !important; } 
+ 
+#objectives-view .card { max-width: 800px; margin: auto; } 
+#add-objective-form { display: flex; gap: 15px; margin-bottom: 30px; } 
+#new-objective-input { flex-grow: 1; } 
+#objectives-list { list-style: none; padding: 0; } 
+.objective-item { 
+    display: flex; align-items: center; gap: 15px; background-color: var(--hover-background); 
+    padding: 15px; border-radius: 8px; margin-bottom: 12px; transition: all 0.3s; 
+} 
+.objective-item.completed { background-color: rgba(46, 204, 113, 0.1); } 
+.objective-item input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--primary-color); } 
+.objective-item .objective-text { flex-grow: 1; } 
+.objective-item.completed .objective-text { text-decoration: line-through; color: var(--text-color-muted); } 
+.objective-item .delete-objective-btn { background: none; border: none; color: var(--text-color-muted); font-size: 1.2em; cursor: pointer; transition: color 0.2s; } 
+.objective-item .delete-objective-btn:hover { color: var(--danger-color); } 
 
 .table-icon {
     height: 24px;
     vertical-align: middle;
 }
 
-@media (max-width: 992px) {
-    .main-content, .team-builder-container {
-        flex-direction: column;
+@media (max-width: 992px) { 
+    .main-content, .team-builder-container { 
+        flex-direction: column; 
+    } 
+} 
+ 
+@media (max-width: 768px) { 
+    body { padding: 15px; } 
+    header { 
+        justify-content: center; 
+        flex-direction: column; /* Assure que le logo et la nav sont bien en colonne sur mobile */
+        gap: 5px; /* Réduit l'espace sur mobile */
+    } 
+    .main-logo {
+        max-width: 250px; /* Adapte la taille du logo sur mobile */
     }
-}
-
-@media (max-width: 768px) {
-    body { padding: 15px; }
-    header { justify-content: center; }
-    header h1 { font-size: 1.8em; text-align: center; }
-    #theme-toggle-btn { position: static; transform: none; }
+    .tagline {
+        font-size: 0.9em;
+    }
+    #theme-toggle-btn { 
+        position: static; 
+        transform: none; 
+        margin-top: 10px; /* Ajoute une marge si pas en position absolue */
+    } 
     .form-grid { grid-template-columns: 1fr; }
 
     /* Styles spécifiques pour la vue "carte" du tableau sur mobile */
@@ -457,10 +512,9 @@ th.sorted .sort-arrow { opacity: 1; }
     td {
         border: none; /* Supprime les bordures de cellule internes */
         position: relative;
-        padding-left: 10px; /* Réduit le padding-left car le label est flex item */
-        padding-right: 10px; /* Garde un padding à droite */
+        padding-left: 8px; /* Réduit le padding-left */
+        padding-right: 8px; /* Réduit le padding à droite */
         text-align: right; /* Aligne la valeur à droite */
-        /* width: 50%; <-- Supprimé pour permettre des largeurs différentes */
         box-sizing: border-box;
         padding-top: 8px;
         padding-bottom: 8px;
@@ -473,7 +527,6 @@ th.sorted .sort-arrow { opacity: 1; }
     td:before {
         content: attr(data-label); /* Utilise l'attribut data-label comme titre */
         flex-shrink: 0; /* Empêche le label de rétrécir */
-        /* Ajustement de la marge droite du label pour donner plus de place */
         margin-right: 5px; /* Réduit la marge entre le label et la valeur */
         text-align: left;
         font-weight: 500;
@@ -550,24 +603,19 @@ th.sorted .sort-arrow { opacity: 1; }
 
     /* --------------- Ajustements pour les cellules problématiques --------------- */
 
-    /* Toutes les cellules standard, par défaut, sont sur 2 colonnes (50% de large) */
-    .unit-element-cell, .unit-rarity-cell, .unit-level-cell {
+    /* Colonnes sur 50% de largeur */
+    .unit-element-cell, .unit-rarity-cell, .unit-level-cell, .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
         width: 50%;
     }
 
     /* Les étoiles et doublons prennent toute la largeur (100%) */
     .stars, .unit-doublon-cell {
-        width: 100%; /* Ces éléments prennent toute la largeur pour avoir de la place */
+        width: 100%;
         padding-right: 10px; /* Conserve un bon padding droit */
-        justify-content: flex-start; /* Aligne le groupe d'éléments à GAUCHE pour les étoiles/doublons */
-        /* IMPORTANT: flex-start plutôt que flex-end pour éviter l'espace vide quand il y a moins d'éléments */
+        /* Aligner les points/étoiles au centre de leur espace quand pas au max */
+        justify-content: center; /* Centre le contenu des étoiles/doublons */
     }
 
-    /* Les compétences S1, S2, S3 restent sur 2 colonnes (50% de large) */
-    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
-        width: 50%;
-    }
-    
     /* Styles pour les éléments de valeur à l'intérieur des cellules (hors label) */
     .unit-element-cell > *:not(:first-child),
     .unit-rarity-cell > *:not(:first-child),
@@ -577,74 +625,70 @@ th.sorted .sort-arrow { opacity: 1; }
     .unit-s1-cell > *:not(:first-child),
     .unit-s2-cell > *:not(:first-child),
     .unit-s3-cell > *:not(:first-child) {
-        flex-grow: 1; /* Permet au contenu de prendre l'espace restant après le label */
-        text-align: right; /* Assure que le contenu s'aligne à droite par défaut */
-        float: none; /* Supprime les float précédemment ajoutés car on est en flexbox */
-        overflow: visible; /* Assure que le contenu n'est pas coupé */
-        white-space: nowrap; /* Tente de garder tout sur une ligne pour étoiles/points */
+        flex-grow: 0; 
+        text-align: right; 
+        float: none; 
+        overflow: visible; 
+        white-space: nowrap; 
     }
 
     /* Ajustements pour les icônes d'élément et de rareté */
     .unit-element-cell .table-icon,
     .unit-rarity-cell .table-icon {
-        margin-left: 5px; /* Petit espace entre le texte et l'icône si le texte est présent */
-        width: 20px; /* Taille fixe pour l'icône */
+        margin-left: 5px; 
+        width: 20px; 
         height: 20px;
-        flex-shrink: 0; /* Empêche l'icône de rétrécir si l'espace est limité */
+        flex-shrink: 0; 
     }
     
     /* Correction spécifique pour le texte de rareté "SSR" ou autres */
-    .unit-rarity-cell span:not(.table-icon) { /* Cible le span du texte "SSR" */
-        font-size: 1.1em; /* Ajusté la taille */
+    .unit-rarity-cell span:not(.table-icon) { 
+        font-size: 1.1em; 
         font-weight: bold;
-        white-space: nowrap; /* Empêche le texte SSR de passer à la ligne */
-        flex-shrink: 0; /* Empêche le texte de rétrécir */
+        white-space: nowrap; 
+        flex-shrink: 0; 
     }
     .unit-rarity-cell img.table-icon {
-        width: 30px; /* Rendre l'icône de rareté plus grande si pas de texte */
+        width: 30px; 
         height: auto;
-        margin-left: 5px; /* Espace entre le texte SSR et l'icône rarity.webp */
+        margin-left: 5px; 
     }
 
     /* Assurer que les étoiles et les points sont bien visibles et alignés */
-    .stars, .unit-doublon-cell, .skill-dots-cell {
-        /* Aligner leur contenu à gauche pour qu'ils soient compacts quand pas au max */
-        justify-content: flex-start;
-        /* Padding droit des cellules contenant les étoiles/points */
-        padding-right: 5px;
-    }
-
-    /* Styles pour les étoiles, doublons, et points de compétence (les icônes/points eux-mêmes) */
     .stars .fa-star,
     .unit-doublon-cell span,
     .skill-dots-cell .filled,
     .skill-dots-cell .empty {
-        /* Réduire encore plus l'espace entre chaque icône/point */
-        margin-left: 0.1px; /* Espacement minime */
-        margin-right: 0.1px; /* Espacement minime */
-        font-size: 1.1em; /* Garder une taille visible */
-        flex-shrink: 0; /* Toujours empêcher de rétrécir */
+        margin-left: 1px; /* Espacement minime entre les points/étoiles */
+        margin-right: 1px; /* Espacement minime entre les points/étoiles */
+        font-size: 1.1em; 
+        flex-shrink: 0; 
     }
 
     /* Rapprocher le nombre de "Level" de son label */
     .unit-level-cell {
-        /* Utilisez justify-content: flex-start; pour pousser le label à gauche
-           et la valeur à droite, puis ajustez la marge droite de la valeur. */
-        justify-content: space-between; /* Maintenir label et valeur aux extrémités */
-        padding-right: 10px; /* Conserve un padding normal pour le bord droit de la cellule */
+        justify-content: space-between;
+        padding-right: 10px;
     }
-
     .unit-level-cell > *:not(:first-child) { /* Cible le chiffre du Level */
-        margin-left: auto; /* Pousse le chiffre Level à l'extrême droite du contenu */
+        margin-left: auto; /* Pousse le chiffre Level à l'extrême droite de l'espace restant */
         flex-shrink: 0; /* Empêche le chiffre de se compresser */
         white-space: nowrap; /* Empêche le chiffre de passer à la ligne */
         text-align: right; /* Assure l'alignement à droite */
     }
 
-    /* Final Adjustments: Réduire les paddings généraux des TD si l'espace est encore trop serré. */
-    td {
-        padding-left: 8px;
-        padding-right: 8px;
+    /* Centrer les contenus des compétences S1, S2, S3 */
+    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
+        justify-content: center; /* Centre les points de compétence */
     }
+    /* S'il faut que le label soit à gauche et les points au centre de l'autre moitié */
+    /* Cela nécessiterait de scinder la td en deux conteneurs enfants flex ou d'utiliser grid */
+    /* Pour l'instant, justify-content: center; alignera l'ensemble (label + points) au centre de la moitié de la carte */
+    /* Si les labels restent à gauche et les points sont au centre, il faudrait un flex-wrap sur td */
+    /* Ou positionner absolument le label à gauche et centrer le reste du contenu */
+    /* Vu que les labels sont "flex-shrink: 0", ils sont toujours présents à gauche dans la TD.
+       justify-content: center; centrera l'ensemble LABEL + VALEUR.
+       Si on veut LABEL à gauche et VALEUR centrée dans l'espace restant, c'est plus complexe.
+       Pour l'instant, on centre l'ensemble. */
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

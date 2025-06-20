@@ -413,54 +413,49 @@ th.sorted .sort-arrow { opacity: 1; }
 } 
 .stars .fa-star { color: var(--star-color); }
 
-/* NOUVEAU : Styles pour le visuel des doublons par SEGMENTS (Version 100% fiable) */
+/* Styles pour le visuel des doublons par SEGMENTS (Version 100% fiable) */
 .doublon-display-cell {
     display: flex;
     align-items: center;
-    gap: 12px; /* Espace entre chaque noeud, qui définit la longueur des segments */
+    gap: 8px; /* MODIFIÉ: Espace réduit pour s'adapter aux pastilles plus petites */
 }
 
 .doublon-node {
-    width: 20px;
-    height: 20px;
+    width: 15px;  /* MODIFIÉ */
+    height: 15px; /* MODIFIÉ */
     border-radius: 50%;
     background-color: #1a233a;
     border: 2px solid var(--doublon-node-border);
     transition: all 0.3s ease;
-    position: relative; /* Indispensable pour positionner le segment de ligne */
+    position: relative;
     box-shadow: 0 2px 5px rgba(0,0,0,0.4);
     flex-shrink: 0;
 }
 
-/* Le segment de ligne, attaché à GAUCHE de chaque noeud */
 .doublon-node::before {
     content: '';
     position: absolute;
     top: 50%;
-    /* Se positionne à droite du noeud parent, s'étend vers la gauche */
     right: 100%; 
-    width: 12px; /* Doit être égal au "gap" du conteneur parent */
+    width: 8px; /* MODIFIÉ: Doit être égal au "gap" */
     height: 3px;
     background-color: var(--doublon-node-bg);
     border: 1px solid var(--doublon-node-border);
     transform: translateY(-50%);
-    z-index: -1; /* Se place derrière les noeuds */
+    z-index: -1;
     transition: all 0.3s ease;
 }
 
-/* Le premier noeud n'a PAS de ligne avant lui */
 .doublon-node:first-child::before {
     display: none;
 }
 
-/* Style du noeud activé */
 .doublon-node.filled {
     background-color: #e0f5ff;
     border-color: var(--doublon-node-filled);
     box-shadow: 0 0 12px 2px var(--doublon-node-glow), inset 0 0 3px rgba(255, 255, 255, 0.8);
 }
 
-/* Style du SEGMENT de ligne activé */
 .doublon-node.filled::before {
     height: 5px;
     background-color: var(--doublon-node-filled);
@@ -607,9 +602,6 @@ th.sorted .sort-arrow { opacity: 1; }
         padding: 5px 0;
         display: flex;
         align-items: center;
-        /* CORRECTION : Uniformisation de l'alignement */
-        justify-content: flex-start;
-        gap: 15px; /* Ajout d'un espace entre le label et la valeur */
         flex-basis: 100%;
         min-height: auto;
     }
@@ -624,12 +616,14 @@ th.sorted .sort-arrow { opacity: 1; }
     
     .checkbox-cell {
         flex-basis: 10%;
+        justify-content: flex-start;
     }
     .checkbox-cell:before { content: none; }
 
     .unit-image-cell {
         flex-basis: 85%;
         gap: 12px;
+        justify-content: flex-start;
     }
     .unit-image-cell:before { content: none; }
     .unit-image-cell img {
@@ -639,12 +633,13 @@ th.sorted .sort-arrow { opacity: 1; }
         font-size: 1.2em; font-weight: 600;
         white-space: normal;
     }
-
-    /* CORRECTION : forcer l'alignement à droite pour ces cellules spécifiques */
-    .unit-level-cell, .unit-rarity-cell, .unit-element-cell {
-        justify-content: space-between;
-    }
     
+    .unit-level-cell, .unit-rarity-cell, .unit-element-cell, 
+    .stars, .doublon-display-cell, .skill-dots-cell {
+        justify-content: flex-start;
+        gap: 15px;
+    }
+
     .unit-element-cell .table-icon { height: 20px; width: auto; }
     .unit-rarity-cell .table-icon { height: 20px; width: auto; }
     
@@ -655,15 +650,13 @@ th.sorted .sort-arrow { opacity: 1; }
     }
     .stars .fa-star { font-size: 1em; }
     
-    /* AMÉLIORATION : Niveau plus visible */
     .unit-level-cell {
-        font-weight: 700; /* Mise en gras */
-        color: var(--text-color); /* Couleur plus vive */
+        font-weight: 700;
+        color: var(--text-color);
     }
-
-    /* AMÉLIORATION : Points de compétence plus gros */
+    
     .skill-dots-cell .filled, .skill-dots-cell .empty { 
-        font-size: 1.1em; /* Augmentation de la taille */
+        font-size: 1.1em;
     }
 
     .action-buttons {

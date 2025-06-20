@@ -75,7 +75,8 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 0; /* Pas de marge en bas, c'est app-tagline (maintenant retirée) qui gérait */
+    /* Margin top pour donner un peu d'espace au dessus du logo */
+    margin-top: 20px;
 }
 .main-logo {
     max-width: 500px; /* Augmenté la taille du logo pour PC */
@@ -446,20 +447,13 @@ th.sorted .sort-arrow { opacity: 1; }
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden; /* Cache tout ce qui dépasse si on utilise un pseudo-élément */
+    flex-shrink: 0; /* Empêche les nœuds de rétrécir */
 }
 .doublon-node.filled {
     background-color: var(--doublon-node-filled);
     border-color: var(--doublon-node-filled);
     box-shadow: 0 0 8px var(--doublon-node-glow), inset 0 0 5px rgba(255, 255, 255, 0.5); /* Effet de glow et lumière interne */
 }
-/* OPTIONNEL: Si vous voulez des icônes différentes pour chaque nœud ou un gradient subtil */
-/* .doublon-node.filled:after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(45deg, rgba(255,255,255,0.2) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
-    border-radius: 50%;
-} */
 
 
 .action-buttons {  
@@ -599,6 +593,7 @@ body.compact-view .unit-rarity-cell { order: 3; flex-grow: 0; width: auto; } /* 
 body.compact-view .stars { order: 4; flex-grow: 1; width: auto; } /* étoiles flexibles */
 body.compact-view .doublon-display-cell { order: 5; flex-grow: 1; width: auto; } /* doublons flexibles */
 body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; } /* actions, petite place */
+
 
 @media (max-width: 992px) { 
     .main-content, .team-builder-container { 

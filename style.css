@@ -273,7 +273,7 @@ label { margin-bottom: 8px; font-weight: 500; font-size: 0.9em; color: var(--tex
     background-color: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 5px; /* Rendre légèrement arrondis, pas ovales */
     width: 30px;
     height: 30px;
     font-size: 1.2em;
@@ -433,8 +433,8 @@ th.sorted .sort-arrow { opacity: 1; }
     padding-right: 5px; /* Pour éviter de coller au bord */
 }
 .doublon-node {
-    width: 18px; /* Taille des cercles/nœuds */
-    height: 18px;
+    width: 20px; /* Augmenter légèrement la taille des cercles/nœuds */
+    height: 20px;
     border-radius: 50%; /* Rendre circulaire */
     background-color: var(--doublon-node-bg);
     border: 1px solid var(--doublon-node-border);
@@ -446,13 +446,14 @@ th.sorted .sort-arrow { opacity: 1; }
     color: var(--text-color-muted);
     transition: all 0.3s ease;
     position: relative;
-    overflow: hidden; /* Cache tout ce qui dépasse si on utilise un pseudo-élément */
+    /* overflow: hidden; Supprimé pour s'assurer que le box-shadow est visible */
     flex-shrink: 0; /* Empêche les nœuds de rétrécir */
+    box-sizing: border-box; /* S'assure que padding/border sont inclus dans width/height */
 }
 .doublon-node.filled {
     background-color: var(--doublon-node-filled);
     border-color: var(--doublon-node-filled);
-    box-shadow: 0 0 8px var(--doublon-node-glow), inset 0 0 5px rgba(255, 255, 255, 0.5); /* Effet de glow et lumière interne */
+    box-shadow: 0 0 5px var(--doublon-node-glow), inset 0 0 3px rgba(255, 255, 255, 0.5); /* Effet de glow et lumière interne */
 }
 
 
@@ -611,7 +612,7 @@ body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; } /* ac
     .main-logo {
         max-width: 250px; /* Adapte la taille du logo sur mobile */
     }
-    /* Styles pour la tagline (si elle était encore présente, mais on l'a retirée dans HTML) */
+    /* Styles pour la tagline (si elle était encore présente, mais on l'a retirée de l'HTML) */
     /* .app-tagline { display: none; } */ /* Pas nécessaire si l'élément est déjà supprimé de l'HTML */
 
     #theme-toggle-btn { 

@@ -334,6 +334,13 @@ document.addEventListener('DOMContentLoaded', () => {
         imagePlaceholder.innerHTML = '<span>Cliquez pour ajouter une image</span>';
         imageInput.value = '';
         unitNameInput.focus();
+        // Réinitialiser les valeurs par défaut des inputs numériques/selects
+        document.getElementById('unit-stars').value = 3;
+        document.getElementById('unit-level').value = 1;
+        document.getElementById('unit-doublon').value = 0;
+        document.getElementById('unit-s1').value = 1;
+        document.getElementById('unit-s2').value = 1;
+        document.getElementById('unit-s3').value = 1;
     };
 
     // Function to fetch and display image placeholder, not upload it yet
@@ -823,7 +830,11 @@ document.addEventListener('DOMContentLoaded', () => {
             let min, max;
 
             if (targetElement.tagName === 'INPUT') {
+                // Si la valeur est vide, on la met à la valeur minimale pour commencer
                 currentValue = parseInt(targetElement.value, 10);
+                if (isNaN(currentValue)) { // Si l'input est vide ou non numérique
+                    currentValue = parseInt(targetElement.min, 10); // Utilise la valeur min
+                }
                 min = parseInt(targetElement.min, 10);
                 max = parseInt(targetElement.max, 10);
             } else if (targetElement.tagName === 'SELECT') {

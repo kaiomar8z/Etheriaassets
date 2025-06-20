@@ -829,11 +829,11 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentValue;
             let min, max;
 
+            // Déterminer la valeur actuelle de manière robuste
             if (targetElement.tagName === 'INPUT') {
-                // Si la valeur est vide, on la met à la valeur minimale pour commencer
                 currentValue = parseInt(targetElement.value, 10);
                 if (isNaN(currentValue)) { // Si l'input est vide ou non numérique
-                    currentValue = parseInt(targetElement.min, 10); // Utilise la valeur min
+                    currentValue = parseInt(targetElement.min, 10); // Utilise la valeur min définie dans l'HTML
                 }
                 min = parseInt(targetElement.min, 10);
                 max = parseInt(targetElement.max, 10);
@@ -1330,7 +1330,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (taskType === 'checkbox') {
             const checkbox = item.querySelector('input[type="checkbox"]');
             taskState = { completedOn: checkbox.checked ? currentGameDay : null };
-        } else if (taskType === 'counter') {
+        } else if (taskDef.type === 'counter') {
             const action = e.target.dataset.action;
             let count = (taskState && taskState.count) || 0;
             if (action === 'plus') {

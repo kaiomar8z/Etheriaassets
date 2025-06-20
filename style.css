@@ -607,7 +607,9 @@ th.sorted .sort-arrow { opacity: 1; }
         padding: 5px 0;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        /* CORRECTION : Uniformisation de l'alignement */
+        justify-content: flex-start;
+        gap: 15px; /* Ajout d'un espace entre le label et la valeur */
         flex-basis: 100%;
         min-height: auto;
     }
@@ -643,17 +645,23 @@ th.sorted .sort-arrow { opacity: 1; }
     .unit-element-cell .table-icon { height: 20px; width: auto; }
     .unit-rarity-cell .table-icon { height: 20px; width: auto; }
     
-    .stars, .skill-dots-cell, .doublon-display-cell {
-        justify-content: flex-start;
-    }
-
     .stars-wrapper, .skills-wrapper {
         display: flex;
         align-items: center;
         gap: 4px;
     }
     .stars .fa-star { font-size: 1em; }
-    .skill-dots-cell .filled, .skill-dots-cell .empty { font-size: 0.9em; }
+    
+    /* AMÉLIORATION : Niveau plus visible */
+    .unit-level-cell {
+        font-weight: 700; /* Mise en gras */
+        color: var(--text-color); /* Couleur plus vive */
+    }
+
+    /* AMÉLIORATION : Points de compétence plus gros */
+    .skill-dots-cell .filled, .skill-dots-cell .empty { 
+        font-size: 1.1em; /* Augmentation de la taille */
+    }
 
     .action-buttons {
         flex-basis: 100%;

@@ -447,8 +447,8 @@ th.sorted .sort-arrow { opacity: 1; }
     top: 50%;
     left: 15px;
     height: 5px;
-    /* La largeur est contrôlée par une variable CSS mise à jour par JS */
-    width: var(--filled-doublon-width, 0%); 
+    /* CORRECTION : Utilisation de calc() pour un dimensionnement précis et sans débordement */
+    width: calc((100% - 30px) * var(--filled-doublon-progress, 0)); 
     background-color: var(--doublon-node-filled);
     transform: translateY(-50%);
     z-index: 2; /* Devant la ligne grise, mais derrière les nœuds */

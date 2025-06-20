@@ -15,7 +15,8 @@
     --input-background: rgba(0,0,0,0.2);
     --hover-background: rgba(255, 255, 255, 0.05);
     --option-background: #2a3b5a;
-    --selected-row-background: rgba(0, 170, 255, 0.08);
+    --selected-row-background: rgba(0, 170, 255, 0.08); /* Nouvelle variable pour ligne sélectionnée */
+
     /* Couleurs pour les doublons inspirées du jeu */
     --doublon-node-bg: rgba(255, 255, 255, 0.1);
     --doublon-node-border: rgba(255, 255, 255, 0.2);
@@ -61,11 +62,11 @@ body.light-theme {
 .container { max-width: 1600px; margin: auto; }
 header {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Organise le logo et la nav verticalement */
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 10px; /* Espace entre les éléments du header */
     text-align: center;
     margin-bottom: 20px;
     position: relative;
@@ -77,17 +78,18 @@ header {
     margin-top: 20px;
 }
 .main-logo {
-    max-width: 500px;
+    max-width: 500px; /* Augmenté la taille du logo pour PC */
     height: auto;
-    filter: brightness(0) invert(1);
-    margin-bottom: 0;
-    display: block;
+    filter: brightness(0) invert(1); /* Rend le logo blanc pour le thème sombre */
+    margin-bottom: 0; /* Assure qu'il n'y a pas de marge sous l'image elle-même */
+    display: block; /* S'assure qu'il est un bloc pour les marges */
 }
 body.light-theme .main-logo {
-    filter: none;
+    filter: none; /* Rétablit la couleur d'origine pour le thème clair */
 }
 
 /* Suppression des styles de .app-tagline car l'élément est retiré de l'HTML */
+/* .app-tagline { display: none; } */
 
 
 #theme-toggle-btn {
@@ -426,26 +428,25 @@ th.sorted .sort-arrow { opacity: 1; }
     display: flex;
     gap: 2px; /* Espace entre les nœuds de doublon */
     align-items: center;
-    justify-content: flex-end; /* Aligner à droite par défaut */
+    justify-content: flex-start; /* Aligner à gauche dans l'espace disponible */
     padding-right: 5px; /* Pour éviter de coller au bord */
 }
 .doublon-node {
-    width: 20px; /* Taille des cercles/nœuds */
-    height: 20px;
+    width: 18px; /* Taille des cercles/nœuds pour assurer la circularité */
+    height: 18px;
     border-radius: 50%; /* Rendre circulaire */
     background-color: var(--doublon-node-bg);
     border: 1px solid var(--doublon-node-border);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 0.8em; /* Taille de l'icône si on en ajoute */
+    font-size: 0.8em;
     font-weight: bold;
     color: var(--text-color-muted);
     transition: all 0.3s ease;
     position: relative;
-    /* overflow: hidden; Supprimé pour s'assurer que le box-shadow est visible */
+    box-sizing: border-box; /* IMPORTANT: box-sizing à border-box pour que padding/border soient inclus */
     flex-shrink: 0; /* Empêche les nœuds de rétrécir */
-    box-sizing: content-box; /* IMPORTANT: box-sizing à content-box pour que padding/border s'ajoutent à width/height */
 }
 .doublon-node.filled {
     background-color: var(--doublon-node-filled);

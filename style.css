@@ -401,6 +401,11 @@ th.sorted .sort-arrow { opacity: 1; }
 .unit-image-cell img.rarity-border-sr { border-color: #d799f5; } 
 .unit-image-cell img.rarity-border-r  { border-color: #b9c5eb; } 
 
+/* MODIFIÉ : Application du style à toutes les vues */
+.unit-level-cell {
+    font-weight: 700;
+}
+
 .skill-dots-cell { 
     text-align: center; 
     white-space: nowrap; 
@@ -413,16 +418,18 @@ th.sorted .sort-arrow { opacity: 1; }
 } 
 .stars .fa-star { color: var(--star-color); }
 
-/* Styles pour le visuel des doublons par SEGMENTS (Version 100% fiable) */
+/* MODIFIÉ : Styles pour les doublons appliqués à toutes les vues */
 .doublon-display-cell {
     display: flex;
     align-items: center;
-    gap: 8px; /* MODIFIÉ: Espace réduit pour s'adapter aux pastilles plus petites */
+    /* L'alignement horizontal est centré pour la vue PC */
+    justify-content: center; 
+    gap: 8px;
 }
 
 .doublon-node {
-    width: 15px;  /* MODIFIÉ */
-    height: 15px; /* MODIFIÉ */
+    width: 15px;
+    height: 15px;
     border-radius: 50%;
     background-color: #1a233a;
     border: 2px solid var(--doublon-node-border);
@@ -437,7 +444,7 @@ th.sorted .sort-arrow { opacity: 1; }
     position: absolute;
     top: 50%;
     right: 100%; 
-    width: 8px; /* MODIFIÉ: Doit être égal au "gap" */
+    width: 8px;
     height: 3px;
     background-color: var(--doublon-node-bg);
     border: 1px solid var(--doublon-node-border);
@@ -634,12 +641,15 @@ th.sorted .sort-arrow { opacity: 1; }
         white-space: normal;
     }
     
-    .unit-level-cell, .unit-rarity-cell, .unit-element-cell, 
+    .unit-level-cell, .unit-rarity-cell, .unit-element-cell {
+        justify-content: space-between;
+    }
+
     .stars, .doublon-display-cell, .skill-dots-cell {
         justify-content: flex-start;
         gap: 15px;
     }
-
+    
     .unit-element-cell .table-icon { height: 20px; width: auto; }
     .unit-rarity-cell .table-icon { height: 20px; width: auto; }
     
@@ -651,7 +661,6 @@ th.sorted .sort-arrow { opacity: 1; }
     .stars .fa-star { font-size: 1em; }
     
     .unit-level-cell {
-        font-weight: 700;
         color: var(--text-color);
     }
     

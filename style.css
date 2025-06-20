@@ -411,72 +411,62 @@ th.sorted .sort-arrow { opacity: 1; }
 .stars { 
     white-space: nowrap; 
 } 
-.stars .fa-star { color: var(--star-color); } 
- 
-/* NOUVEAU : Styles pour le visuel des doublons amélioré */
+.stars .fa-star { color: var(--star-color); }
+
+/* NOUVEAU : Styles pour le visuel des doublons par SEGMENTS (Version 100% fiable) */
 .doublon-display-cell {
-    position: relative;
     display: flex;
     align-items: center;
-    /* Espace les nœuds pour remplir la cellule, important pour le responsive */
-    justify-content: space-between; 
-    height: 30px;
-    padding: 0 5px; /* Petit padding pour que les lueurs ne touchent pas les bords */
-}
-
-/* Ligne de connexion (arrière-plan gris) */
-.doublon-display-cell::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    /* S'étend entre le centre du premier et du dernier nœud */
-    left: 15px; 
-    right: 15px;
-    height: 3px;
-    background-color: var(--doublon-node-bg);
-    border: 1px solid var(--doublon-node-border);
-    transform: translateY(-50%);
-    z-index: 1; /* Derrière les nœuds */
-    border-radius: 2px;
-}
-
-/* Ligne de connexion (premier plan bleu lumineux) */
-.doublon-display-cell::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 15px;
-    height: 5px;
-    /* CORRECTION : Utilisation de calc() pour un dimensionnement précis et sans débordement */
-    width: calc((100% - 30px) * var(--filled-doublon-progress, 0)); 
-    background-color: var(--doublon-node-filled);
-    transform: translateY(-50%);
-    z-index: 2; /* Devant la ligne grise, mais derrière les nœuds */
-    border-radius: 3px;
-    box-shadow: 0 0 10px var(--doublon-node-glow);
-    transition: width 0.5s ease-in-out;
+    gap: 12px; /* Espace entre chaque noeud, qui définit la longueur des segments */
 }
 
 .doublon-node {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background-color: #1a233a; /* Un fond sombre et propre */
+    background-color: #1a233a;
     border: 2px solid var(--doublon-node-border);
     transition: all 0.3s ease;
-    position: relative;
-    z-index: 3; /* Les nœuds sont toujours au-dessus de tout */
+    position: relative; /* Indispensable pour positionner le segment de ligne */
     box-shadow: 0 2px 5px rgba(0,0,0,0.4);
     flex-shrink: 0;
 }
 
+/* Le segment de ligne, attaché à GAUCHE de chaque noeud */
+.doublon-node::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    /* Se positionne à droite du noeud parent, s'étend vers la gauche */
+    right: 100%; 
+    width: 12px; /* Doit être égal au "gap" du conteneur parent */
+    height: 3px;
+    background-color: var(--doublon-node-bg);
+    border: 1px solid var(--doublon-node-border);
+    transform: translateY(-50%);
+    z-index: -1; /* Se place derrière les noeuds */
+    transition: all 0.3s ease;
+}
+
+/* Le premier noeud n'a PAS de ligne avant lui */
+.doublon-node:first-child::before {
+    display: none;
+}
+
+/* Style du noeud activé */
 .doublon-node.filled {
-    background-color: #e0f5ff; /* Un centre presque blanc pour la lueur */
+    background-color: #e0f5ff;
     border-color: var(--doublon-node-filled);
-    /* La lueur iconique ! */
     box-shadow: 0 0 12px 2px var(--doublon-node-glow), inset 0 0 3px rgba(255, 255, 255, 0.8);
 }
 
+/* Style du SEGMENT de ligne activé */
+.doublon-node.filled::before {
+    height: 5px;
+    background-color: var(--doublon-node-filled);
+    border-color: transparent;
+    box-shadow: 0 0 10px var(--doublon-node-glow);
+}
 
 .action-buttons {  
     display: flex;  
@@ -653,11 +643,11 @@ th.sorted .sort-arrow { opacity: 1; }
     .unit-element-cell .table-icon { height: 20px; width: auto; }
     .unit-rarity-cell .table-icon { height: 20px; width: auto; }
     
-    .stars, .skill-dots-cell {
+    .stars, .skill-dots-cell, .doublon-display-cell {
         justify-content: flex-start;
     }
 
-    .stars-wrapper, .doublon-wrapper, .skills-wrapper {
+    .stars-wrapper, .skills-wrapper {
         display: flex;
         align-items: center;
         gap: 4px;

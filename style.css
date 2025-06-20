@@ -413,27 +413,70 @@ th.sorted .sort-arrow { opacity: 1; }
 } 
 .stars .fa-star { color: var(--star-color); } 
  
-/* Styles pour le visuel des doublons inspiré du jeu */
+/* NOUVEAU : Styles pour le visuel des doublons amélioré */
 .doublon-display-cell {
+    position: relative;
     display: flex;
-    gap: 4px; /* Augmentation légère du gap pour la lisibilité */
     align-items: center;
-    justify-content: flex-start;
+    /* Espace les nœuds pour remplir la cellule, important pour le responsive */
+    justify-content: space-between; 
+    height: 30px;
+    padding: 0 5px; /* Petit padding pour que les lueurs ne touchent pas les bords */
 }
-.doublon-node {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
+
+/* Ligne de connexion (arrière-plan gris) */
+.doublon-display-cell::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    /* S'étend entre le centre du premier et du dernier nœud */
+    left: 15px; 
+    right: 15px;
+    height: 3px;
     background-color: var(--doublon-node-bg);
     border: 1px solid var(--doublon-node-border);
+    transform: translateY(-50%);
+    z-index: 1; /* Derrière les nœuds */
+    border-radius: 2px;
+}
+
+/* Ligne de connexion (premier plan bleu lumineux) */
+.doublon-display-cell::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    height: 5px;
+    /* La largeur est contrôlée par une variable CSS mise à jour par JS */
+    width: var(--filled-doublon-width, 0%); 
+    background-color: var(--doublon-node-filled);
+    transform: translateY(-50%);
+    z-index: 2; /* Devant la ligne grise, mais derrière les nœuds */
+    border-radius: 3px;
+    box-shadow: 0 0 10px var(--doublon-node-glow);
+    transition: width 0.5s ease-in-out;
+}
+
+.doublon-node {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #1a233a; /* Un fond sombre et propre */
+    border: 2px solid var(--doublon-node-border);
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 3; /* Les nœuds sont toujours au-dessus de tout */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
     flex-shrink: 0;
 }
+
 .doublon-node.filled {
-    background-color: var(--doublon-node-filled);
+    background-color: #e0f5ff; /* Un centre presque blanc pour la lueur */
     border-color: var(--doublon-node-filled);
-    box-shadow: 0 0 5px var(--doublon-node-glow), inset 0 0 3px rgba(255, 255, 255, 0.5);
+    /* La lueur iconique ! */
+    box-shadow: 0 0 12px 2px var(--doublon-node-glow), inset 0 0 3px rgba(255, 255, 255, 0.8);
 }
+
 
 .action-buttons {  
     display: flex;  
@@ -519,8 +562,6 @@ th.sorted .sort-arrow { opacity: 1; }
     vertical-align: middle;
 }
 
-/* SUPPRESSION de toute la section .compact-view */
-
 @media (max-width: 992px) { 
     .main-content, .team-builder-container { 
         flex-direction: column; 
@@ -545,7 +586,6 @@ th.sorted .sort-arrow { opacity: 1; }
     } 
     .form-grid { grid-template-columns: 1fr; }
 
-    /* NOUVEAU : Refonte complète et robuste de la vue carte pour mobile */
     .table-wrapper {
         overflow-x: hidden;
     }
@@ -553,7 +593,7 @@ th.sorted .sort-arrow { opacity: 1; }
         display: block;
     }
     thead {
-        display: none; /* Cache l'en-tête du tableau, inutile en vue carte */
+        display: none;
     }
     tr {
         margin-bottom: 15px;
@@ -562,11 +602,11 @@ th.sorted .sort-arrow { opacity: 1; }
         padding: 15px;
         background: var(--card-background);
         display: flex;
-        flex-wrap: wrap; /* Permet aux cellules de passer à la ligne */
+        flex-wrap: wrap;
         align-items: center;
-        gap: 5px 10px; /* Espace vertical et horizontal entre les cellules */
+        gap: 5px 10px;
     }
-    tbody tr:nth-child(even) { /* Enlève la coloration alternée en vue carte */
+    tbody tr:nth-child(even) {
         background-color: var(--card-background);
     }
     body.light-theme tbody tr:nth-child(even) {
@@ -575,36 +615,33 @@ th.sorted .sort-arrow { opacity: 1; }
     td {
         border: none;
         padding: 5px 0;
-        display: flex; /* Chaque cellule est un conteneur flex */
+        display: flex;
         align-items: center;
-        justify-content: space-between; /* Espace entre le label et la valeur */
-        flex-basis: 100%; /* Par défaut, chaque cellule prend toute la largeur */
+        justify-content: space-between;
+        flex-basis: 100%;
         min-height: auto;
     }
     td:before {
-        content: attr(data-label) ":"; /* Ajoute le label et ":" */
+        content: attr(data-label) ":";
         flex-shrink: 0;
         text-align: left;
         font-weight: 500;
         color: var(--text-color-muted);
-        width: 80px; /* Largeur fixe pour aligner les labels */
+        width: 80px;
     }
-
-    /* --- Agencement des cellules dans la carte --- */
     
-    /* Ligne 1: Checkbox et Info principale */
     .checkbox-cell {
         flex-basis: 10%;
         justify-content: flex-start;
     }
-    .checkbox-cell:before { content: none; } /* Pas de label pour la checkbox */
+    .checkbox-cell:before { content: none; }
 
     .unit-image-cell {
-        flex-basis: 85%; /* Prend le reste de la première ligne */
-        justify-content: flex-start; /* Aligne l'image et le nom à gauche */
+        flex-basis: 85%;
+        justify-content: flex-start;
         gap: 12px;
     }
-    .unit-image-cell:before { content: none; } /* Pas de label pour la cellule principale */
+    .unit-image-cell:before { content: none; }
     .unit-image-cell img {
         width: 45px; height: 45px;
     }
@@ -613,35 +650,30 @@ th.sorted .sort-arrow { opacity: 1; }
         white-space: normal;
     }
 
-    /* Cellules d'information (une par ligne) */
     .unit-element-cell .table-icon { height: 20px; width: auto; }
     .unit-rarity-cell .table-icon { height: 20px; width: auto; }
     
-    .stars, .doublon-display-cell, .skill-dots-cell {
-        justify-content: flex-start; /* Aligne le contenu à gauche après le label */
+    .stars, .skill-dots-cell {
+        justify-content: flex-start;
     }
 
-    /* Wrapper pour les contenus visuels pour éviter tout bug */
     .stars-wrapper, .doublon-wrapper, .skills-wrapper {
         display: flex;
         align-items: center;
         gap: 4px;
     }
     .stars .fa-star { font-size: 1em; }
-    .doublon-node { width: 16px; height: 16px; }
     .skill-dots-cell .filled, .skill-dots-cell .empty { font-size: 0.9em; }
 
-
-    /* Dernière Ligne: Boutons d'action */
     .action-buttons {
         flex-basis: 100%;
-        justify-content: center; /* Centre les boutons */
+        justify-content: center;
         border-top: 1px solid var(--border-color);
         margin-top: 10px;
         padding-top: 15px;
-        gap: 20px; /* Plus d'espace entre les boutons */
+        gap: 20px;
     }
-    .action-buttons:before { content: none; } /* Pas de label pour les actions */
+    .action-buttons:before { content: none; }
 
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

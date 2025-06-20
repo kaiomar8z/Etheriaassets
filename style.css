@@ -282,6 +282,9 @@ label { margin-bottom: 8px; font-weight: 500; font-size: 0.9em; color: var(--tex
     align-items: center;
     line-height: 1;
     padding: 0;
+    /* Styles pour éviter les ovales sur mobile */
+    min-width: 30px; /* Assure une largeur minimale */
+    min-height: 30px; /* Assure une hauteur minimale */
 }
 .number-controls button:hover {
     background-color: var(--primary-color-hover);
@@ -444,8 +447,9 @@ th.sorted .sort-arrow { opacity: 1; }
     color: var(--text-color-muted);
     transition: all 0.3s ease;
     position: relative;
-    box-sizing: border-box; /* Inclure padding/border dans width/height */
+    /* overflow: hidden; Supprimé pour s'assurer que le box-shadow est visible */
     flex-shrink: 0; /* Empêche les nœuds de rétrécir */
+    box-sizing: border-box; /* IMPORTANT: box-sizing à border-box pour que padding/border soient inclus */
 }
 .doublon-node.filled {
     background-color: var(--doublon-node-filled);

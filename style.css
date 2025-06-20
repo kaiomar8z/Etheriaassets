@@ -420,7 +420,6 @@ th.sorted .sort-arrow { opacity: 1; }
 .doublon-display-cell {
     display: flex;
     align-items: center;
-    justify-content: center; 
     gap: 8px;
 }
 
@@ -467,14 +466,16 @@ th.sorted .sort-arrow { opacity: 1; }
     box-shadow: 0 0 10px var(--doublon-node-glow);
 }
 
-/* NOUVEAU : Correction de l'alignement vertical pour la vue PC */
-#units-table .stars, 
-#units-table .doublon-display-cell,
-#units-table .skill-dots-cell {
+/* CORRECTION DÉFINITIVE - ALIGNEMENT VUE PC */
+/* On force les cellules avec du contenu visuel à utiliser Flexbox pour un centrage parfait. */
+#units-table td.stars, 
+#units-table td.doublon-display-cell,
+#units-table td.skill-dots-cell,
+#units-table td.unit-element-cell,
+#units-table td.unit-rarity-cell {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%; /* S'assure que le conteneur flex prend toute la hauteur de la cellule */
 }
 
 .action-buttons {  
@@ -648,13 +649,19 @@ th.sorted .sort-arrow { opacity: 1; }
         white-space: normal;
     }
     
+    /* CORRECTION DÉFINITIVE - ALIGNEMENT VUE MOBILE */
     .unit-level-cell, .unit-rarity-cell, .unit-element-cell {
         justify-content: space-between;
     }
 
-    .stars, .doublon-display-cell, .skill-dots-cell {
+    .stars, .skill-dots-cell {
         justify-content: flex-start;
         gap: 15px;
+    }
+
+    /* On s'assure que les doublons restent centrés */
+    .doublon-display-cell {
+        justify-content: center;
     }
     
     .unit-element-cell .table-icon { height: 20px; width: auto; }

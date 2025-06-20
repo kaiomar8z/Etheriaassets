@@ -406,23 +406,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderDoublons = (count) => {
         const numericCount = parseInt(count, 10) || 0;
-        
-        const wrapper = document.createElement('div');
-        wrapper.className = 'doublon-display-cell';
-
-        const filledWidthPercentage = numericCount > 1 ? ((numericCount - 1) / 4) * 100 : 0;
-        wrapper.style.setProperty('--filled-doublon-width', `${filledWidthPercentage}%`);
-
+        let html = '';
         for (let i = 0; i < 5; i++) {
-            const node = document.createElement('div');
-            node.className = 'doublon-node';
-            if (i < numericCount) {
-                node.classList.add('filled');
-            }
-            wrapper.appendChild(node);
+            // La classe 'filled' est ajoutée au noeud si son index est inférieur au nombre de doublons
+            html += `<div class="doublon-node ${i < numericCount ? 'filled' : ''}"></div>`;
         }
-
-        return wrapper.outerHTML;
+        // Le conteneur parent a juste besoin de la classe, le CSS fait le reste.
+        return html;
     };
 
 

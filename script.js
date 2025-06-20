@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
         apiKey: "AIzaSyDVVTPm80W3K0ebutcPlh-OAR28kJiaMjE",
         authDomain: "etheria-manager.firebaseapp.com",
         projectId: "etheria-manager",
-        storageBucket: "etheria-manager.firebasestorage.app",
+        storageBucket: "etheria-manager.appspot.com",
         messagingSenderId: "247321381553",
         appId: "1:247321381553:web:517f4fb1989ad14a8e3090"
     };
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const unitsCol = db.collection('units');
     const teamsCol = db.collection('teams');
     const manualObjectivesCol = db.collection('manualObjectives');
-    const dailyRoutineDoc = db.collection('settings').doc('dailyRoutine'); // Store daily routine as a single document
+    const dailyRoutineDoc = db.collection('settings').doc('dailyRoutine');
 
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     const sunIcon = '<i class="fa-solid fa-sun"></i>';
@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Theme is still stored locally as it's a UI preference, not data.
     const savedTheme = localStorage.getItem('etheriaTheme') || 'dark';
     applyTheme(savedTheme);
 
@@ -114,8 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const builderView = document.getElementById('builder-view');
     const objectivesView = document.getElementById('objectives-view');
     
-    const toggleCompactViewBtn = document.getElementById('toggle-compact-view-btn'); // Nouveau bouton
-
     const teamBuilderUnitList = document.getElementById('team-builder-unit-list');
     const teamSlotsContainer = document.querySelector('.team-slots');
     const teamSelect = document.getElementById('team-select');
@@ -134,20 +131,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // #endregion
 
     // #region --- ÉTAT DE L'APPLICATION (State) et variables Firestore ---
-    // Ces variables seront mises à jour par les listeners Firestore
     let units = [];
     let teams = [];
     let manualObjectives = [];
     let dailyRoutine = {};
-    let unitsDB = null; // Still used for initial data fetching
+    let unitsDB = null;
 
-    let activeTeamId = null; // Will store the Firebase Document ID for the active team
+    let activeTeamId = null;
     let currentSort = { column: 'level', direction: 'desc' };
     let favoritesFilterActive = false;
-    let isCompactView = localStorage.getItem('isCompactView') === 'true'; // État de la vue compacte
     let selectionModeSlotIndex = null;
-    let unitImageData = null; // Base64 or URL for the image during add/edit process
-    let currentImageFile = null; // Store the actual file object for upload
+    let unitImageData = null;
+    let currentImageFile = null;
     // #endregion
 
     // #region --- MODULE DE GESTION DE LA ROUTINE ---
@@ -173,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const checkRoutineReset = async () => {
         const currentGameDay = getGameDay();
-        let routineToSave = { ...dailyRoutine }; // Create a copy to modify
+        let routineToSave = { ...dailyRoutine };
 
         if (!routineToSave.tasks) {
             routineToSave.tasks = {};
@@ -209,9 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        if (needsSave || Object.keys(dailyRoutine).length === 0) { // Also save if routine was empty initially
+        if (needsSave || Object.keys(dailyRoutine).length === 0) {
              try {
-                await dailyRoutineDoc.set(routineToSave); // Use set to completely overwrite
+                await dailyRoutineDoc.set(routineToSave);
                 console.log("Daily routine reset/initialized in Firestore.");
             } catch (e) {
                 console.error("Error setting daily routine to Firestore: ", e);
@@ -230,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ROUTINE_DEFINITION.forEach(taskDef => {
             const taskName = taskDef.name;
-            const taskState = dailyRoutine.tasks[taskName]; // Access from the global 'dailyRoutine' object
+            const taskState = dailyRoutine.tasks[taskName];
             const item = document.createElement('div');
             item.className = 'routine-item';
             item.dataset.taskName = taskName;
@@ -246,16 +241,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     </label>
                 `;
             } else if (taskDef.type === 'counter') {
-                  const count = (taskState && taskState.count) || 0;
-                  if (count >= taskDef.max) item.classList.add('completed');
-                  item.innerHTML = `
-                       <label><span>${taskName}</span></label>
-                       <div class="hydra-controls">
-                           <button class="hydra-btn" data-action="minus">-</button>
-                           <span class="hydra-count">${count}</span>
-                           <button class="hydra-btn" data-action="plus">+</button>
-                       </div>
-                   `;
+                const count = (taskState && taskState.count) || 0;
+                if (count >= taskDef.max) item.classList.add('completed');
+                item.innerHTML = `
+                    <label><span>${taskName}</span></label>
+                    <div class="hydra-controls">
+                        <button class="hydra-btn" data-action="minus">-</button>
+                        <span class="hydra-count">${count}</span>
+                        <button class="hydra-btn" data-action="plus">+</button>
+                    </div>
+                `;
             }
             routineTrackerContent.appendChild(item);
         });
@@ -304,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
         manualObjectives.forEach(obj => {
             const li = document.createElement('li');
             li.className = `objective-item ${obj.completed ? 'completed' : ''}`;
-            li.dataset.id = obj.id; // Firebase doc ID
+            li.dataset.id = obj.id;
 
             li.innerHTML = `
                 <input type="checkbox" class="objective-checkbox" ${obj.completed ? 'checked' : ''}>
@@ -334,7 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
         imagePlaceholder.innerHTML = '<span>Cliquez pour ajouter une image</span>';
         imageInput.value = '';
         unitNameInput.focus();
-        // Réinitialiser les valeurs par défaut des inputs numériques/selects
         document.getElementById('unit-stars').value = 3;
         document.getElementById('unit-level').value = 1;
         document.getElementById('unit-doublon').value = 0;
@@ -343,7 +337,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('unit-s3').value = 1;
     };
 
-    // Function to fetch and display image placeholder, not upload it yet
     const findUnitImage = async (unitName) => {
         if (!unitName || !unitName.trim()) {
             unitImageData = null;
@@ -365,9 +358,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (foundImageUrl) {
-            unitImageData = foundImageUrl; // Store the URL directly
+            unitImageData = foundImageUrl;
             imagePlaceholder.innerHTML = `<img src="${unitImageData}" alt="${unitName}">`;
-            currentImageFile = null; // No file to upload if it's an external URL
+            currentImageFile = null;
         } else {
             unitImageData = null;
             imagePlaceholder.innerHTML = '<span>Image non trouvée.<br>Cliquez pour uploader.</span>';
@@ -401,25 +394,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderSkillLevel = (level) => {
         const numericLevel = parseInt(level, 10) || 0;
-        return '<span class="filled">●</span>'.repeat(numericLevel) + '<span class="empty">●</span>'.repeat(5 - numericLevel);
+        const dots = '<span class="filled">●</span>'.repeat(numericLevel) + '<span class="empty">●</span>'.repeat(5 - numericLevel);
+        return `<div class="skills-wrapper">${dots}</div>`;
     };
 
     const renderStars = (count) => {
         const numericCount = parseInt(count, 10) || 0;
-        return Array(numericCount).fill('<i class="fa-solid fa-star"></i>').join('');
+        const stars = Array(numericCount).fill('<i class="fa-solid fa-star"></i>').join('');
+        return `<div class="stars-wrapper">${stars}</div>`;
     };
 
     const renderDoublons = (count) => {
         const numericCount = parseInt(count, 10) || 0;
         let html = '';
-        for (let i = 0; i < 5; i++) { // Max 5 doublons
-            if (i < numericCount) {
-                html += '<div class="doublon-node filled"></div>';
-            } else {
-                html += '<div class="doublon-node"></div>';
-            }
+        for (let i = 0; i < 5; i++) {
+            html += `<div class="doublon-node ${i < numericCount ? 'filled' : ''}"></div>`;
         }
-        return html;
+        return `<div class="doublon-wrapper">${html}</div>`;
     };
 
 
@@ -428,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedElement = filterElement.value;
         const selectedRarity = filterRarity.value;
 
-        let processedUnits = units.filter(unit => { // 'units' is now from Firestore listener
+        let processedUnits = units.filter(unit => {
             const matchesSearch = unit.name.toLowerCase().includes(searchTerm);
             const matchesElement = !selectedElement || unit.element === selectedElement;
             const matchesRarity = !selectedRarity || unit.rarity === selectedRarity;
@@ -463,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         unitsToDisplay.forEach(unit => {
             const rowFragment = unitRowTemplate.content.cloneNode(true);
-            const row = rowFragment.querySelector('tr'); // Get the row element
+            const row = rowFragment.querySelector('tr');
 
             const checkbox = rowFragment.querySelector('.unit-checkbox');
             checkbox.dataset.id = unit.id;
@@ -471,7 +462,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 Array.from(document.querySelectorAll('.unit-checkbox')).some(cb => cb.dataset.id === unit.id && cb.checked)
             );
 
-            // Add/remove 'selected-row' class based on checkbox state
             if (checkbox.checked) {
                 row.classList.add('selected-row');
             } else {
@@ -525,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             rowFragment.querySelector('.stars').innerHTML = renderStars(unit.stars);
             rowFragment.querySelector('.unit-level-cell').textContent = unit.level;
-            rowFragment.querySelector('.doublon-display-cell').innerHTML = renderDoublons(unit.doublon); // Nouvelle classe de cellule
+            rowFragment.querySelector('.doublon-display-cell').innerHTML = renderDoublons(unit.doublon);
             
             rowFragment.querySelector('.unit-s1-cell').innerHTML = renderSkillLevel(unit.s1);
             rowFragment.querySelector('.unit-s2-cell').innerHTML = renderSkillLevel(unit.s2);
@@ -542,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 favoriteBtn.title = "Mettre en favori";
             }
 
-            favoriteBtn.dataset.id = unit.id; // Use Firebase ID
+            favoriteBtn.dataset.id = unit.id;
             rowFragment.querySelector('.edit-btn').dataset.id = unit.id;
             rowFragment.querySelector('.delete-btn').dataset.id = unit.id;
 
@@ -559,19 +549,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 th.classList.add('sorted', currentSort.direction);
                 arrow.innerHTML = currentSort.direction === 'asc' ? '<i class="fa-solid fa-arrow-up"></i>' : '<i class="fa-solid fa-arrow-down"></i>';
             } else {
-                  arrow.innerHTML = '';
+                 arrow.innerHTML = '';
             }
         });
     };
 
-    async function openEditModal(unitId) { // Now takes Firebase ID
+    async function openEditModal(unitId) {
         const unit = units.find(u => u.id === unitId);
         if (!unit) {
             showToast('Unité introuvable pour édition.', 'error');
             return;
         }
 
-        document.getElementById('edit-unit-id').value = unit.id; // Store Firebase ID
+        document.getElementById('edit-unit-id').value = unit.id;
         document.getElementById('edit-unit-name').value = unit.name;
         document.getElementById('edit-unit-element').value = unit.element;
         document.getElementById('edit-unit-rarity').value = unit.rarity;
@@ -609,7 +599,6 @@ document.addEventListener('DOMContentLoaded', () => {
             selectAllCheckbox.indeterminate = false;
         }
 
-        // Update row background based on individual checkbox state
         allCheckboxes.forEach(checkbox => {
             const row = checkbox.closest('tr');
             if (checkbox.checked) {
@@ -624,12 +613,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // #region --- MODULE TEAM BUILDER ---
     const renderTeamBuilderUnitList = () => {
         teamBuilderUnitList.innerHTML = '';
-        units.forEach((unit) => { // units array is now from Firestore
+        units.forEach((unit) => {
             const img = document.createElement('img');
             img.src = unit.image || `https://via.placeholder.com/60x60/304065/e0e0e0?text=?`;
             img.title = unit.name;
             img.draggable = true;
-            img.dataset.unitId = unit.id; // Use Firebase ID for drag/drop
+            img.dataset.unitId = unit.id;
             teamBuilderUnitList.appendChild(img);
         });
     };
@@ -648,11 +637,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const activeTeam = teams.find(team => team.id === activeTeamId);
 
         if (!activeTeam && teams.length > 0) {
-            activeTeamId = teams[0].id; // Fallback to the first team if activeTeamId is invalid
-            renderActiveTeam(); // Re-render with new active team
+            activeTeamId = teams[0].id;
+            renderActiveTeam();
             return;
         }
-        if (!activeTeam) { // If no teams exist at all
+        if (!activeTeam) {
             teamNameInput.value = '';
             teamNotesTextarea.value = '';
             for(let i=0; i<5; i++) {
@@ -667,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         teamNameInput.value = activeTeam.name;
         teamNotesTextarea.value = activeTeam.notes || '';
-        const currentTeamUnits = activeTeam.units || [null, null, null, null, null]; // Ensure array for slots
+        const currentTeamUnits = activeTeam.units || [null, null, null, null, null];
 
         for(let i=0; i<5; i++) {
             const slot = document.createElement('div');
@@ -675,7 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
             slot.dataset.slotIndex = i;
 
             const unitData = currentTeamUnits[i];
-            if (unitData) { // unitData now contains full unit object from team doc
+            if (unitData) {
                 slot.innerHTML = `
                     <img src="${unitData.image || `https://via.placeholder.com/100x100/304065/e0e0e0?text=?`}" title="${unitData.name}">
                     <button class="remove-from-team-btn" data-slot-index="${i}">&times;</button>
@@ -691,12 +680,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderTeamSelect = () => {
         teamSelect.innerHTML = '';
         if(teams.length === 0) {
-            // This case should be handled by Firestore listener when initial teams are loaded
             return;
         }
         teams.forEach((team) => {
             const option = document.createElement('option');
-            option.value = team.id; // Use Firebase Document ID
+            option.value = team.id;
             option.textContent = team.name;
             if(team.id === activeTeamId) {
                 option.selected = true;
@@ -726,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const elementOrder = ['Rouge', 'Bleu', 'Vert', 'Light', 'Dark'];
         elementOrder.forEach(element => {
             const count = elementCounts[element] || 0;
-            if(count > 0 || totalUnits === 0) { // Show all elements if no units, or only existing ones
+            if(count > 0 || totalUnits === 0) {
                 const percentage = totalUnits > 0 ? (count / totalUnits) * 100 : 0;
                 const barHtml = `
                     <div class="element-bar">
@@ -754,8 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const unitName = document.getElementById('unit-name').value;
 
-        // Check if an image file was selected
-        let imageUrl = unitImageData; // Default to the fetched/manual URL
+        let imageUrl = unitImageData;
         if (currentImageFile) {
             const storageRef = storage.ref(`unit_images/${unitName}_${Date.now()}_${currentImageFile.name}`);
             try {
@@ -766,13 +753,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error("Error uploading image:", error);
                 showToast("Erreur lors du téléchargement de l'image.", 'error');
-                imageUrl = null; // Fallback if upload fails
+                imageUrl = null;
             }
         }
 
         const newUnit = {
             name: unitName,
-            image: imageUrl, // Use the uploaded URL or base URL
+            image: imageUrl,
             element: document.getElementById('unit-element').value,
             rarity: document.getElementById('unit-rarity').value,
             stars: parseInt(document.getElementById('unit-stars').value, 10),
@@ -807,20 +794,19 @@ document.addEventListener('DOMContentLoaded', () => {
     imageInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
-            currentImageFile = file; // Store the file object
+            currentImageFile = file;
             const reader = new FileReader();
             reader.onload = (e) => {
-                unitImageData = e.target.result; // For displaying preview
+                unitImageData = e.target.result;
                 imagePlaceholder.innerHTML = `<img src="${unitImageData}" alt="Aperçu de l'unité">`;
             };
             reader.readAsDataURL(file);
         }
     });
 
-    // Handle number controls (+/- buttons) for add/edit forms
     document.querySelectorAll('.number-controls button').forEach(button => {
         button.addEventListener('click', (event) => {
-            const targetInputId = event.target.dataset.targetInput; // Get ID from data attribute
+            const targetInputId = event.target.dataset.targetInput;
             if (!targetInputId) return;
 
             const targetElement = document.getElementById(targetInputId);
@@ -829,11 +815,10 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentValue;
             let min, max;
 
-            // Déterminer la valeur actuelle de manière robuste
             if (targetElement.tagName === 'INPUT') {
                 currentValue = parseInt(targetElement.value, 10);
-                if (isNaN(currentValue)) { // Si l'input est vide ou non numérique
-                    currentValue = parseInt(targetElement.min, 10); // Utilise la valeur min définie dans l'HTML
+                if (isNaN(currentValue)) {
+                    currentValue = parseInt(targetElement.min, 10);
                 }
                 min = parseInt(targetElement.min, 10);
                 max = parseInt(targetElement.max, 10);
@@ -856,13 +841,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Tableau des unités (Actions, Filtres, Tri, Sélection)
     unitListBody.addEventListener('click', async (event) => {
         const button = event.target.closest('button');
         const checkbox = event.target.closest('.unit-checkbox');
 
-        if (button && button.dataset.id) { // Use dataset.id
-            const unitId = button.dataset.id; // Get Firebase Document ID
+        if (button && button.dataset.id) {
+            const unitId = button.dataset.id;
 
             if (button.classList.contains('favorite-btn')) {
                 const unitToUpdate = units.find(u => u.id === unitId);
@@ -879,7 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 openEditModal(unitId);
             } else if (button.classList.contains('delete-btn')) {
                 const unitName = units.find(u => u.id === unitId)?.name || 'cette unité';
-                if (await showConfirm('Supprimer en masse', `Êtes-vous sûr de vouloir supprimer ${unitName} ?`)) {
+                if (await showConfirm('Supprimer', `Êtes-vous sûr de vouloir supprimer ${unitName} ?`)) {
                     try {
                         await unitsCol.doc(unitId).delete();
                         showToast('Unité supprimée.', 'info');
@@ -938,7 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 await batch.commit();
                 showToast(`${selectedIds.length} unité(s) supprimée(s).`, 'success');
-                selectAllCheckbox.checked = false; // Reset select all
+                selectAllCheckbox.checked = false;
                 selectAllCheckbox.indeterminate = false;
                 deleteSelectedBtn.style.display = 'none';
             } catch (e) {
@@ -948,10 +932,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Modale d'édition
     editForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const unitId = document.getElementById('edit-unit-id').value; // Get Firebase ID
+        const unitId = document.getElementById('edit-unit-id').value;
 
         const updatedUnitData = {
             name: document.getElementById('edit-unit-name').value,
@@ -978,16 +961,13 @@ document.addEventListener('DOMContentLoaded', () => {
     closeModalBtn.addEventListener('click', closeEditModal);
     window.addEventListener('click', (event) => { if (event.target == editModal) closeEditModal(); });
 
-    // Import / Export
     exportBtn.addEventListener('click', () => {
-        // We export current in-memory data that comes from Firestore
         if (units.length === 0 && teams.length === 0 && manualObjectives.length === 0 && Object.keys(dailyRoutine).length === 0) {
             showToast("Il n'y a aucune donnée à exporter.", 'info');
             return;
         }
-        // Exclude Firebase document IDs from export, as they are internal
         const unitsExport = units.map(({ id, ...rest }) => rest);
-        const teamsExport = teams.map(({ id, ...rest }) => ({...rest, units: rest.units.filter(u => u != null) })); // Filter out nulls from teams array
+        const teamsExport = teams.map(({ id, ...rest }) => ({...rest, units: rest.units.filter(u => u != null) }));
         const objectivesExport = manualObjectives.map(({ id, ...rest }) => rest);
 
         const backupData = { units: unitsExport, teams: teamsExport, manualObjectives: objectivesExport, dailyRoutine };
@@ -1012,7 +992,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const importedData = JSON.parse(e.target.result);
                 if (await showConfirm('Importer un fichier JSON', "Voulez-vous vraiment remplacer vos données par celles importées ? Cette action est irréversible et écrasera les données sur Firebase.")) {
                     showToast("Importation en cours... Veuillez patienter.", 'info', 5000);
-                    // Clear existing data in Firestore
                     const deleteBatch = db.batch();
                     const existingUnits = await unitsCol.get();
                     existingUnits.forEach(doc => deleteBatch.delete(doc.ref));
@@ -1020,11 +999,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     existingTeams.forEach(doc => deleteBatch.delete(doc.ref));
                     const existingObjectives = await manualObjectivesCol.get();
                     existingObjectives.forEach(doc => deleteBatch.delete(doc.ref));
-                    deleteBatch.delete(dailyRoutineDoc); // Delete daily routine document
+                    deleteBatch.delete(dailyRoutineDoc);
 
                     await deleteBatch.commit();
 
-                    // Add imported data to Firestore
                     const addBatch = db.batch();
                     importedData.units.forEach(unit => addBatch.set(unitsCol.doc(), unit));
                     importedData.teams.forEach(team => addBatch.set(teamsCol.doc(), team));
@@ -1075,23 +1053,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         s1: parseInt(columns[6].trim(), 10) || 1,
                         s2: parseInt(columns[7].trim(), 10) || 1,
                         s3: parseInt(columns[8].trim(), 10) || 1,
-                        image: null, // Will attempt to find/set this
+                        image: null,
                         isFavorite: false,
                         notes: ''
                     };
 
-                    const existingUnit = units.find(u => u.name.toLowerCase() === unitData.name.toLowerCase()); // 'units' is from Firestore
+                    const existingUnit = units.find(u => u.name.toLowerCase() === unitData.name.toLowerCase());
                     if (existingUnit) {
-                        // Update existing unit
-                        unitData.notes = existingUnit.notes || ''; // Keep existing notes
-                        unitData.isFavorite = existingUnit.isFavorite || false; // Keep existing favorite status
-                        // Important: Keep existing image if no new one is provided in CSV logic
+                        unitData.notes = existingUnit.notes || '';
+                        unitData.isFavorite = existingUnit.isFavorite || false;
                         unitData.image = existingUnit.image || null;
 
                         batch.update(unitsCol.doc(existingUnit.id), unitData);
                         updatedCount++;
                     } else {
-                        // Add new unit
                         batch.set(unitsCol.doc(), unitData);
                         addedCount++;
                     }
@@ -1109,35 +1084,29 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsText(file, 'UTF-8');
     });
 
-    // Team Builder
     teamBuilderUnitList.addEventListener('dragstart', (e) => {
         if(e.target.tagName === 'IMG') {
-            e.dataTransfer.setData('text/plain', e.target.dataset.unitId); // Use Firebase ID
+            e.dataTransfer.setData('text/plain', e.target.dataset.unitId);
             e.dataTransfer.effectAllowed = 'copy';
         }
     });
 
     teamSlotsContainer.addEventListener('dragover', (e) => { e.preventDefault(); const slot = e.target.closest('.team-slot'); if (slot) slot.classList.add('drag-over'); });
     teamSlotsContainer.addEventListener('dragleave', (e) => { const slot = e.target.closest('.team-slot'); if (slot) slot.classList.remove('drag-over'); });
-    teamSlotsContainer.addEventListener('drop', async (e) => { // Make async
+    teamSlotsContainer.addEventListener('drop', async (e) => {
         e.preventDefault();
         const slot = e.target.closest('.team-slot');
         if(slot) {
             slot.classList.remove('drag-over');
-            const unitId = e.dataTransfer.getData('text/plain'); // Get Firebase Unit ID
-
-            // Ensure slot index is correctly retrieved from the actual slot element
-            // If dropping on an image inside a slot, get the parent slot
+            const unitId = e.dataTransfer.getData('text/plain');
             const targetSlot = e.target.classList.contains('team-slot') ? e.target : e.target.closest('.team-slot');
             const slotIndex = parseInt(targetSlot.dataset.slotIndex);
-
-
-            const unitToAdd = units.find(u => u.id === unitId); // Find the full unit object
+            const unitToAdd = units.find(u => u.id === unitId);
             if (unitToAdd && activeTeamId) {
                 const activeTeam = teams.find(t => t.id === activeTeamId);
                 if (activeTeam) {
                     const newUnits = [...(activeTeam.units || [null, null, null, null, null])];
-                    newUnits[slotIndex] = { ...unitToAdd, id: unitId }; // Store a copy of the unit data
+                    newUnits[slotIndex] = { ...unitToAdd, id: unitId };
                     try {
                         await teamsCol.doc(activeTeamId).update({ units: newUnits });
                         showToast("Unité ajoutée à l'équipe.", 'success');
@@ -1150,7 +1119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    teamSlotsContainer.addEventListener('click', async (e) => { // Make async
+    teamSlotsContainer.addEventListener('click', async (e) => {
         const target = e.target;
         const slot = target.closest('.team-slot');
         if (target.classList.contains('remove-from-team-btn')) {
@@ -1182,16 +1151,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    teamBuilderUnitList.addEventListener('click', async (e) => { // Make async
+    teamBuilderUnitList.addEventListener('click', async (e) => {
         if (e.target.tagName === 'IMG' && selectionModeSlotIndex !== null) {
-            const unitId = e.target.dataset.unitId; // Get Firebase Unit ID
-            const unitToAdd = units.find(u => u.id === unitId); // Find the full unit object
+            const unitId = e.target.dataset.unitId;
+            const unitToAdd = units.find(u => u.id === unitId);
 
             if (unitToAdd && activeTeamId) {
                 const activeTeam = teams.find(t => t.id === activeTeamId);
                 if (activeTeam) {
                     const newUnits = [...(activeTeam.units || [null, null, null, null, null])];
-                    newUnits[selectionModeSlotIndex] = { ...unitToAdd, id: unitId }; // Store a copy
+                    newUnits[selectionModeSlotIndex] = { ...unitToAdd, id: unitId };
                     try {
                         await teamsCol.doc(activeTeamId).update({ units: newUnits });
                         showToast("Unité ajoutée à l'équipe.", 'success');
@@ -1207,11 +1176,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     teamSelect.addEventListener('change', (event) => {
-        activeTeamId = event.target.value; // Set activeTeamId to the selected Firebase Document ID
+        activeTeamId = event.target.value;
         renderActiveTeam();
     });
 
-    saveTeamBtn.addEventListener('click', async () => { // Make async
+    saveTeamBtn.addEventListener('click', async () => {
         const newName = teamNameInput.value.trim();
         if (newName && activeTeamId) {
             try {
@@ -1226,11 +1195,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    newTeamBtn.addEventListener('click', async () => { // Make async
+    newTeamBtn.addEventListener('click', async () => {
         const newTeamData = { name: 'Nouvelle Équipe', units: [null, null, null, null, null], notes: '' };
         try {
-            const docRef = await teamsCol.add(newTeamData); // Add new team to Firestore
-            activeTeamId = docRef.id; // Set new team as active
+            const docRef = await teamsCol.add(newTeamData);
+            activeTeamId = docRef.id;
             showToast('Nouvelle équipe créée !', 'success');
         } catch (e) {
             console.error("Error adding new team: ", e);
@@ -1238,7 +1207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    deleteTeamBtn.addEventListener('click', async () => { // Make async
+    deleteTeamBtn.addEventListener('click', async () => {
         if(teams.length <= 1) {
             showToast("Vous ne pouvez pas supprimer votre dernière équipe.", 'info');
             return;
@@ -1248,8 +1217,6 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await teamsCol.doc(activeTeamId).delete();
                 showToast('Équipe supprimée.', 'success');
-                // The onSnapshot listener for teams will update 'teams' array,
-                // and we'll handle setting a new activeTeamId there.
             } catch (e) {
                 console.error("Error deleting team: ", e);
                 showToast("Erreur lors de la suppression de l'équipe.", 'error');
@@ -1257,11 +1224,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    teamNotesTextarea.addEventListener('input', async () => { // Make async
+    teamNotesTextarea.addEventListener('input', async () => {
         if (activeTeamId) {
             try {
                 await teamsCol.doc(activeTeamId).update({ notes: teamNotesTextarea.value });
-                // showToast('Notes sauvegardées.', 'success'); // Too chatty, remove for input
             } catch (e) {
                 console.error("Error updating team notes: ", e);
                 showToast("Erreur lors de la sauvegarde des notes.", 'error');
@@ -1269,8 +1235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Objectifs (To-Do List)
-    addObjectiveForm.addEventListener('submit', async (e) => { // Make async
+    addObjectiveForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const text = newObjectiveInput.value.trim();
         if (text) {
@@ -1285,11 +1250,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    objectivesListContainer.addEventListener('click', async (e) => { // Make async
+    objectivesListContainer.addEventListener('click', async (e) => {
         const target = e.target;
         const li = target.closest('.objective-item');
         if (!li) return;
-        const objectiveId = li.dataset.id; // Firebase doc ID
+        const objectiveId = li.dataset.id;
 
         if (target.classList.contains('objective-checkbox')) {
             const currentStatus = target.checked;
@@ -1311,8 +1276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Gestionnaire d'événements pour le tracker de routine
-    routineTrackerContent.addEventListener('click', async (e) => { // Make async
+    routineTrackerContent.addEventListener('click', async (e) => {
         const item = e.target.closest('.routine-item');
         if (!item) return;
 
@@ -1321,7 +1285,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskDef = ROUTINE_DEFINITION.find(t => t.name === taskName);
         if (!taskDef) return;
 
-        // Create a mutable copy of the tasks
         let updatedTasks = { ...dailyRoutine.tasks };
         let taskState = updatedTasks[taskName];
 
@@ -1340,11 +1303,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             taskState = { count: count, updatedOn: currentGameDay };
         }
-        updatedTasks[taskName] = taskState; // Update the task in the copied tasks object
+        updatedTasks[taskName] = taskState;
 
         try {
-            await dailyRoutineDoc.update({ tasks: updatedTasks }); // Update only the 'tasks' field
-            // The onSnapshot listener will re-render
+            await dailyRoutineDoc.update({ tasks: updatedTasks });
         } catch (error) {
             console.error("Error updating routine task: ", error);
             showToast("Erreur lors de la mise à jour de la routine.", 'error');
@@ -1356,27 +1318,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // #region --- INITIALISATION DE L'APPLICATION (Firebase Listeners) ---
 
     const setupFirestoreListeners = () => {
-        // Units Listener
         unitsCol.onSnapshot(snapshot => {
             units = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             refreshUI();
-            renderTeamBuilderUnitList(); // Units in team builder need to be updated
-            renderActiveTeam(); // Teams might reference unit data which has changed
+            renderTeamBuilderUnitList();
+            renderActiveTeam();
         }, error => {
             console.error("Error listening to units collection:", error);
             showToast("Erreur de synchronisation des unités.", 'error');
         });
 
-        // Teams Listener
         teamsCol.orderBy('name').onSnapshot(snapshot => {
             teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-            // If activeTeamId is not set or the active team was deleted, set a new active team
             if (!activeTeamId || !teams.some(team => team.id === activeTeamId)) {
                 if (teams.length > 0) {
-                    activeTeamId = teams[0].id; // Set first team as active
+                    activeTeamId = teams[0].id;
                 } else {
-                    // No teams exist, create a default one
                     teamsCol.add({ name: 'Mon Équipe', units: [null, null, null, null, null], notes: '' })
                         .then(docRef => {
                             activeTeamId = docRef.id;
@@ -1392,7 +1350,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast("Erreur de synchronisation des équipes.", 'error');
         });
 
-        // Manual Objectives Listener
         manualObjectivesCol.orderBy('text').onSnapshot(snapshot => {
             manualObjectives = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderManualObjectives();
@@ -1401,14 +1358,13 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast("Erreur de synchronisation des objectifs.", 'error');
         });
 
-        // Daily Routine Listener
         dailyRoutineDoc.onSnapshot(doc => {
             if (doc.exists) {
                 dailyRoutine = doc.data();
             } else {
-                dailyRoutine = { tasks: {} }; // Initialize if document doesn't exist
+                dailyRoutine = { tasks: {} };
             }
-            checkRoutineReset(); // This will trigger a save if reset needed
+            checkRoutineReset();
             renderRoutineTracker();
         }, error => {
             console.error("Error listening to daily routine document:", error);
@@ -1417,26 +1373,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const refreshUI = () => {
-        // Routine check/render is handled by its own listener
         displayUnits();
         updateDashboard();
-        updateSelectionState(); // Call updateSelectionState to handle row highlighting
-        // Apply compact view state on refresh
-        document.body.classList.toggle('compact-view', isCompactView);
-        toggleCompactViewBtn.classList.toggle('active', isCompactView);
+        updateSelectionState();
     };
 
-    // Toggle compact view
-    toggleCompactViewBtn.addEventListener('click', () => {
-        isCompactView = !isCompactView;
-        localStorage.setItem('isCompactView', isCompactView);
-        refreshUI(); // Re-render table and apply class
-    });
-
-    // Start listening to Firestore data
     setupFirestoreListeners();
-
-    // Set initial view
     switchView('manager');
     // #endregion
 });

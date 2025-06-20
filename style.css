@@ -88,9 +88,6 @@ body.light-theme .main-logo {
     filter: none;
 }
 
-/* Suppression des styles de .app-tagline car l'élément est retiré de l'HTML */
-
-
 #theme-toggle-btn {
     position: absolute;
     top: 50%;
@@ -345,13 +342,6 @@ textarea {
     background-color: rgba(241, 196, 15, 0.1); 
     color: var(--star-color);
 }
-#toggle-compact-view-btn {
-    background-color: var(--info-color);
-    color: white;
-}
-#toggle-compact-view-btn.active {
-    background-color: var(--primary-color-hover);
-}
  
 .table-wrapper { overflow-x: auto; } 
 table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; }
@@ -423,13 +413,12 @@ th.sorted .sort-arrow { opacity: 1; }
 } 
 .stars .fa-star { color: var(--star-color); } 
  
-/* NOUVEAU: Styles pour le visuel des doublons inspiré du jeu */
+/* Styles pour le visuel des doublons inspiré du jeu */
 .doublon-display-cell {
     display: flex;
-    gap: 2px;
+    gap: 4px; /* Augmentation légère du gap pour la lisibilité */
     align-items: center;
     justify-content: flex-start;
-    padding-right: 5px;
 }
 .doublon-node {
     width: 18px;
@@ -437,15 +426,7 @@ th.sorted .sort-arrow { opacity: 1; }
     border-radius: 50%;
     background-color: var(--doublon-node-bg);
     border: 1px solid var(--doublon-node-border);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 0.8em;
-    font-weight: bold;
-    color: var(--text-color-muted);
     transition: all 0.3s ease;
-    position: relative;
-    box-sizing: border-box;
     flex-shrink: 0;
 }
 .doublon-node.filled {
@@ -453,7 +434,6 @@ th.sorted .sort-arrow { opacity: 1; }
     border-color: var(--doublon-node-filled);
     box-shadow: 0 0 5px var(--doublon-node-glow), inset 0 0 3px rgba(255, 255, 255, 0.5);
 }
-
 
 .action-buttons {  
     display: flex;  
@@ -476,14 +456,13 @@ th.sorted .sort-arrow { opacity: 1; }
 .favorite-btn { color: var(--text-color-muted); } 
 .favorite-btn.is-favorite { color: var(--star-color); transform: scale(1.1); } 
 .action-buttons button:hover { background-color: var(--hover-background); } 
-/* Animation de l'icône au survol/clic */
 .action-buttons button .fa-solid, .action-buttons button .fa-regular {
     transition: transform 0.2s ease, color 0.2s ease;
 }
 .action-buttons button:hover .fa-solid, .action-buttons button:hover .fa-regular {
     transform: scale(1.2);
 }
-.favorite-btn.is-favorite:hover .fa-star { /* Ajuste le scale du favori au survol */
+.favorite-btn.is-favorite:hover .fa-star {
     transform: scale(1.3);
 }
 
@@ -540,59 +519,7 @@ th.sorted .sort-arrow { opacity: 1; }
     vertical-align: middle;
 }
 
-/* NOUVEAU: Styles pour le mode compact */
-body.compact-view .table-wrapper table {
-    margin-top: 10px;
-}
-body.compact-view tbody tr {
-    padding: 5px;
-    margin-bottom: 8px;
-}
-body.compact-view td {
-    padding-top: 4px;
-    padding-bottom: 4px;
-    min-height: auto;
-}
-body.compact-view .unit-image-cell {
-    margin-bottom: 5px;
-}
-body.compact-view .unit-image-cell img {
-    width: 30px;
-    height: 30px;
-}
-body.compact-view .unit-image-cell span.unit-name-cell {
-    font-size: 0.9em;
-}
-body.compact-view td:before {
-    font-size: 0.8em;
-}
-/* Cacher certaines informations en mode compact pour maximiser l'espace */
-body.compact-view .unit-level-cell,
-body.compact-view .unit-s1-cell,
-body.compact-view .unit-s2-cell,
-body.compact-view .unit-s3-cell {
-    display: none;
-}
-/* Assure que les colonnes qui restent s'étalent correctement */
-body.compact-view .checkbox-cell,
-body.compact-view .unit-image-cell,
-body.compact-view .unit-element-cell,
-body.compact-view .unit-rarity-cell,
-body.compact-view .stars,
-body.compact-view .doublon-display-cell,
-body.compact-view .action-buttons {
-    width: auto;
-    flex-basis: auto;
-    flex-grow: 1;
-}
-body.compact-view .checkbox-cell { order: 0; flex-grow: 0; width: 30px; }
-body.compact-view .unit-image-cell { order: 1; flex-grow: 2; width: auto; }
-body.compact-view .unit-element-cell { order: 2; flex-grow: 0; width: auto; }
-body.compact-view .unit-rarity-cell { order: 3; flex-grow: 0; width: auto; }
-body.compact-view .stars { order: 4; flex-grow: 1; width: auto; }
-body.compact-view .doublon-display-cell { order: 5; flex-grow: 1; width: auto; }
-body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; }
-
+/* SUPPRESSION de toute la section .compact-view */
 
 @media (max-width: 992px) { 
     .main-content, .team-builder-container { 
@@ -618,182 +545,103 @@ body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; }
     } 
     .form-grid { grid-template-columns: 1fr; }
 
-    /* Refonte COMPLÈTE de la vue carte pour mobile */
+    /* NOUVEAU : Refonte complète et robuste de la vue carte pour mobile */
     .table-wrapper {
         overflow-x: hidden;
     }
-
     table, thead, tbody, th, td, tr {
-        display: block; /* Chaque TR est une carte */
+        display: block;
     }
-
     thead {
-        display: none; /* Cache l'en-tête du tableau */
+        display: none; /* Cache l'en-tête du tableau, inutile en vue carte */
     }
-
     tr {
         margin-bottom: 15px;
         border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 8px; /* Padding global de la carte, réduit */
+        border-radius: 12px;
+        padding: 15px;
         background: var(--card-background);
-        display: flex; /* Utilisation de Flexbox principal pour les TD */
-        flex-wrap: wrap; /* Les TD peuvent s'enrouler */
-        align-items: flex-start;
-        position: relative;
+        display: flex;
+        flex-wrap: wrap; /* Permet aux cellules de passer à la ligne */
+        align-items: center;
+        gap: 5px 10px; /* Espace vertical et horizontal entre les cellules */
     }
-
-    tbody tr:nth-child(even) {
+    tbody tr:nth-child(even) { /* Enlève la coloration alternée en vue carte */
         background-color: var(--card-background);
     }
     body.light-theme tbody tr:nth-child(even) {
         background-color: var(--card-background);
     }
-    tbody tr.selected-row {
-        background-color: var(--selected-row-background);
-    }
-    tbody tr:hover {
-        background-color: var(--hover-background);
-    }
-
     td {
         border: none;
-        padding: 4px 0px; /* Paddings verticaux réduits, horizontal géré par flex */
-        display: flex;
+        padding: 5px 0;
+        display: flex; /* Chaque cellule est un conteneur flex */
         align-items: center;
-        position: relative;
+        justify-content: space-between; /* Espace entre le label et la valeur */
+        flex-basis: 100%; /* Par défaut, chaque cellule prend toute la largeur */
         min-height: auto;
     }
-
     td:before {
-        content: attr(data-label);
+        content: attr(data-label) ":"; /* Ajoute le label et ":" */
         flex-shrink: 0;
-        margin-right: 5px;
         text-align: left;
         font-weight: 500;
         color: var(--text-color-muted);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.8em; /* Rétablit une taille plus petite pour les labels */
-        width: 50px; /* Largeur fixe pour les labels pour uniformité */
-        padding-left: 8px; /* Padding à gauche du label */
+        width: 80px; /* Largeur fixe pour aligner les labels */
     }
 
-    /* Cellule de la checkbox */
+    /* --- Agencement des cellules dans la carte --- */
+    
+    /* Ligne 1: Checkbox et Info principale */
     .checkbox-cell {
-        order: 0;
-        width: 10%; /* Prend une petite portion au début */
-        flex-grow: 0;
-        padding-left: 8px; /* Assure un padding gauche */
-        margin-right: 0; /* Pas de marge à droite, le gap gérera */
+        flex-basis: 10%;
         justify-content: flex-start;
     }
-    .checkbox-cell:before { content: none; }
+    .checkbox-cell:before { content: none; } /* Pas de label pour la checkbox */
 
-
-    /* Cellule de l'image et du nom */
     .unit-image-cell {
-        order: 1;
-        width: 88%; /* Prend presque tout le reste de la largeur de la première ligne */
-        justify-content: flex-start;
-        padding-left: 0; /* Pas de padding spécifique, la checkbox est gérée à part */
-        gap: 8px;
-        margin-bottom: 5px;
-        flex-grow: 1; /* Permet de prendre l'espace restant */
+        flex-basis: 85%; /* Prend le reste de la première ligne */
+        justify-content: flex-start; /* Aligne l'image et le nom à gauche */
+        gap: 12px;
     }
-    .unit-image-cell:before { content: none; }
+    .unit-image-cell:before { content: none; } /* Pas de label pour la cellule principale */
     .unit-image-cell img {
-        width: 40px; height: 40px;
-        flex-shrink: 0;
+        width: 45px; height: 45px;
     }
     .unit-image-cell span.unit-name-cell {
-        font-size: 1.1em; font-weight: 600;
-        white-space: normal; overflow: hidden; text-overflow: ellipsis;
-        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-    }
-    .unit-has-notes-icon { margin-left: 5px; font-size: 0.8em; }
-
-
-    /* Élément et Rareté (sur une même "ligne" logique, deux colonnes) */
-    .unit-element-cell, .unit-rarity-cell {
-        width: 50%; /* Chacune prend la moitié de la largeur */
-        flex-shrink: 0;
-        justify-content: space-between;
-        padding-right: 8px; /* Espacement à droite de la cellule */
-    }
-    .unit-element-cell { order: 2; }
-    .unit-rarity-cell { order: 3; }
-    .unit-element-cell .table-icon { width: 20px; height: 20px; margin-left: 5px; }
-    .unit-rarity-cell .table-icon { width: 30px; height: auto; margin-left: 5px; }
-    .unit-rarity-cell span:not(.table-icon) { font-size: 1.0em; font-weight: bold; } /* Rareté textuelle */
-
-
-    /* Étoiles et Level (sur une nouvelle "ligne" logique, deux colonnes) */
-    .stars, .unit-level-cell {
-        width: 50%; /* Chacune prend la moitié de la largeur */
-        flex-shrink: 0;
-        justify-content: space-between;
-        padding-right: 8px;
-    }
-    .stars { order: 4; }
-    .unit-level-cell { order: 5; }
-    .stars .fa-star {
-        font-size: 1em; /* Taille des étoiles */
-        margin-left: 1px; margin-right: 1px; /* Espacement minimal */
-        flex-shrink: 0;
-    }
-    .stars:before { width: 50px; } /* Label Étoiles */
-    .unit-level-cell > *:not(:first-child) { /* Valeur du level */
-        margin-left: auto; /* Pousse à droite */
-        flex-shrink: 0;
-    }
-    .unit-level-cell:before { width: 50px; } /* Label Level */
-
-
-    /* Doublons (sur une nouvelle "ligne" logique, pleine largeur) */
-    .doublon-display-cell {
-        order: 6;
-        width: 100%; /* Prend toute la largeur */
-        justify-content: flex-start; /* Aligne les nœuds à gauche */
-        padding-right: 8px;
-    }
-    .doublon-display-cell:before { width: 55px; } /* Label Doublons */
-    .doublon-node {
-        width: 16px; height: 16px; /* Taille des pastilles */
-        gap: 1px; /* Espace entre les pastilles */
+        font-size: 1.2em; font-weight: 600;
+        white-space: normal;
     }
 
-
-    /* Compétences S1, S2, S3 (sur une nouvelle "ligne" logique, trois colonnes) */
-    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
-        width: 33.33%; /* Trois par ligne */
-        flex-shrink: 0;
-        justify-content: space-between; /* Label à gauche, points à droite */
-        padding-right: 5px; /* Espacement réduit pour coller */
-    }
-    .unit-s1-cell { order: 7; }
-    .unit-s2-cell { order: 8; }
-    .unit-s3-cell { order: 9; }
-    .unit-s1-cell:before, .unit-s2-cell:before, .unit-s3-cell:before { width: 30px; } /* Labels S1, S2, S3 plus petits */
-    .skill-dots-cell .filled, .skill-dots-cell .empty {
-        font-size: 0.8em; /* Taille des points de compétence */
-        margin-left: 0.5px; margin-right: 0.5px;
+    /* Cellules d'information (une par ligne) */
+    .unit-element-cell .table-icon { height: 20px; width: auto; }
+    .unit-rarity-cell .table-icon { height: 20px; width: auto; }
+    
+    .stars, .doublon-display-cell, .skill-dots-cell {
+        justify-content: flex-start; /* Aligne le contenu à gauche après le label */
     }
 
+    /* Wrapper pour les contenus visuels pour éviter tout bug */
+    .stars-wrapper, .doublon-wrapper, .skills-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .stars .fa-star { font-size: 1em; }
+    .doublon-node { width: 16px; height: 16px; }
+    .skill-dots-cell .filled, .skill-dots-cell .empty { font-size: 0.9em; }
 
-    /* Boutons d'action (sur une nouvelle ligne complète en bas) */
+
+    /* Dernière Ligne: Boutons d'action */
     .action-buttons {
-        order: 99;
-        width: 100%;
-        justify-content: center;
-        padding-left: 0;
+        flex-basis: 100%;
+        justify-content: center; /* Centre les boutons */
         border-top: 1px solid var(--border-color);
         margin-top: 10px;
-        padding-top: 10px;
-        gap: 15px;
+        padding-top: 15px;
+        gap: 20px; /* Plus d'espace entre les boutons */
     }
-    .action-buttons:before { content: none; }
+    .action-buttons:before { content: none; } /* Pas de label pour les actions */
 
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

@@ -15,8 +15,7 @@
     --input-background: rgba(0,0,0,0.2);
     --hover-background: rgba(255, 255, 255, 0.05);
     --option-background: #2a3b5a;
-    --selected-row-background: rgba(0, 170, 255, 0.08); /* Nouvelle variable pour ligne sélectionnée */
-
+    --selected-row-background: rgba(0, 170, 255, 0.08);
     /* Couleurs pour les doublons inspirées du jeu */
     --doublon-node-bg: rgba(255, 255, 255, 0.1);
     --doublon-node-border: rgba(255, 255, 255, 0.2);
@@ -36,7 +35,7 @@ body.light-theme {
     --input-background: rgba(0,0,0,0.05);
     --hover-background: rgba(0, 0, 0, 0.05);
     --option-background: #e9ecef;
-    --selected-row-background: rgba(0, 123, 255, 0.08); /* Nouvelle variable pour ligne sélectionnée*/
+    --selected-row-background: rgba(0, 123, 255, 0.08);
 
     --doublon-node-bg: rgba(0, 0, 0, 0.05);
     --doublon-node-border: rgba(0, 0, 0, 0.1);
@@ -62,11 +61,11 @@ body.light-theme {
 .container { max-width: 1600px; margin: auto; }
 header {
     display: flex;
-    flex-direction: column; /* Organise le logo et la nav verticalement */
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px; /* Espace entre les éléments du header */
+    gap: 10px;
     text-align: center;
     margin-bottom: 20px;
     position: relative;
@@ -75,22 +74,20 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Margin top pour donner un peu d'espace au dessus du logo */
     margin-top: 20px;
 }
 .main-logo {
-    max-width: 500px; /* Augmenté la taille du logo pour PC */
+    max-width: 500px;
     height: auto;
-    filter: brightness(0) invert(1); /* Rend le logo blanc pour le thème sombre */
-    margin-bottom: 0; /* Assure qu'il n'y a pas de marge sous l'image elle-même */
-    display: block; /* S'assure qu'il est un bloc pour les marges */
+    filter: brightness(0) invert(1);
+    margin-bottom: 0;
+    display: block;
 }
 body.light-theme .main-logo {
-    filter: none; /* Rétablit la couleur d'origine pour le thème clair */
+    filter: none;
 }
 
 /* Suppression des styles de .app-tagline car l'élément est retiré de l'HTML */
-/* .app-tagline { display: none; } */
 
 
 #theme-toggle-btn {
@@ -106,13 +103,13 @@ body.light-theme .main-logo {
     border-radius: 50%;
     font-size: 1.2em;
     padding: 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Ombre pour effet de relief */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
 }
 #theme-toggle-btn:hover {
     color: var(--primary-color);
     border-color: var(--primary-color);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4); /* Ombre plus prononcée au survol */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 .main-nav {
@@ -132,11 +129,11 @@ body.light-theme .nav-btn.active { color: white; }
 .view.active.flex { display: flex; flex-wrap: wrap; }
 .card {
     background: var(--card-background); backdrop-filter: blur(15px); padding: 30px; border-radius: 16px; border: 1px solid var(--border-color);
-    box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.05); /* Ombre plus complexe */
+    box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .card:hover {
-    box-shadow: 0 10px 20px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.08); /* Ombre au survol */
+    box-shadow: 0 10px 20px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .dashboard-container {
@@ -433,7 +430,7 @@ th.sorted .sort-arrow { opacity: 1; }
     padding-right: 5px; /* Pour éviter de coller au bord */
 }
 .doublon-node {
-    width: 20px; /* Augmenter légèrement la taille des cercles/nœuds */
+    width: 20px; /* Taille des cercles/nœuds */
     height: 20px;
     border-radius: 50%; /* Rendre circulaire */
     background-color: var(--doublon-node-bg);
@@ -448,7 +445,7 @@ th.sorted .sort-arrow { opacity: 1; }
     position: relative;
     /* overflow: hidden; Supprimé pour s'assurer que le box-shadow est visible */
     flex-shrink: 0; /* Empêche les nœuds de rétrécir */
-    box-sizing: border-box; /* S'assure que padding/border sont inclus dans width/height */
+    box-sizing: content-box; /* IMPORTANT: box-sizing à content-box pour que padding/border s'ajoutent à width/height */
 }
 .doublon-node.filled {
     background-color: var(--doublon-node-filled);

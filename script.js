@@ -406,11 +406,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderDoublons = (count) => {
         const numericCount = parseInt(count, 10) || 0;
-        let html = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'doublon-display-cell';
+
+        const filledWidthPercentage = numericCount > 1 ? ((numericCount - 1) / 4) * 100 : 0;
+        wrapper.style.setProperty('--filled-doublon-width', `${filledWidthPercentage}%`);
+
         for (let i = 0; i < 5; i++) {
-            html += `<div class="doublon-node ${i < numericCount ? 'filled' : ''}"></div>`;
+            const node = document.createElement('div');
+            node.className = 'doublon-node';
+            if (i < numericCount) {
+                node.classList.add('filled');
+            }
+            wrapper.appendChild(node);
         }
-        return `<div class="doublon-wrapper">${html}</div>`;
+
+        return wrapper.outerHTML;
     };
 
 

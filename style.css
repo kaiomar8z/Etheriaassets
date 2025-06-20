@@ -624,13 +624,11 @@ th.sorted .sort-arrow { opacity: 1; }
     
     .checkbox-cell {
         flex-basis: 10%;
-        justify-content: flex-start;
     }
     .checkbox-cell:before { content: none; }
 
     .unit-image-cell {
         flex-basis: 85%;
-        justify-content: flex-start;
         gap: 12px;
     }
     .unit-image-cell:before { content: none; }
@@ -642,6 +640,11 @@ th.sorted .sort-arrow { opacity: 1; }
         white-space: normal;
     }
 
+    /* CORRECTION : forcer l'alignement à droite pour ces cellules spécifiques */
+    .unit-level-cell, .unit-rarity-cell, .unit-element-cell {
+        justify-content: space-between;
+    }
+    
     .unit-element-cell .table-icon { height: 20px; width: auto; }
     .unit-rarity-cell .table-icon { height: 20px; width: auto; }
     

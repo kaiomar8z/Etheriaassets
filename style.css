@@ -130,11 +130,11 @@ body.light-theme .nav-btn.active { color: white; }
 .view.active.flex { display: flex; flex-wrap: wrap; }
 .card {
     background: var(--card-background); backdrop-filter: blur(15px); padding: 30px; border-radius: 16px; border: 1px solid var(--border-color);
-    box-shadow: 0 6px 12px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 var(--shadow-color); /* Utilisation de la variable shadow-color */
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .card:hover {
-    box-shadow: 0 10px 20px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); /* Ombre plus prononcée au survol */
 }
 
 .dashboard-container {
@@ -447,9 +447,8 @@ th.sorted .sort-arrow { opacity: 1; }
     color: var(--text-color-muted);
     transition: all 0.3s ease;
     position: relative;
-    /* overflow: hidden; Supprimé pour s'assurer que le box-shadow est visible */
+    box-sizing: border-box; /* Inclure padding/border dans width/height */
     flex-shrink: 0; /* Empêche les nœuds de rétrécir */
-    box-sizing: border-box; /* IMPORTANT: box-sizing à border-box pour que padding/border soient inclus */
 }
 .doublon-node.filled {
     background-color: var(--doublon-node-filled);
@@ -545,36 +544,36 @@ th.sorted .sort-arrow { opacity: 1; }
 
 /* NOUVEAU: Styles pour le mode compact */
 body.compact-view .table-wrapper table {
-    margin-top: 10px; /* Réduit la marge du tableau */
+    margin-top: 10px;
 }
 body.compact-view tbody tr {
-    padding: 5px; /* Réduit le padding des cartes en mode compact */
-    margin-bottom: 8px; /* Réduit la marge entre les cartes */
+    padding: 5px;
+    margin-bottom: 8px;
 }
 body.compact-view td {
     padding-top: 4px;
     padding-bottom: 4px;
-    min-height: auto; /* Permet aux cellules de se compresser plus */
+    min-height: auto;
 }
 body.compact-view .unit-image-cell {
-    margin-bottom: 5px; /* Réduit la marge sous l'image */
+    margin-bottom: 5px;
 }
 body.compact-view .unit-image-cell img {
-    width: 30px; /* Réduit la taille des images en mode compact */
+    width: 30px;
     height: 30px;
 }
 body.compact-view .unit-image-cell span.unit-name-cell {
-    font-size: 0.9em; /* Réduit la taille du nom */
+    font-size: 0.9em;
 }
 body.compact-view td:before {
-    font-size: 0.8em; /* Réduit la taille des labels */
+    font-size: 0.8em;
 }
 /* Cacher certaines informations en mode compact pour maximiser l'espace */
 body.compact-view .unit-level-cell,
 body.compact-view .unit-s1-cell,
 body.compact-view .unit-s2-cell,
 body.compact-view .unit-s3-cell {
-    display: none; /* Cache ces colonnes en mode compacte */
+    display: none;
 }
 /* Assure que les colonnes qui restent s'étalent correctement */
 body.compact-view .checkbox-cell,
@@ -584,17 +583,17 @@ body.compact-view .unit-rarity-cell,
 body.compact-view .stars,
 body.compact-view .doublon-display-cell,
 body.compact-view .action-buttons {
-    width: auto; /* Laisse flexbox gérer la largeur */
-    flex-basis: auto; /* Laisse flexbox gérer la base de la flex */
-    flex-grow: 1; /* Permet de grandir pour remplir l'espace */
+    width: auto;
+    flex-basis: auto;
+    flex-grow: 1;
 }
-body.compact-view .checkbox-cell { order: 0; flex-grow: 0; width: 30px; } /* checkbox fixe petite */
-body.compact-view .unit-image-cell { order: 1; flex-grow: 2; width: auto; } /* nom + image prend plus de place */
-body.compact-view .unit-element-cell { order: 2; flex-grow: 0; width: auto; } /* élément, petite place */
-body.compact-view .unit-rarity-cell { order: 3; flex-grow: 0; width: auto; } /* rareté, petite place */
-body.compact-view .stars { order: 4; flex-grow: 1; width: auto; } /* étoiles flexibles */
-body.compact-view .doublon-display-cell { order: 5; flex-grow: 1; width: auto; } /* doublons flexibles */
-body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; } /* actions, petite place */
+body.compact-view .checkbox-cell { order: 0; flex-grow: 0; width: 30px; }
+body.compact-view .unit-image-cell { order: 1; flex-grow: 2; width: auto; }
+body.compact-view .unit-element-cell { order: 2; flex-grow: 0; width: auto; }
+body.compact-view .unit-rarity-cell { order: 3; flex-grow: 0; width: auto; }
+body.compact-view .stars { order: 4; flex-grow: 1; width: auto; }
+body.compact-view .doublon-display-cell { order: 5; flex-grow: 1; width: auto; }
+body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; }
 
 
 @media (max-width: 992px) { 
@@ -607,33 +606,31 @@ body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; } /* ac
     body { padding: 15px; } 
     header { 
         justify-content: center; 
-        flex-direction: column; /* Assure que le logo et la nav sont bien en colonne sur mobile */
-        gap: 5px; /* Réduit l'espace sur mobile */
+        flex-direction: column;
+        gap: 5px;
     } 
     .main-logo {
-        max-width: 250px; /* Adapte la taille du logo sur mobile */
+        max-width: 250px;
     }
-    /* Styles pour la tagline (si elle était encore présente, mais on l'a retirée de l'HTML) */
-    /* .app-tagline { display: none; } */ /* Pas nécessaire si l'élément est déjà supprimé de l'HTML */
 
     #theme-toggle-btn { 
         position: static; 
         transform: none; 
-        margin-top: 10px; /* Ajoute une marge si pas en position absolue */
+        margin-top: 10px;
     } 
     .form-grid { grid-template-columns: 1fr; }
 
-    /* Styles spécifiques pour la vue "carte" du tableau sur mobile */
+    /* Rénovation complète de la vue carte pour mobile */
     .table-wrapper {
-        overflow-x: hidden; /* Désactive le défilement horizontal */
+        overflow-x: hidden;
     }
 
     table, thead, tbody, th, td, tr {
-        display: block; /* Transforme les éléments du tableau en blocs */
+        display: block;
     }
 
     thead {
-        display: none; /* Cache l'en-tête du tableau sur mobile */
+        display: none; /* Cache l'en-tête du tableau */
     }
 
     tr {
@@ -641,15 +638,23 @@ body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; } /* ac
         border: 1px solid var(--border-color);
         border-radius: 8px;
         padding: 10px;
-        background: var(--card-background); /* Chaque ligne devient une carte */
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-start; /* Aligne les éléments en haut de la carte */
-        position: relative; /* Pour positionner les labels et actions */
+        background: var(--card-background);
+        display: grid; /* Utilisation de Grid pour un contrôle précis */
+        /* Définition des zones de la grille */
+        grid-template-columns: auto 1fr auto; /* Col 1: Checkbox, Col 2: Nom/Image, Col 3: Rareté/Élément */
+        grid-template-rows: auto auto auto auto auto; /* 5 lignes pour les infos */
+        grid-template-areas:
+            "checkbox unit-name unit-element"
+            ". rarity-level ."
+            ". stars-doublons ."
+            ". s-skills ."
+            "actions actions actions"; /* Actions sur toute la largeur en bas */
+        align-items: center;
+        gap: 5px 10px; /* Espacement entre les cellules de la grille */
     }
 
-    tbody tr:nth-child(even) { /* Ajuste les bandes zébrées pour la vue carte */
-        background-color: var(--card-background); /* Les cartes ont toutes le même fond */
+    tbody tr:nth-child(even) {
+        background-color: var(--card-background);
     }
     body.light-theme tbody tr:nth-child(even) {
         background-color: var(--card-background);
@@ -661,185 +666,125 @@ body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; } /* ac
         background-color: var(--hover-background);
     }
 
-
     td {
-        border: none; /* Supprime les bordures de cellule internes */
-        position: relative;
-        padding-left: 8px; /* Réduit le padding-left */
-        padding-right: 8px; /* Réduit le padding à droite */
-        text-align: right; /* Aligne la valeur à droite */
-        box-sizing: border-box;
-        padding-top: 8px;
-        padding-bottom: 8px;
-        display: flex; /* Permet un alignement flex pour label/valeur */
-        justify-content: space-between; /* Pour que le label soit à gauche et la valeur à droite */
-        align-items: center; /* Centre verticalement les éléments dans la cellule */
-        min-height: 36px; /* Ajoute une hauteur minimale pour éviter l'écrasement */
+        border: none;
+        padding: 0; /* Réduire le padding de base des TD au maximum */
+        display: flex; /* La TD elle-même est un flex container pour son label et sa valeur */
+        align-items: center;
+        justify-content: flex-start; /* Aligne le label et la valeur à gauche de leur zone */
+        position: relative; /* Pour les pseudo-éléments */
+        min-height: auto; /* Permet à la cellule de s'adapter au contenu */
     }
 
     td:before {
-        content: attr(data-label); /* Utilise l'attribut data-label comme titre */
-        flex-shrink: 0; /* Empêche le label de rétrécir */
-        margin-right: 5px; /* Réduit la marge entre le label et la valeur */
+        content: attr(data-label);
+        flex-shrink: 0;
+        margin-right: 5px; /* Espace entre le label et la valeur */
         text-align: left;
         font-weight: 500;
         color: var(--text-color-muted);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        font-size: 0.85em; /* Taille du label */
+        width: 60px; /* Largeur fixe pour les labels pour un alignement propre */
     }
 
-    /* Ajustements spécifiques aux cellules pour la vue carte */
+    /* Assignation des zones de grille */
     .checkbox-cell {
-        order: 0; /* Place la checkbox tout en haut à gauche */
-        width: auto;
+        grid-area: checkbox;
+        justify-content: flex-start;
+        width: auto; /* Géré par la grille */
         padding-left: 10px;
-        text-align: left !important;
-        flex-grow: 0;
-        margin-right: 10px; /* Espace après la checkbox */
-        align-self: flex-start; /* Aligne la checkbox en haut de l'image/nom */
-        padding-right: 0; /* Pas de padding droit pour éviter l'écart */
-        min-height: auto; /* Supprime la hauteur minimale */
     }
     .checkbox-cell:before { content: none; } /* Pas de label pour la checkbox */
     .checkbox-cell input[type="checkbox"] {
-        margin: 0; /* Supprime les marges par défaut des checkbox */
+        margin: 0;
     }
-
 
     .unit-image-cell {
-        order: 1; /* Place l'image et le nom juste après la checkbox */
-        width: calc(100% - 60px); /* Prend le reste de la largeur de la première ligne, en tenant compte de la checkbox */
-        padding-left: 0;
-        text-align: left;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
-        padding-top: 0; /* Réduire le padding top */
-        padding-bottom: 0; /* Réduire le padding bottom */
-        min-height: auto; /* Supprime la hauteur minimale */
+        grid-area: unit-name;
+        justify-content: flex-start;
+        padding-left: 0; /* Pas de padding gauche ici */
+        gap: 8px; /* Espace entre image et nom */
     }
-    .unit-image-cell:before { content: none; } /* Pas de label pour la cellule image/nom */
+    .unit-image-cell:before { content: none; }
     .unit-image-cell img {
-        width: 40px; /* Ajuster la taille de l'image pour les petites cartes */
-        height: 40px;
-        border-width: 2px; /* Réduire la bordure */
+        width: 40px; height: 40px; /* Taille fixe pour l'image de l'unité */
+        flex-shrink: 0;
     }
     .unit-image-cell span.unit-name-cell {
-        white-space: normal; /* Permet au nom de s'enrouler sur plusieurs lignes */
-        overflow: visible;
-        text-overflow: clip;
-        flex-grow: 1;
-        font-size: 1.1em; /* Légèrement plus grand pour le nom */
+        font-size: 1.1em;
+        font-weight: 600;
+        white-space: normal; /* Permet le retour à la ligne pour le nom si trop long */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box; /* Pour troncature multi-lignes */
+        -webkit-line-clamp: 2; /* Max 2 lignes */
+        -webkit-box-orient: vertical;
     }
-    .unit-has-notes-icon {
-        margin-left: 5px; /* Ajuster la marge */
-        font-size: 0.8em; /* Réduire la taille de l'icône de note */
+    .unit-has-notes-icon { margin-left: 0; } /* Ajusté la marge */
+
+
+    .unit-element-cell { grid-area: unit-element; justify-content: flex-end; padding-right: 10px; }
+    .unit-element-cell .table-icon {
+        margin-left: 5px; width: 20px; height: 20px; flex-shrink: 0;
     }
+    .unit-element-cell > *:not(:first-child) { flex-grow: 0; } /* Empêche le texte de s'étirer */
+
+
+    .unit-rarity-cell { grid-area: rarity-level; justify-content: flex-start; padding-left: 10px; }
+    .unit-rarity-cell .table-icon {
+        margin-left: 5px; width: 30px; height: auto; flex-shrink: 0;
+    }
+    .unit-rarity-cell span:not(.table-icon) {
+        font-size: 1.1em; font-weight: bold; white-space: nowrap; flex-shrink: 0;
+    }
+
+    .unit-level-cell { grid-area: rarity-level; justify-content: flex-end; padding-right: 10px; } /* Partage la même ligne que rarity */
+    .unit-level-cell > *:not(:first-child) { flex-shrink: 0; }
+
+
+    .stars { grid-area: stars-doublons; justify-content: flex-start; padding-left: 10px;}
+    .stars .fa-star {
+        margin-left: 1px; margin-right: 1px; font-size: 1em; /* Réduit la taille des étoiles */
+        flex-shrink: 0;
+    }
+    .stars:before { width: 60px; } /* Label Étoiles, même largeur que les autres labels */
+
+
+    .doublon-display-cell { grid-area: stars-doublons; justify-content: flex-end; padding-right: 10px; }
+    .doublon-display-cell .doublon-node {
+        width: 16px; height: 16px; /* Taille plus petite pour les pastilles */
+        margin-left: 1px; margin-right: 1px; /* Espacement minime */
+    }
+    .doublon-display-cell:before { width: 60px; } /* Label Doublon */
+
+
+    .unit-s1-cell { grid-area: s-skills; justify-content: flex-start; padding-left: 10px; }
+    .unit-s2-cell { grid-area: s-skills; justify-content: center; } /* Tentative de centrer S2 */
+    .unit-s3-cell { grid-area: s-skills; justify-content: flex-end; padding-right: 10px; }
+
+    .unit-s1-cell .filled, .unit-s1-cell .empty,
+    .unit-s2-cell .filled, .unit-s2-cell .empty,
+    .unit-s3-cell .filled, .unit-s3-cell .empty {
+        font-size: 0.9em; /* Réduit la taille des points de compétence */
+        margin-left: 0.5px; margin-right: 0.5px;
+    }
+    .unit-s1-cell:before, .unit-s2-cell:before, .unit-s3-cell:before { width: 40px; } /* Labels S1, S2, S3 */
 
 
     .action-buttons {
-        order: 99; /* Place les actions tout en bas de la carte */
+        grid-area: actions;
+        justify-content: center;
         width: 100%;
-        text-align: center;
         padding-left: 0;
-        border-top: 1px solid var(--border-color); /* Séparateur visuel */
+        border-top: 1px solid var(--border-color);
         margin-top: 10px;
         padding-top: 10px;
-        justify-content: center; /* Centre les boutons d'action */
-        gap: 15px; /* Plus d'espace entre les boutons */
-        min-height: auto; /* Supprime la hauteur minimale */
+        gap: 15px;
     }
     .action-buttons:before { content: none; } /* Pas de label pour les actions */
 
-
-    /* --------------- Ajustements pour les cellules problématiques --------------- */
-
-    /* Colonnes sur 50% de largeur */
-    .unit-element-cell, .unit-rarity-cell, .unit-level-cell, .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
-        width: 50%;
-    }
-
-    /* Les étoiles et doublons prennent toute la largeur (100%) */
-    .stars, .doublon-display-cell { /* Utilisation de la nouvelle classe */
-        width: 100%; /* Ces éléments prennent toute la largeur pour avoir de la place */
-        padding-right: 10px; /* Conserve un bon padding droit */
-        justify-content: flex-start; /* Aligne le groupe d'éléments à GAUCHE pour les étoiles/doublons */
-    }
-
-    /* Les compétences S1, S2, S3 restent sur 2 colonnes (50% de large) */
-    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
-        width: 50%;
-    }
-    
-    /* Styles pour les éléments de valeur à l'intérieur des cellules (hors label) */
-    .unit-element-cell > *:not(:first-child),
-    .unit-rarity-cell > *:not(:first-child),
-    .stars > *:not(:first-child),
-    .unit-level-cell > *:not(:first-child),
-    .doublon-display-cell > *:not(:first-child), /* Utilisation de la nouvelle classe */
-    .unit-s1-cell > *:not(:first-child),
-    .unit-s2-cell > *:not(:first-child),
-    .unit-s3-cell > *:not(:first-child) {
-        flex-grow: 1; /* Permet au contenu de prendre l'espace restant après le label */
-        text-align: right; /* Assure que le contenu s'aligne à droite par défaut */
-        float: none; /* Supprime les float précédemment ajoutés car on est en flexbox */
-        overflow: visible; /* Assure que le contenu n'est pas coupé */
-        white-space: nowrap; /* Tente de garder tout sur une ligne pour étoiles/points */
-    }
-
-    /* Ajustements pour les icônes d'élément et de rareté */
-    .unit-element-cell .table-icon,
-    .unit-rarity-cell .table-icon {
-        margin-left: 5px; 
-        width: 20px; 
-        height: 20px;
-        flex-shrink: 0; 
-    }
-    
-    /* Correction spécifique pour le texte de rareté "SSR" ou autres */
-    .unit-rarity-cell span:not(.table-icon) { 
-        font-size: 1.1em; 
-        font-weight: bold;
-        white-space: nowrap; 
-        flex-shrink: 0; 
-    }
-    .unit-rarity-cell img.table-icon {
-        width: 30px; 
-        height: auto;
-        margin-left: 5px; 
-    }
-
-    /* Assurer que les étoiles et les points sont bien visibles et alignés */
-    .stars .fa-star,
-    .doublon-display-cell .doublon-node, /* Cible les nœuds de doublons */
-    .skill-dots-cell .filled,
-    .skill-dots-cell .empty {
-        margin-left: 1px; /* Espacement minime entre les points/étoiles */
-        margin-right: 1px; /* Espacement minime entre les points/étoiles */
-        font-size: 1.1em; 
-        flex-shrink: 0; 
-    }
-
-    /* Rapprocher le nombre de "Level" de son label */
-    .unit-level-cell > *:not(:first-child) { /* Cible le chiffre du Level */
-        margin-left: auto; /* Pousse le chiffre Level à l'extrême droite de l'espace restant */
-        flex-shrink: 0; /* Empêche le chiffre de se compresser */
-        white-space: nowrap; /* Empêche le chiffre de passer à la ligne */
-        text-align: right; /* Assure l'alignement à droite */
-    }
-
-    /* Centrer les contenus des compétences S1, S2, S3 */
-    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
-        justify-content: flex-start; /* Aligne les points de compétence à gauche */
-        padding-right: 5px; /* Réduit le padding droit pour les points de compétence */
-    }
-
-    /* Final Adjustments: Réduire les paddings généraux des TD si l'espace est encore trop serré. */
-    td {
-        padding-left: 8px;
-        padding-right: 8px;
-    }
 }
 @media (max-width: 540px) { .dashboard-container .span-2 { grid-column: span 1; } }

@@ -618,7 +618,7 @@ body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; }
     } 
     .form-grid { grid-template-columns: 1fr; }
 
-    /* Rénovation complète de la vue carte pour mobile */
+    /* Refonte COMPLÈTE de la vue carte pour mobile */
     .table-wrapper {
         overflow-x: hidden;
     }
@@ -635,13 +635,12 @@ body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; }
         margin-bottom: 15px;
         border: 1px solid var(--border-color);
         border-radius: 8px;
-        padding: 10px;
+        padding: 8px; /* Padding global de la carte, réduit */
         background: var(--card-background);
-        display: flex; /* Utilisation de Flexbox pour le layout principal de la carte */
-        flex-wrap: wrap; /* Permet aux éléments de passer à la ligne */
-        align-items: flex-start; /* Aligne les éléments en haut de la carte */
+        display: flex; /* Utilisation de Flexbox principal pour les TD */
+        flex-wrap: wrap; /* Les TD peuvent s'enrouler */
+        align-items: flex-start;
         position: relative;
-        gap: 5px 0px; /* Espacement vertical entre les lignes d'infos dans la carte */
     }
 
     tbody tr:nth-child(even) {
@@ -659,14 +658,11 @@ body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; }
 
     td {
         border: none;
-        padding: 4px 8px; /* Paddings réduits pour les cellules */
+        padding: 4px 0px; /* Paddings verticaux réduits, horizontal géré par flex */
         display: flex;
         align-items: center;
-        justify-content: flex-start; /* Aligne le label et la valeur à gauche par défaut */
         position: relative;
         min-height: auto;
-        /* Par défaut, toutes les TD prennent 100% de la largeur, puis on les ajuste */
-        width: 100%;
     }
 
     td:before {
@@ -679,20 +675,34 @@ body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; }
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        font-size: 0.85em;
-        width: 55px; /* Largeur fixe pour les labels pour un meilleur alignement */
+        font-size: 0.8em; /* Rétablit une taille plus petite pour les labels */
+        width: 50px; /* Largeur fixe pour les labels pour uniformité */
+        padding-left: 8px; /* Padding à gauche du label */
     }
+
+    /* Cellule de la checkbox */
+    .checkbox-cell {
+        order: 0;
+        width: 10%; /* Prend une petite portion au début */
+        flex-grow: 0;
+        padding-left: 8px; /* Assure un padding gauche */
+        margin-right: 0; /* Pas de marge à droite, le gap gérera */
+        justify-content: flex-start;
+    }
+    .checkbox-cell:before { content: none; }
+
 
     /* Cellule de l'image et du nom */
     .unit-image-cell {
-        order: 1; /* Ordre visuel dans la flexbox principale de la TR */
-        width: 100%; /* Prend toute la largeur */
+        order: 1;
+        width: 88%; /* Prend presque tout le reste de la largeur de la première ligne */
         justify-content: flex-start;
         padding-left: 0; /* Pas de padding spécifique, la checkbox est gérée à part */
         gap: 8px;
-        margin-bottom: 5px; /* Espace sous cette ligne */
+        margin-bottom: 5px;
+        flex-grow: 1; /* Permet de prendre l'espace restant */
     }
-    .unit-image-cell:before { content: none; } /* Pas de label pour cette cellule */
+    .unit-image-cell:before { content: none; }
     .unit-image-cell img {
         width: 40px; height: 40px;
         flex-shrink: 0;
@@ -705,88 +715,76 @@ body.compact-view .action-buttons { order: 6; flex-grow: 0; width: auto; }
     .unit-has-notes-icon { margin-left: 5px; font-size: 0.8em; }
 
 
-    /* Checkbox - positionnée tout en haut à gauche */
-    .checkbox-cell {
-        order: 0;
-        width: auto; /* Auto largeur */
-        padding-right: 0; /* Pas de padding droit pour la checkbox */
-        margin-right: 5px; /* Espace entre checkbox et image */
-        align-self: center; /* Aligne avec le centre de la ligne image/nom */
+    /* Élément et Rareté (sur une même "ligne" logique, deux colonnes) */
+    .unit-element-cell, .unit-rarity-cell {
+        width: 50%; /* Chacune prend la moitié de la largeur */
+        flex-shrink: 0;
+        justify-content: space-between;
+        padding-right: 8px; /* Espacement à droite de la cellule */
     }
-    .checkbox-cell:before { content: none; }
-    .checkbox-cell input[type="checkbox"] { margin: 0; }
-
-
-    /* Lignes d'informations classiques (2 par ligne de carte) */
-    .unit-element-cell, .unit-rarity-cell, .unit-level-cell, .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
-        width: 50%; /* Chaque élément prend la moitié de la largeur de la carte */
-        flex-shrink: 0; /* Empêche de rétrécir */
-        justify-content: space-between; /* Label à gauche, valeur à droite */
-    }
-    /* Ordre visuel dans la TR */
     .unit-element-cell { order: 2; }
     .unit-rarity-cell { order: 3; }
-    .unit-level-cell { order: 4; }
-    .unit-s1-cell { order: 6; } /* S1, S2, S3 sur une nouvelle "ligne" virtuelle */
-    .unit-s2-cell { order: 7; }
-    .unit-s3-cell { order: 8; }
-
-
-    /* Styles spécifiques pour les icônes d'élément et de rareté */
     .unit-element-cell .table-icon { width: 20px; height: 20px; margin-left: 5px; }
     .unit-rarity-cell .table-icon { width: 30px; height: auto; margin-left: 5px; }
-    .unit-rarity-cell span:not(.table-icon) { font-size: 1.1em; font-weight: bold; }
+    .unit-rarity-cell span:not(.table-icon) { font-size: 1.0em; font-weight: bold; } /* Rareté textuelle */
 
 
-    /* Styles pour les étoiles (qui prennent 100% de la largeur) */
-    .stars {
-        order: 5; /* Après Element/Rarity/Level */
-        width: 100%; /* Prend toute la largeur disponible */
-        justify-content: flex-start; /* Aligne les étoiles à gauche */
-        padding-right: 10px; /* Conserve un petit padding droit */
+    /* Étoiles et Level (sur une nouvelle "ligne" logique, deux colonnes) */
+    .stars, .unit-level-cell {
+        width: 50%; /* Chacune prend la moitié de la largeur */
+        flex-shrink: 0;
+        justify-content: space-between;
+        padding-right: 8px;
     }
+    .stars { order: 4; }
+    .unit-level-cell { order: 5; }
     .stars .fa-star {
-        font-size: 1.1em; /* Taille des étoiles */
-        margin-left: 1px; margin-right: 1px; /* Espacement minimal entre les étoiles */
+        font-size: 1em; /* Taille des étoiles */
+        margin-left: 1px; margin-right: 1px; /* Espacement minimal */
         flex-shrink: 0;
     }
-    .stars:before { width: 55px; } /* Largeur du label "Étoiles" */
+    .stars:before { width: 50px; } /* Label Étoiles */
+    .unit-level-cell > *:not(:first-child) { /* Valeur du level */
+        margin-left: auto; /* Pousse à droite */
+        flex-shrink: 0;
+    }
+    .unit-level-cell:before { width: 50px; } /* Label Level */
 
 
-    /* Styles pour les doublons (qui prennent 100% de la largeur) */
+    /* Doublons (sur une nouvelle "ligne" logique, pleine largeur) */
     .doublon-display-cell {
-        order: 5; /* Partage la même ligne flexbox avec les étoiles, sera après si flex-wrap */
-        width: 100%; /* Prend toute la largeur disponible */
-        justify-content: flex-start; /* Aligne les nœuds de doublon à gauche */
-        padding-right: 10px; /* Conserve un petit padding droit */
+        order: 6;
+        width: 100%; /* Prend toute la largeur */
+        justify-content: flex-start; /* Aligne les nœuds à gauche */
+        padding-right: 8px;
     }
-    .doublon-display-cell:before { width: 55px; } /* Largeur du label "Doublon" */
+    .doublon-display-cell:before { width: 55px; } /* Label Doublons */
     .doublon-node {
-        width: 16px; height: 16px; /* Taille réduite pour les pastilles */
-        border-radius: 50%;
-        gap: 1px; /* Gap entre les nœuds */
-        box-sizing: border-box; /* S'assurer que le border/padding est inclus */
+        width: 16px; height: 16px; /* Taille des pastilles */
+        gap: 1px; /* Espace entre les pastilles */
+    }
+
+
+    /* Compétences S1, S2, S3 (sur une nouvelle "ligne" logique, trois colonnes) */
+    .unit-s1-cell, .unit-s2-cell, .unit-s3-cell {
+        width: 33.33%; /* Trois par ligne */
         flex-shrink: 0;
+        justify-content: space-between; /* Label à gauche, points à droite */
+        padding-right: 5px; /* Espacement réduit pour coller */
     }
-    .doublon-display-cell .doublon-node.filled {
-        box-shadow: 0 0 3px var(--doublon-node-glow), inset 0 0 2px rgba(255, 255, 255, 0.4);
-    }
-
-
-    /* Styles pour les compétences S1, S2, S3 */
-    .skill-dots-cell {
-        /* Les labels S1, S2, S3 sont à 40px de large */
-        /* Les points sont .9em avec 0.5px de marge */
-    }
+    .unit-s1-cell { order: 7; }
+    .unit-s2-cell { order: 8; }
+    .unit-s3-cell { order: 9; }
+    .unit-s1-cell:before, .unit-s2-cell:before, .unit-s3-cell:before { width: 30px; } /* Labels S1, S2, S3 plus petits */
     .skill-dots-cell .filled, .skill-dots-cell .empty {
-        font-size: 0.9em;
+        font-size: 0.8em; /* Taille des points de compétence */
         margin-left: 0.5px; margin-right: 0.5px;
-        flex-shrink: 0;
     }
 
-    /* Boutons d'action */
+
+    /* Boutons d'action (sur une nouvelle ligne complète en bas) */
     .action-buttons {
-        order: 99; /* Toujours en bas */
+        order: 99;
         width: 100%;
         justify-content: center;
         padding-left: 0;

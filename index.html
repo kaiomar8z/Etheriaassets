@@ -46,7 +46,7 @@
                 <div class="stat-card card span-2 routine-tracker-card">
                     <h3><i class="fa-solid fa-clock-rotate-left"></i> Routine Quotidienne</h3>
                     <div class="card-content" id="routine-tracker-content">
-                        </div>
+                    </div>
                 </div>
 
                 <div class="stat-card card span-2">
@@ -136,9 +136,6 @@
                     <div class="list-header">
                         <h2>Liste des Unités</h2>
                         <div class="header-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button id="toggle-compact-view-btn" class="action-btn">
-                                <i class="fa-solid fa-table-list"></i> Vue Compacte
-                            </button>
                             <button id="delete-selected-btn" class="action-btn delete-selected-btn" style="display:none;">
                                 <i class="fa-solid fa-trash-can"></i> Supprimer la sélection
                             </button>
@@ -348,7 +345,8 @@
             <td class="unit-rarity-cell" data-label="Rareté"></td>
             <td class="stars" data-label="Étoiles"></td>
             <td class="unit-level-cell" data-label="Level"></td>
-            <td class="doublon-display-cell" data-label="Doublon"></td> <td class="unit-s1-cell skill-dots-cell" data-label="S1"></td>
+            <td class="doublon-display-cell" data-label="Doublon"></td> 
+            <td class="unit-s1-cell skill-dots-cell" data-label="S1"></td>
             <td class="unit-s2-cell skill-dots-cell" data-label="S2"></td>
             <td class="unit-s3-cell skill-dots-cell" data-label="S3"></td>
             <td class="action-buttons column-actions" data-label="Actions">
@@ -361,6 +359,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script> <script src="script.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script> 
+    <script src="script.js" defer></script>
 </body>
 </html>

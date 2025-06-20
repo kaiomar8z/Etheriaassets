@@ -144,10 +144,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeTeamId = null; // Will store the Firebase Document ID for the active team
     let currentSort = { column: 'level', direction: 'desc' };
     let favoritesFilterActive = false;
+    let isCompactView = localStorage.getItem('isCompactView') === 'true'; // État de la vue compacte
     let selectionModeSlotIndex = null;
     let unitImageData = null; // Base64 or URL for the image during add/edit process
     let currentImageFile = null; // Store the actual file object for upload
-    let isCompactView = localStorage.getItem('isCompactView') === 'true'; // État de la vue compacte
     // #endregion
 
     // #region --- MODULE DE GESTION DE LA ROUTINE ---
@@ -810,27 +810,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle number controls (+/- buttons)
+    // Handle number controls (+/- buttons) for add/edit forms
     document.querySelectorAll('.number-controls button').forEach(button => {
         button.addEventListener('click', (event) => {
-            const inputGroup = event.target.closest('.input-with-controls');
-            const input = inputGroup.querySelector('input[type="number"]');
-            const select = inputGroup.querySelector('select'); // Handle select for doublon
-            
+            const targetInputId = event.target.dataset.targetInput; // Get ID from data attribute
+            if (!targetInputId) return;
+
+            const targetElement = document.getElementById(targetInputId);
+            if (!targetElement) return;
+
             let currentValue;
             let min, max;
-            if (input) {
-                currentValue = parseInt(input.value, 10);
-                min = parseInt(input.min, 10);
-                max = parseInt(input.max, 10);
-            } else if (select) { // Handle select for doublon
-                currentValue = parseInt(select.value, 10);
-                min = parseInt(select.querySelector('option:first-child').value, 10);
-                max = parseInt(select.querySelector('option:last-child').value, 10);
+
+            if (targetElement.tagName === 'INPUT') {
+                currentValue = parseInt(targetElement.value, 10);
+                min = parseInt(targetElement.min, 10);
+                max = parseInt(targetElement.max, 10);
+            } else if (targetElement.tagName === 'SELECT') {
+                currentValue = parseInt(targetElement.value, 10);
+                const options = Array.from(targetElement.options).map(opt => parseInt(opt.value, 10));
+                min = Math.min(...options);
+                max = Math.max(...options);
             } else {
                 return;
             }
-
 
             if (event.target.classList.contains('minus-btn')) {
                 currentValue = Math.max(min, currentValue - 1);
@@ -838,11 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentValue = Math.min(max, currentValue + 1);
             }
 
-            if (input) {
-                input.value = currentValue;
-            } else if (select) {
-                select.value = currentValue;
-            }
+            targetElement.value = currentValue;
         });
     });
 
@@ -869,7 +868,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 openEditModal(unitId);
             } else if (button.classList.contains('delete-btn')) {
                 const unitName = units.find(u => u.id === unitId)?.name || 'cette unité';
-                if (await showConfirm('Supprimer l\'unité', `Êtes-vous sûr de vouloir supprimer ${unitName} ?`)) {
+                if (await showConfirm('Supprimer en masse', `Êtes-vous sûr de vouloir supprimer ${unitName} ?`)) {
                     try {
                         await unitsCol.doc(unitId).delete();
                         showToast('Unité supprimée.', 'info');

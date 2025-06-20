@@ -406,7 +406,6 @@ th.sorted .sort-arrow { opacity: 1; }
 }
 
 .skill-dots-cell { 
-    text-align: center; 
     white-space: nowrap; 
 } 
 .skill-dots-cell .filled { color: var(--primary-color); font-size: 1.1em; } 
@@ -468,6 +467,7 @@ th.sorted .sort-arrow { opacity: 1; }
 
 /* CORRECTION DÉFINITIVE - ALIGNEMENT VUE PC */
 /* On force les cellules avec du contenu visuel à utiliser Flexbox pour un centrage parfait. */
+/* Cette règle NE s'applique PAS en vue mobile grâce aux surcharges dans la media query. */
 #units-table td.stars, 
 #units-table td.doublon-display-cell,
 #units-table td.skill-dots-cell,
@@ -649,7 +649,6 @@ th.sorted .sort-arrow { opacity: 1; }
         white-space: normal;
     }
     
-    /* CORRECTION DÉFINITIVE - ALIGNEMENT VUE MOBILE */
     .unit-level-cell, .unit-rarity-cell, .unit-element-cell {
         justify-content: space-between;
     }
@@ -658,8 +657,9 @@ th.sorted .sort-arrow { opacity: 1; }
         justify-content: flex-start;
         gap: 15px;
     }
-
-    /* On s'assure que les doublons restent centrés */
+    
+    /* CORRECTION DÉFINITIVE - VUE MOBILE */
+    /* On s'assure que les doublons RESTENT centrés sur mobile */
     .doublon-display-cell {
         justify-content: center;
     }

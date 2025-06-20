@@ -401,7 +401,6 @@ th.sorted .sort-arrow { opacity: 1; }
 .unit-image-cell img.rarity-border-sr { border-color: #d799f5; } 
 .unit-image-cell img.rarity-border-r  { border-color: #b9c5eb; } 
 
-/* MODIFIÉ : Application du style à toutes les vues */
 .unit-level-cell {
     font-weight: 700;
 }
@@ -418,11 +417,9 @@ th.sorted .sort-arrow { opacity: 1; }
 } 
 .stars .fa-star { color: var(--star-color); }
 
-/* MODIFIÉ : Styles pour les doublons appliqués à toutes les vues */
 .doublon-display-cell {
     display: flex;
     align-items: center;
-    /* L'alignement horizontal est centré pour la vue PC */
     justify-content: center; 
     gap: 8px;
 }
@@ -468,6 +465,16 @@ th.sorted .sort-arrow { opacity: 1; }
     background-color: var(--doublon-node-filled);
     border-color: transparent;
     box-shadow: 0 0 10px var(--doublon-node-glow);
+}
+
+/* NOUVEAU : Correction de l'alignement vertical pour la vue PC */
+#units-table .stars, 
+#units-table .doublon-display-cell,
+#units-table .skill-dots-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* S'assure que le conteneur flex prend toute la hauteur de la cellule */
 }
 
 .action-buttons {  

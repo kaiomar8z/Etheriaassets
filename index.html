@@ -83,16 +83,16 @@
                                 <label for="unit-stars">Étoiles * (3-6)</label>
                                 <input type="number" id="unit-stars" min="3" max="6" required>
                                 <div class="number-controls">
-                                    <button type="button" class="minus-btn">-</button>
-                                    <button type="button" class="plus-btn">+</button>
+                                    <button type="button" class="minus-btn" data-target-input="unit-stars">-</button>
+                                    <button type="button" class="plus-btn" data-target-input="unit-stars">+</button>
                                 </div>
                             </div>
                             <div class="form-group input-with-controls">
                                 <label for="unit-level">Level *</label>
                                 <input type="number" id="unit-level" min="1" max="100" required>
                                 <div class="number-controls">
-                                    <button type="button" class="minus-btn">-</button>
-                                    <button type="button" class="plus-btn">+</button>
+                                    <button type="button" class="minus-btn" data-target-input="unit-level">-</button>
+                                    <button type="button" class="plus-btn" data-target-input="unit-level">+</button>
                                 </div>
                             </div>
                             <div class="form-group input-with-controls">
@@ -101,32 +101,32 @@
                                     <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
                                 </select>
                                 <div class="number-controls">
-                                    <button type="button" class="minus-btn" data-target="unit-doublon">-</button>
-                                    <button type="button" class="plus-btn" data-target="unit-doublon">+</button>
+                                    <button type="button" class="minus-btn" data-target-input="unit-doublon">-</button>
+                                    <button type="button" class="plus-btn" data-target-input="unit-doublon">+</button>
                                 </div>
                             </div>
                             <div class="form-group input-with-controls">
                                 <label for="unit-s1">S1 * (1-5)</label>
                                 <input type="number" id="unit-s1" min="1" max="5" required>
                                 <div class="number-controls">
-                                    <button type="button" class="minus-btn">-</button>
-                                    <button type="button" class="plus-btn">+</button>
+                                    <button type="button" class="minus-btn" data-target-input="unit-s1">-</button>
+                                    <button type="button" class="plus-btn" data-target-input="unit-s1">+</button>
                                 </div>
                             </div>
                             <div class="form-group input-with-controls">
                                 <label for="unit-s2">S2 * (1-5)</label>
                                 <input type="number" id="unit-s2" min="1" max="5" required>
                                 <div class="number-controls">
-                                    <button type="button" class="minus-btn">-</button>
-                                    <button type="button" class="plus-btn">+</button>
+                                    <button type="button" class="minus-btn" data-target-input="unit-s2">-</button>
+                                    <button type="button" class="plus-btn" data-target-input="unit-s2">+</button>
                                 </div>
                             </div>
                             <div class="form-group input-with-controls">
                                 <label for="unit-s3">S3 * (1-5)</label>
                                 <input type="number" id="unit-s3" min="1" max="5" required>
                                 <div class="number-controls">
-                                    <button type="button" class="minus-btn">-</button>
-                                    <button type="button" class="plus-btn">+</button>
+                                    <button type="button" class="minus-btn" data-target-input="unit-s3">-</button>
+                                    <button type="button" class="plus-btn" data-target-input="unit-s3">+</button>
                                 </div>
                             </div>
                             <div class="form-buttons full-width">
@@ -142,7 +142,7 @@
                         <h2>Liste des Unités</h2>
                         <div class="header-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
                             <button id="toggle-compact-view-btn" class="action-btn">
-                                <i class="fa-solid fa-compact-disc"></i> Vue Compacte
+                                <i class="fa-solid fa-table-list"></i> Vue Compacte
                             </button>
                             <button id="delete-selected-btn" class="action-btn delete-selected-btn" style="display:none;">
                                 <i class="fa-solid fa-trash-can"></i> Supprimer la sélection
@@ -266,16 +266,16 @@
                         <label for="edit-unit-stars">Étoiles * (3-6)</label>
                         <input type="number" id="edit-unit-stars" min="3" max="6" required>
                         <div class="number-controls">
-                            <button type="button" class="minus-btn">-</button>
-                            <button type="button" class="plus-btn">+</button>
+                            <button type="button" class="minus-btn" data-target-input="edit-unit-stars">-</button>
+                            <button type="button" class="plus-btn" data-target-input="edit-unit-stars">+</button>
                         </div>
                     </div>
                     <div class="form-group input-with-controls">
                         <label for="edit-unit-level">Level *</label>
                         <input type="number" id="edit-unit-level" min="1" max="100" required>
                         <div class="number-controls">
-                            <button type="button" class="minus-btn">-</button>
-                            <button type="button" class="plus-btn">+</button>
+                            <button type="button" class="minus-btn" data-target-input="edit-unit-level">-</button>
+                            <button type="button" class="plus-btn" data-target-input="edit-unit-level">+</button>
                         </div>
                     </div>
                     <div class="form-group input-with-controls">
@@ -284,32 +284,32 @@
                             <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
                         </select>
                         <div class="number-controls">
-                            <button type="button" class="minus-btn" data-target="edit-unit-doublon">-</button>
-                            <button type="button" class="plus-btn" data-target="edit-unit-doublon">+</button>
+                            <button type="button" class="minus-btn" data-target-input="edit-unit-doublon">-</button>
+                            <button type="button" class="plus-btn" data-target-input="edit-unit-doublon">+</button>
                         </div>
                     </div>
                     <div class="form-group input-with-controls">
                         <label for="edit-unit-s1">S1 * (1-5)</label>
                         <input type="number" id="edit-unit-s1" min="1" max="5" required>
                         <div class="number-controls">
-                            <button type="button" class="minus-btn">-</button>
-                            <button type="button" class="plus-btn">+</button>
+                            <button type="button" class="minus-btn" data-target-input="edit-unit-s1">-</button>
+                            <button type="button" class="plus-btn" data-target-input="edit-unit-s1">+</button>
                         </div>
                     </div>
                     <div class="form-group input-with-controls">
                         <label for="edit-unit-s2">S2 * (1-5)</label>
                         <input type="number" id="edit-unit-s2" min="1" max="5" required>
                         <div class="number-controls">
-                            <button type="button" class="minus-btn">-</button>
-                            <button type="button" class="plus-btn">+</button>
+                            <button type="button" class="minus-btn" data-target-input="edit-unit-s2">-</button>
+                            <button type="button" class="plus-btn" data-target-input="edit-unit-s2">+</button>
                         </div>
                     </div>
                     <div class="form-group input-with-controls">
                         <label for="edit-unit-s3">S3 * (1-5)</label>
                         <input type="number" id="edit-unit-s3" min="1" max="5" required>
                         <div class="number-controls">
-                            <button type="button" class="minus-btn">-</button>
-                            <button type="button" class="plus-btn">+</button>
+                            <button type="button" class="minus-btn" data-target-input="edit-unit-s3">-</button>
+                            <button type="button" class="plus-btn" data-target-input="edit-unit-s3">+</button>
                         </div>
                     </div>
 

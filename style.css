@@ -473,7 +473,6 @@ th.sorted .sort-arrow { opacity: 1; }
     box-shadow: 0 0 10px var(--doublon-node-glow);
 }
 
-/* On force un alignement centré pour les colonnes visuelles en vue PC */
 .unit-rarity-cell,
 .unit-element-cell,
 .stars,
@@ -483,16 +482,17 @@ th.sorted .sort-arrow { opacity: 1; }
     text-align: center;
 }
 
-/* ... et pour les actions aussi */
 .action-buttons {  
     display: flex;  
     gap: 8px;  
-    justify-content: center; /* Centrage des boutons */
+    justify-content: center;
+    /* CORRECTION : On s'assure que les boutons ne passent pas à la ligne */
+    flex-wrap: nowrap;
 }
  
+/* CORRECTION : On donne une largeur minimale à la colonne actions pour éviter le débordement */
 .column-actions { 
-    width: 1%; 
-    white-space: nowrap; 
+    min-width: 130px; 
 }
  
 .action-buttons button { 
@@ -666,7 +666,6 @@ th.sorted .sort-arrow { opacity: 1; }
         gap: 15px;
     }
     
-    /* On s'assure que les doublons RESTENT centrés sur mobile */
     .doublon-display-cell {
         justify-content: center;
     }

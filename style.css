@@ -343,8 +343,15 @@ textarea {
     color: var(--star-color);
 }
  
+/* CORRECTION FINALE : On passe le tableau en mode "fixed" pour contrôler les largeurs */
 .table-wrapper { overflow-x: auto; } 
-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; }
+table { 
+    width: 100%; 
+    border-collapse: separate; 
+    border-spacing: 0; 
+    margin-top: 20px; 
+    table-layout: fixed; /* Règle la plus importante pour un layout stable */
+}
  
 th, td {  
     padding: 8px 15px;  
@@ -352,6 +359,8 @@ th, td {
     border-bottom: 1px solid var(--border-color);  
     vertical-align: middle;  
     transition: background-color 0.3s ease;  
+    overflow: hidden; /* Empêche le contenu de déborder de la cellule */
+    text-overflow: ellipsis; /* Ajoute "..." si le texte est trop long */
 }
  
 thead th { 
@@ -363,6 +372,20 @@ thead th {
     position: sticky; top: 0; 
     z-index: 10; 
 } 
+/* CORRECTION FINALE : On assigne des largeurs à chaque colonne */
+thead th:nth-child(1) { width: 4%; } /* Checkbox */
+thead th:nth-child(2) { width: 20%; } /* Unité */
+thead th:nth-child(3) { width: 8%; }  /* Élément */
+thead th:nth-child(4) { width: 8%; }  /* Rareté */
+thead th:nth-child(5) { width: 12%; } /* Étoiles */
+thead th:nth-child(6) { width: 6%; }  /* Level */
+thead th:nth-child(7) { width: 12%; } /* Doublon */
+thead th:nth-child(8) { width: 6%; }  /* S1 */
+thead th:nth-child(9) { width: 6%; }  /* S2 */
+thead th:nth-child(10){ width: 6%; } /* S3 */
+thead th:nth-child(11){ width: 12%; } /* Actions */
+
+
 body.light-theme thead th { background-color: #e9ecef; color: #495057; } 
 
 thead th:first-child { border-radius: 8px 0 0 0; } 
@@ -384,7 +407,6 @@ th.sorted .sort-arrow { opacity: 1; }
     align-items: center;  
     gap: 15px;  
     font-weight: 500;  
-    max-width: 220px; 
 }
  
 .unit-image-cell img {  
@@ -396,7 +418,11 @@ th.sorted .sort-arrow { opacity: 1; }
     flex-shrink: 0;  
     transition: border-color 0.3s ease; 
 }
-.unit-image-cell span.unit-name-cell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.unit-image-cell span.unit-name-cell { 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
  
 .unit-has-notes-icon { 
     color: var(--text-color-muted); 
@@ -481,23 +507,19 @@ th.sorted .sort-arrow { opacity: 1; }
     text-align: center;
 }
 
-/* CORRECTION FINALE : Alignements pour la vue PC */
-td.doublon-display-cell,
-td.action-buttons {
-    /* La propriété vertical-align est suffisante si le contenu n'est pas trop complexe */
-    /* On s'assure que le contenu interne est bien centré horizontalement */
-    text-align: center;
+.doublon-display-cell,
+.action-buttons {
+    justify-content: center;
 }
-
+ 
 .action-buttons {  
     display: flex;  
     gap: 5px;
-    justify-content: center;
     flex-wrap: nowrap;
 }
  
 .column-actions { 
-    width: 140px; /* On augmente la largeur pour être sûr que les 3 boutons tiennent */
+    text-align: center;
 }
  
 .action-buttons button { 

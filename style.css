@@ -473,6 +473,7 @@ th.sorted .sort-arrow { opacity: 1; }
     box-shadow: 0 0 10px var(--doublon-node-glow);
 }
 
+/* CORRECTION FINALE : Alignements pour la vue PC */
 .unit-rarity-cell,
 .unit-element-cell,
 .stars,
@@ -482,17 +483,24 @@ th.sorted .sort-arrow { opacity: 1; }
     text-align: center;
 }
 
+/* On force le contenu des cellules visuelles à être centré */
+td.unit-rarity-cell > *,
+td.unit-element-cell > *,
+td.stars > *,
+td.doublon-display-cell, /* Le conteneur flex lui-même */
+td.skill-dots-cell > * {
+    margin: 0 auto; /* Centrage horizontal pour les éléments bloc/flex */
+}
+
 .action-buttons {  
     display: flex;  
-    gap: 8px;  
+    gap: 5px;  /* Espace réduit entre les boutons */
     justify-content: center;
-    /* CORRECTION : On s'assure que les boutons ne passent pas à la ligne */
     flex-wrap: nowrap;
 }
  
-/* CORRECTION : On donne une largeur minimale à la colonne actions pour éviter le débordement */
 .column-actions { 
-    min-width: 130px; 
+    min-width: 125px; /* Largeur minimale pour éviter le débordement */
 }
  
 .action-buttons button { 

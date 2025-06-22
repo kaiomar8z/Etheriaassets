@@ -128,6 +128,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const unitRowTemplate = document.getElementById('unit-row-template');
     const routineTrackerContent = document.getElementById('routine-tracker-content');
+    
+    // AJOUT : Sélection du nouveau bouton
+    const backToTopBtn = document.getElementById('back-to-top-btn');
     // #endregion
 
     // #region --- ÉTAT DE L'APPLICATION (State) et variables Firestore ---
@@ -143,6 +146,25 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectionModeSlotIndex = null;
     let unitImageData = null;
     let currentImageFile = null;
+    // #endregion
+
+    // #region --- GESTIONNAIRE D'ÉVÉNEMENTS "Retour en Haut" ---
+    if (backToTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) { // Le bouton apparaît après avoir scrollé de 300px
+                backToTopBtn.classList.add('active');
+            } else {
+                backToTopBtn.classList.remove('active');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' // Défilement fluide
+            });
+        });
+    }
     // #endregion
 
     // #region --- MODULE DE GESTION DE LA ROUTINE ---
@@ -408,10 +430,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const numericCount = parseInt(count, 10) || 0;
         let html = '';
         for (let i = 0; i < 5; i++) {
-            // La classe 'filled' est ajoutée au noeud si son index est inférieur au nombre de doublons
             html += `<div class="doublon-node ${i < numericCount ? 'filled' : ''}"></div>`;
         }
-        // Le conteneur parent a juste besoin de la classe, le CSS fait le reste.
         return html;
     };
 

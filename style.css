@@ -482,13 +482,22 @@ th.sorted .sort-arrow { opacity: 1; }
 }
 
 /* CORRECTION FINALE : Alignements pour la vue PC */
-.doublon-display-cell,
-.action-buttons {
-    justify-content: center;
+td.doublon-display-cell,
+td.action-buttons {
+    /* La propriété vertical-align est suffisante si le contenu n'est pas trop complexe */
+    /* On s'assure que le contenu interne est bien centré horizontalement */
+    text-align: center;
 }
 
+.action-buttons {  
+    display: flex;  
+    gap: 5px;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+ 
 .column-actions { 
-    width: 130px; /* On donne une largeur fixe pour éviter le débordement */
+    width: 140px; /* On augmente la largeur pour être sûr que les 3 boutons tiennent */
 }
  
 .action-buttons button { 

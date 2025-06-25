@@ -1,21 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // === CONFIGURATION FIREBASE SÉCURISÉE ===
-    let firebaseConfig;
-    try {
-        firebaseConfig = window.getFirebaseConfig ? window.getFirebaseConfig() : {
-            // Configuration de fallback (à remplacer par vos vraies clés)
-            apiKey: "AIzaSyDVVTPm80W3K0ebutcPlh-OAR28kJiaMjE",
-            authDomain: "etheria-manager.firebaseapp.com",
-            projectId: "etheria-manager",
-            storageBucket: "etheria-manager.appspot.com",
-            messagingSenderId: "247321381553",
-            appId: "1:247321381553:web:517f4fb1989ad14a8e3090"
-        };
-    } catch (error) {
-        console.error('Erreur lors du chargement de la configuration Firebase:', error);
-        firebaseConfig = {}; // Configuration vide pour éviter les erreurs
-    }
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDVVTPm80W3K0ebutcPlh-OAR28kJiaMjE",
+        authDomain: "etheria-manager.firebaseapp.com",
+        projectId: "etheria-manager",
+        storageBucket: "etheria-manager.appspot.com",
+        messagingSenderId: "247321381553",
+        appId: "1:247321381553:web:517f4fb1989ad14a8e3090"
+    };
 
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
@@ -28,620 +21,71 @@ document.addEventListener('DOMContentLoaded', () => {
     const manualObjectivesCol = db.collection('manualObjectives');
     const dailyRoutineDoc = db.collection('settings').doc('dailyRoutine');
 
-    // === SYSTÈME DE NOTIFICATIONS AMÉLIORÉ ===
-    class NotificationManager {
-        constructor() {
-            this.container = document.getElementById('notification-container');
-            this.notificationId = 0;
-        }
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const sunIcon = '<i class="fa-solid fa-sun"></i>';
+    const moonIcon = '<i class="fa-solid fa-moon"></i>';
 
-        show(type = 'info', title = '', message = '', duration = 4000) {
-            const id = ++this.notificationId;
-            const notification = this.createNotification(id, type, title, message);
-            
-            this.container.appendChild(notification);
-            
-            if (duration > 0) {
-                setTimeout(() => this.remove(id), duration);
-            }
-            
-            return id;
-        }
-
-        createNotification(id, type, title, message) {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.id = `notification-${id}`;
-            
-            const icons = {
-                success: 'fas fa-check-circle',
-                error: 'fas fa-times-circle',
-                info: 'fas fa-info-circle',
-                warning: 'fas fa-exclamation-triangle',
-                loading: 'fas fa-spinner'
-            };
-
-            notification.innerHTML = `
-                <div class="notification-icon">
-                    <i class="${icons[type]}"></i>
-                </div>
-                <div class="notification-content">
-                    <div class="notification-title">${title}</div>
-                    <div class="notification-message">${message}</div>
-                </div>
-                <button class="notification-close" onclick="notificationManager.remove(${id})">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="notification-progress"></div>
-            `;
-
-            return notification;
-        }
-
-        remove(id) {
-            const notification = document.getElementById(`notification-${id}`);
-            if (notification) {
-                notification.style.animation = 'slideOutRight 0.3s ease forwards';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 300);
-            }
-        }
-
-        loading(title, message) {
-            return this.show('loading', title, message, 0);
-        }
-
-        success(title, message) {
-            return this.show('success', title, message);
-        }
-
-        error(title, message) {
-            return this.show('error', title, message);
-        }
-
-        warning(title, message) {
-            return this.show('warning', title, message);
-        }
-
-        info(title, message) {
-            return this.show('info', title, message);
-        }
-    }
-
-    // Instance globale du gestionnaire de notifications
-    const notificationManager = new NotificationManager();
-    window.notificationManager = notificationManager;
-
-    // === GESTION DES THÈMES AMÉLIORÉE ===
-    const ThemeManager = {
-        themes: ['dark', 'light', 'gaming', 'minimal'],
-        currentTheme: 'dark',
-
-        init() {
-            this.currentTheme = localStorage.getItem('etheriaTheme') || 'dark';
-            this.applyTheme(this.currentTheme);
-            this.setupEventListeners();
-        },
-
-        applyTheme(themeName) {
-            // Supprimer toutes les classes de thème
-            this.themes.forEach(theme => {
-                document.body.classList.remove(`${theme}-theme`);
-            });
-
-            // Appliquer le nouveau thème
-            if (themeName !== 'dark') {
-                document.body.classList.add(`${themeName}-theme`);
-            }
-
-            this.currentTheme = themeName;
-            localStorage.setItem('etheriaTheme', themeName);
-            
-            // Mettre à jour l'interface
-            this.updateThemeControls();
-        },
-
-        updateThemeControls() {
-            const themeToggle = document.getElementById('theme-toggle-btn');
-            const themeSelect = document.getElementById('theme-selector');
-            
-            if (themeSelect) {
-                themeSelect.value = this.currentTheme;
-            }
-
-            if (themeToggle) {
-                const icons = {
-                    dark: 'fa-sun',
-                    light: 'fa-moon',
-                    gaming: 'fa-gamepad',
-                    minimal: 'fa-circle'
-                };
-                themeToggle.innerHTML = `<i class="fas ${icons[this.currentTheme]}"></i>`;
-            }
-        },
-
-        setupEventListeners() {
-            const themeToggle = document.getElementById('theme-toggle-btn');
-            const themeSelect = document.getElementById('theme-selector');
-
-            if (themeToggle) {
-                themeToggle.addEventListener('click', () => {
-                    const currentIndex = this.themes.indexOf(this.currentTheme);
-                    const nextIndex = (currentIndex + 1) % this.themes.length;
-                    this.applyTheme(this.themes[nextIndex]);
-                });
-            }
-
-            if (themeSelect) {
-                themeSelect.addEventListener('change', (e) => {
-                    this.applyTheme(e.target.value);
-                });
-            }
+    const applyTheme = (theme) => {
+        if (theme === 'light') {
+            document.body.classList.add('light-theme');
+            themeToggleBtn.innerHTML = moonIcon;
+        } else {
+            document.body.classList.remove('light-theme');
+            themeToggleBtn.innerHTML = sunIcon;
         }
     };
 
-    // === GESTIONNAIRE DE FILTRES AVANCÉS ===
-    class FilterManager {
-        constructor() {
-            this.activeFilters = {
-                search: '',
-                element: '',
-                rarity: '',
-                sort: 'name-asc',
-                quickFilters: new Set(),
-                levelMin: null,
-                levelMax: null,
-                starsMin: null,
-                starsMax: null,
-                doublonMin: null,
-                doublonMax: null,
-                skillFilter: ''
+    const savedTheme = localStorage.getItem('etheriaTheme') || 'dark';
+    applyTheme(savedTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+        const isLight = document.body.classList.contains('light-theme');
+        const newTheme = isLight ? 'dark' : 'light';
+        localStorage.setItem('etheriaTheme', newTheme);
+        applyTheme(newTheme);
+    });
+
+    // #region --- MODULES UTILITAIRES (Notifications, Confirmations) ---
+    const toastContainer = document.getElementById('toast-container');
+    const showToast = (message, type = 'info', duration = 3500) => {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+            toast.remove();
+        }, duration);
+    };
+
+    const confirmModal = document.getElementById('confirm-modal');
+    const showConfirm = (title, message) => {
+        return new Promise((resolve) => {
+            const confirmTitle = document.getElementById('confirm-title');
+            const confirmMessage = document.getElementById('confirm-message');
+            const confirmOkBtn = document.getElementById('confirm-ok-btn');
+            const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+            const confirmCloseBtn = document.getElementById('confirm-close-btn');
+
+            confirmTitle.textContent = title;
+            confirmMessage.textContent = message;
+            confirmModal.style.display = 'block';
+
+            const close = (value) => {
+                confirmModal.style.display = 'none';
+                confirmOkBtn.onclick = null;
+                confirmCancelBtn.onclick = null;
+                confirmCloseBtn.onclick = null;
+                resolve(value);
             };
-            this.debounceTimer = null;
-            this.init();
-        }
 
-        init() {
-            this.setupEventListeners();
-            this.setupDebouncing();
-        }
+            confirmOkBtn.onclick = () => close(true);
+            confirmCancelBtn.onclick = () => close(false);
+            confirmCloseBtn.onclick = () => close(false);
+        });
+    };
+    // #endregion
 
-        setupEventListeners() {
-            // Recherche avec debouncing
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) {
-                searchInput.addEventListener('input', (e) => {
-                    this.debouncedApplyFilters();
-                    this.updateClearButton();
-                });
-            }
-
-            // Filtres de base
-            ['filter-element', 'filter-rarity', 'sort-select'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.addEventListener('change', () => this.applyFilters());
-                }
-            });
-
-            // Filtres rapides
-            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
-                btn.addEventListener('click', () => this.toggleQuickFilter(btn));
-            });
-
-            // Filtres avancés
-            ['level-min', 'level-max', 'stars-min', 'stars-max', 'doublon-min', 'doublon-max', 'skill-filter'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.addEventListener('change', () => this.applyFilters());
-                }
-            });
-
-            // Toggle des filtres avancés
-            const toggleBtn = document.getElementById('toggle-advanced-filters');
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', () => this.toggleAdvancedFilters());
-            }
-
-            // Actions des filtres
-            const clearBtn = document.getElementById('clear-all-filters');
-            if (clearBtn) {
-                clearBtn.addEventListener('click', () => this.clearAllFilters());
-            }
-
-            // Bouton de nettoyage de la recherche
-            const clearSearchBtn = document.getElementById('clear-search');
-            if (clearSearchBtn) {
-                clearSearchBtn.addEventListener('click', () => this.clearSearch());
-            }
-        }
-
-        setupDebouncing() {
-            this.debouncedApplyFilters = this.debounce(() => {
-                this.applyFilters();
-            }, 300);
-        }
-
-        debounce(func, wait) {
-            return (...args) => {
-                clearTimeout(this.debounceTimer);
-                this.debounceTimer = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-
-        toggleQuickFilter(button) {
-            const filterType = button.dataset.filter;
-            
-            if (this.activeFilters.quickFilters.has(filterType)) {
-                this.activeFilters.quickFilters.delete(filterType);
-                button.classList.remove('active');
-            } else {
-                this.activeFilters.quickFilters.add(filterType);
-                button.classList.add('active');
-            }
-            
-            this.applyFilters();
-        }
-
-        toggleAdvancedFilters() {
-            const advancedFilters = document.getElementById('advanced-filters');
-            if (advancedFilters) {
-                const isVisible = advancedFilters.style.display !== 'none';
-                advancedFilters.style.display = isVisible ? 'none' : 'grid';
-            }
-        }
-
-        updateClearButton() {
-            const clearBtn = document.getElementById('clear-search');
-            const searchInput = document.getElementById('search-input');
-            
-            if (clearBtn && searchInput) {
-                clearBtn.style.display = searchInput.value ? 'block' : 'none';
-            }
-        }
-
-        clearSearch() {
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) {
-                searchInput.value = '';
-                this.updateClearButton();
-                this.applyFilters();
-            }
-        }
-
-        clearAllFilters() {
-            // Réinitialiser tous les champs
-            document.getElementById('search-input').value = '';
-            document.getElementById('filter-element').value = '';
-            document.getElementById('filter-rarity').value = '';
-            document.getElementById('sort-select').value = 'name-asc';
-            
-            // Filtres avancés
-            ['level-min', 'level-max', 'stars-min', 'stars-max', 'doublon-min', 'doublon-max'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.value = '';
-            });
-            
-            document.getElementById('skill-filter').value = '';
-
-            // Filtres rapides
-            this.activeFilters.quickFilters.clear();
-            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            this.updateClearButton();
-            this.applyFilters();
-        }
-
-        collectFilterValues() {
-            return {
-                search: document.getElementById('search-input')?.value.toLowerCase() || '',
-                element: document.getElementById('filter-element')?.value || '',
-                rarity: document.getElementById('filter-rarity')?.value || '',
-                sort: document.getElementById('sort-select')?.value || 'name-asc',
-                quickFilters: this.activeFilters.quickFilters,
-                levelMin: parseInt(document.getElementById('level-min')?.value) || null,
-                levelMax: parseInt(document.getElementById('level-max')?.value) || null,
-                starsMin: parseInt(document.getElementById('stars-min')?.value) || null,
-                starsMax: parseInt(document.getElementById('stars-max')?.value) || null,
-                doublonMin: parseInt(document.getElementById('doublon-min')?.value) || null,
-                doublonMax: parseInt(document.getElementById('doublon-max')?.value) || null,
-                skillFilter: document.getElementById('skill-filter')?.value || ''
-            };
-        }
-
-        applyFilters() {
-            this.activeFilters = this.collectFilterValues();
-            displayUnits();
-        }
-
-        filterUnits(units) {
-            return units.filter(unit => {
-                // Recherche textuelle
-                const matchesSearch = !this.activeFilters.search || 
-                    unit.name.toLowerCase().includes(this.activeFilters.search);
-
-                // Filtres de base
-                const matchesElement = !this.activeFilters.element || unit.element === this.activeFilters.element;
-                const matchesRarity = !this.activeFilters.rarity || unit.rarity === this.activeFilters.rarity;
-
-                // Filtres rapides
-                let matchesQuickFilters = true;
-                this.activeFilters.quickFilters.forEach(filter => {
-                    switch (filter) {
-                        case 'favorites':
-                            matchesQuickFilters = matchesQuickFilters && unit.isFavorite;
-                            break;
-                        case 'max-level':
-                            matchesQuickFilters = matchesQuickFilters && unit.level === 50;
-                            break;
-                        case 'high-stars':
-                            matchesQuickFilters = matchesQuickFilters && unit.stars >= 5;
-                            break;
-                        case 'has-notes':
-                            matchesQuickFilters = matchesQuickFilters && unit.notes && unit.notes.trim() !== '';
-                            break;
-                        case 'ssr-only':
-                            matchesQuickFilters = matchesQuickFilters && unit.rarity === 'SSR';
-                            break;
-                    }
-                });
-
-                // Filtres de plage
-                const matchesLevelRange = (!this.activeFilters.levelMin || unit.level >= this.activeFilters.levelMin) &&
-                                         (!this.activeFilters.levelMax || unit.level <= this.activeFilters.levelMax);
-
-                const matchesStarsRange = (!this.activeFilters.starsMin || unit.stars >= this.activeFilters.starsMin) &&
-                                         (!this.activeFilters.starsMax || unit.stars <= this.activeFilters.starsMax);
-
-                const matchesDoublonRange = (!this.activeFilters.doublonMin || unit.doublon >= this.activeFilters.doublonMin) &&
-                                           (!this.activeFilters.doublonMax || unit.doublon <= this.activeFilters.doublonMax);
-
-                // Filtre de compétences
-                let matchesSkillFilter = true;
-                if (this.activeFilters.skillFilter) {
-                    const avgSkill = (unit.s1 + unit.s2 + unit.s3) / 3;
-                    switch (this.activeFilters.skillFilter) {
-                        case 'maxed':
-                            matchesSkillFilter = unit.s1 === 5 && unit.s2 === 5 && unit.s3 === 5;
-                            break;
-                        case 'high':
-                            matchesSkillFilter = avgSkill >= 4;
-                            break;
-                        case 'low':
-                            matchesSkillFilter = avgSkill <= 3;
-                            break;
-                    }
-                }
-
-                return matchesSearch && matchesElement && matchesRarity && matchesQuickFilters && 
-                       matchesLevelRange && matchesStarsRange && matchesDoublonRange && matchesSkillFilter;
-            });
-        }
-
-        sortUnits(units) {
-            const [column, direction] = this.activeFilters.sort.split('-');
-            
-            return units.sort((a, b) => {
-                // Favoris toujours en premier
-                if (a.isFavorite && !b.isFavorite) return -1;
-                if (!a.isFavorite && b.isFavorite) return 1;
-
-                const valA = a[column];
-                const valB = b[column];
-                const multiplier = direction === 'asc' ? 1 : -1;
-
-                if (typeof valA === 'string') {
-                    return valA.localeCompare(valB) * multiplier;
-                } else {
-                    return (valA - valB) * multiplier;
-                }
-            });
-        }
-
-        updateResultsInfo(filteredCount, totalCount) {
-            const resultsInfo = document.getElementById('results-info');
-            const resultsCount = document.getElementById('results-count');
-            
-            if (resultsCount) {
-                resultsCount.textContent = filteredCount;
-            }
-            
-            if (resultsInfo && filteredCount !== totalCount) {
-                resultsInfo.style.display = 'flex';
-            } else if (resultsInfo) {
-                resultsInfo.style.display = 'none';
-            }
-        }
-    }
-
-    // === ANALYSEUR DE SYNERGIES POUR LE TEAM BUILDER ===
-    class SynergyAnalyzer {
-        calculateTeamScore(team) {
-            const filledSlots = team.filter(unit => unit !== null);
-            
-            if (filledSlots.length === 0) return 0;
-
-            let score = 30; // Score de base
-
-            // Bonus diversité élémentaire
-            const elements = [...new Set(filledSlots.map(unit => unit.element))];
-            score += elements.length * 12;
-
-            // Bonus nombre d'unités
-            score += filledSlots.length * 8;
-
-            // Bonus rareté
-            const ssrCount = filledSlots.filter(unit => unit.rarity === 'SSR').length;
-            const srCount = filledSlots.filter(unit => unit.rarity === 'SR').length;
-            score += ssrCount * 8 + srCount * 4;
-
-            // Bonus niveau moyen
-            const avgLevel = filledSlots.reduce((sum, unit) => sum + unit.level, 0) / filledSlots.length;
-            if (avgLevel >= 40) score += 10;
-            else if (avgLevel >= 30) score += 5;
-
-            // Bonus compétences
-            const avgSkills = filledSlots.reduce((sum, unit) => sum + (unit.s1 + unit.s2 + unit.s3) / 3, 0) / filledSlots.length;
-            if (avgSkills >= 4) score += 8;
-            else if (avgSkills >= 3) score += 4;
-
-            // Malus déséquilibre (si trop du même élément)
-            const maxElementCount = Math.max(...elements.map(el => filledSlots.filter(unit => unit.element === el).length));
-            if (maxElementCount > 3) score -= 10;
-
-            return Math.min(100, Math.max(0, Math.round(score)));
-        }
-
-        getScoreDescription(score) {
-            if (score >= 85) return 'Excellente synergie';
-            if (score >= 70) return 'Bonne composition';
-            if (score >= 50) return 'Synergie correcte';
-            if (score >= 30) return 'Amélioration possible';
-            return 'Équipe à retravailler';
-        }
-
-        getScoreClass(score) {
-            if (score >= 85) return 'excellent';
-            if (score >= 70) return 'good';
-            return 'poor';
-        }
-
-        getTeamDetails(team) {
-            const filledSlots = team.filter(unit => unit !== null);
-            const details = [];
-
-            if (filledSlots.length > 0) {
-                // Diversité élémentaire
-                const elements = [...new Set(filledSlots.map(unit => unit.element))];
-                details.push({
-                    label: 'Diversité élémentaire',
-                    value: `+${elements.length * 12}`,
-                    type: 'bonus'
-                });
-
-                // Rareté moyenne
-                const ssrCount = filledSlots.filter(unit => unit.rarity === 'SSR').length;
-                if (ssrCount > 0) {
-                    details.push({
-                        label: `${ssrCount} unité(s) SSR`,
-                        value: `+${ssrCount * 8}`,
-                        type: 'bonus'
-                    });
-                }
-
-                // Niveau moyen
-                const avgLevel = Math.round(filledSlots.reduce((sum, unit) => sum + unit.level, 0) / filledSlots.length);
-                details.push({
-                    label: `Niveau moyen: ${avgLevel}`,
-                    value: avgLevel >= 40 ? '+10' : avgLevel >= 30 ? '+5' : '0',
-                    type: avgLevel >= 30 ? 'bonus' : 'neutral'
-                });
-
-                // Déséquilibre d'éléments
-                const maxElementCount = Math.max(...elements.map(el => filledSlots.filter(unit => unit.element === el).length));
-                if (maxElementCount > 3) {
-                    details.push({
-                        label: 'Déséquilibre élémentaire',
-                        value: '-10',
-                        type: 'malus'
-                    });
-                }
-            }
-
-            return details;
-        }
-    }
-
-    // === OPTIMISATION DES PERFORMANCES ===
-    class PerformanceOptimizer {
-        constructor() {
-            this.lazyImageObserver = null;
-            this.init();
-        }
-
-        init() {
-            this.setupLazyLoading();
-        }
-
-        setupLazyLoading() {
-            if ('IntersectionObserver' in window) {
-                this.lazyImageObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const img = entry.target;
-                            if (img.dataset.src) {
-                                img.src = img.dataset.src;
-                                img.classList.add('loaded');
-                                img.removeAttribute('data-src');
-                                this.lazyImageObserver.unobserve(img);
-                            }
-                        }
-                    });
-                });
-            }
-        }
-
-        observeImage(img) {
-            if (this.lazyImageObserver && img.dataset.src) {
-                this.lazyImageObserver.observe(img);
-            }
-        }
-
-        // Fonction utilitaire pour optimiser les grandes listes
-        virtualizeList(container, items, renderItem, itemHeight = 60) {
-            const containerHeight = container.clientHeight;
-            const visibleCount = Math.ceil(containerHeight / itemHeight) + 2;
-            
-            let scrollTop = container.scrollTop;
-            let startIndex = Math.floor(scrollTop / itemHeight);
-            let endIndex = Math.min(startIndex + visibleCount, items.length);
-            
-            // Nettoyer le container
-            container.innerHTML = '';
-            
-            // Créer un spacer pour maintenir la hauteur de défilement
-            const spacer = document.createElement('div');
-            spacer.style.height = `${items.length * itemHeight}px`;
-            spacer.style.position = 'relative';
-            container.appendChild(spacer);
-            
-            // Rendre seulement les éléments visibles
-            for (let i = startIndex; i < endIndex; i++) {
-                const element = renderItem(items[i], i);
-                element.style.position = 'absolute';
-                element.style.top = `${i * itemHeight}px`;
-                element.style.width = '100%';
-                element.style.height = `${itemHeight}px`;
-                spacer.appendChild(element);
-            }
-        }
-    }
-
-    // === VARIABLES GLOBALES ===
-    let units = [];
-    let teams = [];
-    let manualObjectives = [];
-    let dailyRoutine = {};
-    let unitsDB = null;
-
-    let activeTeamId = null;
-    let currentSort = { column: 'level', direction: 'desc' };
-    let favoritesFilterActive = false;
-    let selectionModeSlotIndex = null;
-    let unitImageData = null;
-    let currentImageFile = null;
-
-    // Instances des gestionnaires
-    const filterManager = new FilterManager();
-    const synergyAnalyzer = new SynergyAnalyzer();
-    const performanceOptimizer = new PerformanceOptimizer();
-
-    // === SÉLECTION DES ÉLÉMENTS DU DOM ===
+    // #region --- SÉLECTION DES ÉLÉMENTS DU DOM ---
     const imageBaseUrl = 'https://raw.githubusercontent.com/kaiomar8z/Etheriaassets/main/';
     const addForm = document.getElementById('add-unit-form');
     const unitListBody = document.getElementById('unit-list-body');
@@ -685,9 +129,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const unitRowTemplate = document.getElementById('unit-row-template');
     const routineTrackerContent = document.getElementById('routine-tracker-content');
     
+    // AJOUT : Sélection du nouveau bouton
     const backToTopBtn = document.getElementById('back-to-top-btn');
+    // #endregion
 
-    // === ROUTINE QUOTIDIENNE ===
+    // #region --- ÉTAT DE L'APPLICATION (State) et variables Firestore ---
+    let units = [];
+    let teams = [];
+    let manualObjectives = [];
+    let dailyRoutine = {};
+    let unitsDB = null;
+
+    let activeTeamId = null;
+    let currentSort = { column: 'level', direction: 'desc' };
+    let favoritesFilterActive = false;
+    let selectionModeSlotIndex = null;
+    let unitImageData = null;
+    let currentImageFile = null;
+    // #endregion
+
+    // #region --- GESTIONNAIRE D'ÉVÉNEMENTS "Retour en Haut" ---
+    if (backToTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) { // Le bouton apparaît après avoir scrollé de 300px
+                backToTopBtn.classList.add('active');
+            } else {
+                backToTopBtn.classList.remove('active');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' // Défilement fluide
+            });
+        });
+    }
+    // #endregion
+
+    // #region --- MODULE DE GESTION DE LA ROUTINE ---
     const ROUTINE_DEFINITION = [
         { name: "Arène", type: "checkbox" },
         { name: "Event Train de l'infini", type: "checkbox" },
@@ -757,8 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderRoutineTracker = () => {
-        if (!routineTrackerContent) return;
-        
         routineTrackerContent.innerHTML = '';
         const currentGameDay = getGameDay();
 
@@ -799,8 +277,9 @@ document.addEventListener('DOMContentLoaded', () => {
             routineTrackerContent.appendChild(item);
         });
     };
+    // #endregion
 
-    // === NAVIGATION ===
+    // #region --- NAVIGATION PRINCIPALE ---
     const switchView = (viewToShow) => {
         managerView.classList.remove('active');
         builderView.classList.remove('active', 'flex');
@@ -818,22 +297,20 @@ document.addEventListener('DOMContentLoaded', () => {
             showBuilderBtn.classList.add('active');
             renderTeamBuilderUnitList();
             renderActiveTeam();
-            updateSynergyAnalysis();
         } else if (viewToShow === 'objectives') {
             objectivesView.classList.add('active');
             showObjectivesBtn.classList.add('active');
             renderManualObjectives();
         }
     };
+    // #endregion
 
-    // === OBJECTIFS ===
+    // #region --- MODULE GESTIONNAIRE D'OBJECTIFS (To-Do List) ---
     const addObjectiveForm = document.getElementById('add-objective-form');
     const newObjectiveInput = document.getElementById('new-objective-input');
     const objectivesListContainer = document.getElementById('objectives-list');
 
     const renderManualObjectives = () => {
-        if (!objectivesListContainer) return;
-        
         objectivesListContainer.innerHTML = '';
 
         if (manualObjectives.length === 0) {
@@ -856,8 +333,9 @@ document.addEventListener('DOMContentLoaded', () => {
             objectivesListContainer.appendChild(li);
         });
     };
+    // #endregion
 
-    // === GESTION DES UNITÉS ===
+    // #region --- MODULE GESTIONNAIRE D'UNITÉS ---
     const elementIconMap = {
         'Rouge': 'reason.webp',
         'Bleu': 'odd.webp',
@@ -928,11 +406,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (foundUnit) {
                 document.getElementById('unit-element').value = foundUnit.element;
                 document.getElementById('unit-rarity').value = foundUnit.rarity;
-                notificationManager.success('Données chargées', `Informations pour ${foundUnit.name} trouvées !`);
+                showToast(`Données pour ${foundUnit.name} chargées !`, 'success');
             }
         } catch (error) {
             console.error("Erreur lors de la récupération de la base de données d'unités:", error);
-            notificationManager.error("Erreur", "Impossible de charger la base de données des unités.");
+            showToast("Impossible de charger la base de données des unités.", "error");
         }
     };
 
@@ -957,46 +435,69 @@ document.addEventListener('DOMContentLoaded', () => {
         return html;
     };
 
+
     const displayUnits = () => {
-        const filteredUnits = filterManager.filterUnits(units);
-        const sortedUnits = filterManager.sortUnits(filteredUnits);
-        
-        renderTable(sortedUnits);
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedElement = filterElement.value;
+        const selectedRarity = filterRarity.value;
+
+        let processedUnits = units.filter(unit => {
+            const matchesSearch = unit.name.toLowerCase().includes(searchTerm);
+            const matchesElement = !selectedElement || unit.element === selectedElement;
+            const matchesRarity = !selectedRarity || unit.rarity === selectedRarity;
+            const matchesFavorite = !favoritesFilterActive || unit.isFavorite;
+            return matchesSearch && matchesElement && matchesRarity && matchesFavorite;
+        });
+
+        processedUnits.sort((a, b) => {
+            if (a.isFavorite && !b.isFavorite) return -1;
+            if (!a.isFavorite && b.isFavorite) return 1;
+
+            const valA = a[currentSort.column];
+            const valB = b[currentSort.column];
+            const direction = currentSort.direction === 'asc' ? 1 : -1;
+
+            if (typeof valA === 'string') {
+                return valA.localeCompare(valB) * direction;
+            } else {
+                return (valA - valB) * direction;
+            }
+        });
+
+        renderTable(processedUnits);
         updateSortHeaders();
-        filterManager.updateResultsInfo(filteredUnits.length, units.length);
     };
 
     const renderTable = (unitsToDisplay) => {
-        if (!unitListBody) return;
-        
         unitListBody.innerHTML = '';
         if (unitsToDisplay.length === 0) {
             unitListBody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--text-color-muted);">Aucune unité ne correspond à vos critères.</td></tr>`;
             return;
         }
-        
         unitsToDisplay.forEach(unit => {
             const rowFragment = unitRowTemplate.content.cloneNode(true);
             const row = rowFragment.querySelector('tr');
 
             const checkbox = rowFragment.querySelector('.unit-checkbox');
             checkbox.dataset.id = unit.id;
-            checkbox.checked = document.getElementById('select-all-checkbox')?.checked || false;
+            checkbox.checked = document.getElementById('select-all-checkbox').checked || (
+                Array.from(document.querySelectorAll('.unit-checkbox')).some(cb => cb.dataset.id === unit.id && cb.checked)
+            );
 
             if (checkbox.checked) {
                 row.classList.add('selected-row');
+            } else {
+                row.classList.remove('selected-row');
             }
 
             const img = rowFragment.querySelector('.unit-image-cell img');
             img.alt = unit.name;
 
             if (unit.image) {
-                img.dataset.src = unit.image;
-                performanceOptimizer.observeImage(img);
+                img.src = unit.image;
             } else {
                 const formattedName = unit.name.trim().replace(/ /g, '_').toLowerCase();
-                img.dataset.src = `${imageBaseUrl}${formattedName}.webp`;
-                performanceOptimizer.observeImage(img);
+                img.src = `${imageBaseUrl}${formattedName}.webp`;
                 img.onerror = () => {
                     img.src = 'https://via.placeholder.com/50x50/304065/e0e0e0?text=?';
                     img.onerror = null;
@@ -1062,8 +563,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateSortHeaders = () => {
-        if (!table) return;
-        
         table.querySelectorAll('thead th.sortable').forEach(th => {
             const sortKey = th.dataset.sort;
             th.classList.remove('sorted', 'asc', 'desc');
@@ -1080,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function openEditModal(unitId) {
         const unit = units.find(u => u.id === unitId);
         if (!unit) {
-            notificationManager.error('Erreur', 'Unité introuvable pour édition.');
+            showToast('Unité introuvable pour édition.', 'error');
             return;
         }
 
@@ -1098,9 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editModal.style.display = 'block';
     }
 
-    function closeEditModal() { 
-        if (editModal) editModal.style.display = 'none'; 
-    }
+    function closeEditModal() { editModal.style.display = 'none'; }
 
     const updateSelectionState = () => {
         const allCheckboxes = document.querySelectorAll('.unit-checkbox');
@@ -1108,7 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (checkedCheckboxes.length > 0) {
             deleteSelectedBtn.style.display = 'inline-flex';
-            deleteSelectedBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Supprimer (${checkedCheckboxes.length})`;
+            deleteSelectedBtn.textContent = `Supprimer (${checkedCheckboxes.length})`;
         } else {
             deleteSelectedBtn.style.display = 'none';
         }
@@ -1133,11 +630,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
+    // #endregion
 
-    // === TEAM BUILDER ===
+    // #region --- MODULE TEAM BUILDER ---
     const renderTeamBuilderUnitList = () => {
-        if (!teamBuilderUnitList) return;
-        
         teamBuilderUnitList.innerHTML = '';
         units.forEach((unit) => {
             const img = document.createElement('img');
@@ -1159,8 +655,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderActiveTeam = () => {
-        if (!teamSlotsContainer) return;
-        
         teamSlotsContainer.innerHTML = '';
         const activeTeam = teams.find(team => team.id === activeTeamId);
 
@@ -1206,8 +700,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderTeamSelect = () => {
-        if (!teamSelect) return;
-        
         teamSelect.innerHTML = '';
         if(teams.length === 0) {
             return;
@@ -1222,187 +714,67 @@ document.addEventListener('DOMContentLoaded', () => {
             teamSelect.appendChild(option);
         });
     };
+    // #endregion
 
-    // === ANALYSE DE SYNERGIES ===
-    const updateSynergyAnalysis = () => {
-        const activeTeam = teams.find(team => team.id === activeTeamId);
-        if (!activeTeam) return;
-
-        const teamUnits = activeTeam.units || [null, null, null, null, null];
-        const score = synergyAnalyzer.calculateTeamScore(teamUnits);
-        const details = synergyAnalyzer.getTeamDetails(teamUnits);
-
-        // Mettre à jour le score
-        const scoreCircle = document.getElementById('synergy-score-circle');
-        const scoreValue = document.getElementById('synergy-score-value');
-        const scoreDescription = document.getElementById('synergy-description');
-
-        if (scoreCircle && scoreValue && scoreDescription) {
-            scoreValue.textContent = score;
-            scoreDescription.textContent = synergyAnalyzer.getScoreDescription(score);
-            
-            scoreCircle.className = `score-circle ${synergyAnalyzer.getScoreClass(score)}`;
-            
-            // Mettre à jour la progression circulaire
-            const percentage = Math.min(100, score);
-            scoreCircle.style.background = `conic-gradient(var(--primary-color) ${percentage}%, rgba(255,255,255,0.2) 0%)`;
-        }
-
-        // Mettre à jour les détails
-        const detailsContainer = document.getElementById('synergy-details');
-        if (detailsContainer) {
-            detailsContainer.innerHTML = '';
-            
-            details.forEach(detail => {
-                const item = document.createElement('div');
-                item.className = 'synergy-item';
-                item.innerHTML = `
-                    <span>${detail.label}</span>
-                    <span class="synergy-${detail.type}">${detail.value}</span>
-                `;
-                detailsContainer.appendChild(item);
-            });
-        }
-    };
-
-    // === DASHBOARD ===
+    // #region --- MODULES DASHBOARD & IMPORT/EXPORT ---
     const updateDashboard = () => {
         const totalUnits = units.length;
-        const totalUnitsEl = document.getElementById('stat-total-units');
-        if (totalUnitsEl) totalUnitsEl.innerText = totalUnits;
-        
+        document.getElementById('stat-total-units').innerText = totalUnits;
         const rarityCounts = units.reduce((acc, unit) => {
             acc[unit.rarity] = (acc[unit.rarity] || 0) + 1;
             return acc;
         }, {});
-        
-        const ssrCountEl = document.getElementById('stat-ssr-count');
-        const srCountEl = document.getElementById('stat-sr-count');
-        const rCountEl = document.getElementById('stat-r-count');
-        
-        if (ssrCountEl) ssrCountEl.innerText = rarityCounts['SSR'] || 0;
-        if (srCountEl) srCountEl.innerText = rarityCounts['SR'] || 0;
-        if (rCountEl) rCountEl.innerText = rarityCounts['R'] || 0;
-
-        // Nouvelles statistiques moyennes
-        if (totalUnits > 0) {
-            const avgLevel = Math.round(units.reduce((sum, unit) => sum + unit.level, 0) / totalUnits);
-            const avgStars = Math.round((units.reduce((sum, unit) => sum + unit.stars, 0) / totalUnits) * 10) / 10;
-            const avgPower = Math.round(units.reduce((sum, unit) => sum + (unit.level * unit.stars * 100), 0) / totalUnits);
-
-            const avgLevelEl = document.getElementById('avg-level');
-            const avgStarsEl = document.getElementById('avg-stars');
-            const avgPowerEl = document.getElementById('avg-power');
-
-            if (avgLevelEl) avgLevelEl.innerText = avgLevel;
-            if (avgStarsEl) avgStarsEl.innerText = avgStars;
-            if (avgPowerEl) avgPowerEl.innerText = avgPower.toLocaleString();
-        }
-        
+        document.getElementById('stat-ssr-count').innerText = rarityCounts['SSR'] || 0;
+        document.getElementById('stat-sr-count').innerText = rarityCounts['SR'] || 0;
+        document.getElementById('stat-r-count').innerText = rarityCounts['R'] || 0;
         const elementCounts = units.reduce((acc, unit) => {
             acc[unit.element] = (acc[unit.element] || 0) + 1;
             return acc;
         }, {});
-        
         const elementDistributionDiv = document.getElementById('stat-element-distribution');
-        if (elementDistributionDiv) {
-            elementDistributionDiv.innerHTML = '';
-            const elementOrder = ['Rouge', 'Bleu', 'Vert', 'Light', 'Dark'];
-            elementOrder.forEach(element => {
-                const count = elementCounts[element] || 0;
-                if(count > 0 || totalUnits === 0) {
-                    const percentage = totalUnits > 0 ? (count / totalUnits) * 100 : 0;
-                    const barHtml = `
-                        <div class="element-bar">
-                            <span class="element-label">${element}</span>
-                            <div class="element-progress-bar">
-                                <div class="element-progress progress-${element}" style="width: ${percentage}%;"></div>
-                            </div>
-                            <span class="element-count">${count}</span>
-                        </div>`;
-                    elementDistributionDiv.innerHTML += barHtml;
-                }
-            });
-        }
-    };
-
-    // === CONFIRMATIONS ===
-    const confirmModal = document.getElementById('confirm-modal');
-    const showConfirm = (title, message) => {
-        return new Promise((resolve) => {
-            const confirmTitle = document.getElementById('confirm-title');
-            const confirmMessage = document.getElementById('confirm-message');
-            const confirmOkBtn = document.getElementById('confirm-ok-btn');
-            const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
-            const confirmCloseBtn = document.getElementById('confirm-close-btn');
-
-            confirmTitle.textContent = title;
-            confirmMessage.textContent = message;
-            confirmModal.style.display = 'block';
-
-            const close = (value) => {
-                confirmModal.style.display = 'none';
-                confirmOkBtn.onclick = null;
-                confirmCancelBtn.onclick = null;
-                confirmCloseBtn.onclick = null;
-                resolve(value);
-            };
-
-            confirmOkBtn.onclick = () => close(true);
-            confirmCancelBtn.onclick = () => close(false);
-            confirmCloseBtn.onclick = () => close(false);
-        });
-    };
-
-    // === EVENT LISTENERS ===
-    
-    // Initialisation des thèmes
-    ThemeManager.init();
-
-    // Navigation
-    showManagerBtn?.addEventListener('click', () => switchView('manager'));
-    showBuilderBtn?.addEventListener('click', () => switchView('builder'));
-    showObjectivesBtn?.addEventListener('click', () => switchView('objectives'));
-
-    // Bouton retour en haut
-    if (backToTopBtn) {
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTopBtn.classList.add('active');
-            } else {
-                backToTopBtn.classList.remove('active');
+        elementDistributionDiv.innerHTML = '';
+        const elementOrder = ['Rouge', 'Bleu', 'Vert', 'Light', 'Dark'];
+        elementOrder.forEach(element => {
+            const count = elementCounts[element] || 0;
+            if(count > 0 || totalUnits === 0) {
+                const percentage = totalUnits > 0 ? (count / totalUnits) * 100 : 0;
+                const barHtml = `
+                    <div class="element-bar">
+                        <span class="element-label">${element}</span>
+                        <div class="element-progress-bar">
+                            <div class="element-progress progress-${element}" style="width: ${percentage}%;"></div>
+                        </div>
+                        <span class="element-count">${count}</span>
+                    </div>`;
+                elementDistributionDiv.innerHTML += barHtml;
             }
         });
+    };
+    // #endregion
 
-        backToTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-    }
+    // #region --- GESTION DES ÉVÉNEMENTS (Event Listeners) ---
+    // Navigation
+    showManagerBtn.addEventListener('click', () => switchView('manager'));
+    showBuilderBtn.addEventListener('click', () => switchView('builder'));
+    showObjectivesBtn.addEventListener('click', () => switchView('objectives'));
 
     // Formulaire d'ajout
-    addForm?.addEventListener('submit', async (event) => {
+    addForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const unitName = document.getElementById('unit-name').value;
-        const loadingId = notificationManager.loading('Ajout en cours', 'Sauvegarde de l\'unité...');
 
         let imageUrl = unitImageData;
         if (currentImageFile) {
             const storageRef = storage.ref(`unit_images/${unitName}_${Date.now()}_${currentImageFile.name}`);
             try {
-                notificationManager.remove(loadingId);
-                const uploadId = notificationManager.loading("Téléchargement", "Upload de l'image en cours...");
+                showToast("Téléchargement de l'image...", 'info', 5000);
                 const snapshot = await storageRef.put(currentImageFile);
                 imageUrl = await snapshot.ref.getDownloadURL();
-                notificationManager.remove(uploadId);
-                notificationManager.success("Image uploadée", "L'image a été téléchargée avec succès !");
+                showToast("Image téléchargée !", 'success');
             } catch (error) {
                 console.error("Error uploading image:", error);
-                notificationManager.remove(loadingId);
-                notificationManager.error("Erreur d'upload", "Impossible de télécharger l'image.");
+                showToast("Erreur lors du téléchargement de l'image.", 'error');
                 imageUrl = null;
             }
         }
@@ -1424,26 +796,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             await unitsCol.add(newUnit);
-            notificationManager.remove(loadingId);
-            notificationManager.success('Unité ajoutée', `${newUnit.name} a été ajouté avec succès !`);
+            showToast(`'${newUnit.name}' a été ajouté.`, 'success');
             resetAddForm();
         } catch (e) {
             console.error("Error adding document: ", e);
-            notificationManager.remove(loadingId);
-            notificationManager.error("Erreur", "Impossible d'ajouter l'unité.");
+            showToast("Erreur lors de l'ajout de l'unité.", 'error');
         }
     });
 
-    clearFormBtn?.addEventListener('click', resetAddForm);
+    clearFormBtn.addEventListener('click', resetAddForm);
 
-    unitNameInput?.addEventListener('blur', () => {
+    unitNameInput.addEventListener('blur', () => {
         const name = unitNameInput.value;
         findUnitImage(name);
         fetchAndFillUnitData(name);
     });
 
-    imagePlaceholder?.addEventListener('click', () => imageInput?.click());
-    imageInput?.addEventListener('change', (event) => {
+    imagePlaceholder.addEventListener('click', () => imageInput.click());
+    imageInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
             currentImageFile = file;
@@ -1456,7 +826,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Contrôles numériques
     document.querySelectorAll('.number-controls button').forEach(button => {
         button.addEventListener('click', (event) => {
             const targetInputId = event.target.dataset.targetInput;
@@ -1494,8 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Actions sur les unités
-    unitListBody?.addEventListener('click', async (event) => {
+    unitListBody.addEventListener('click', async (event) => {
         const button = event.target.closest('button');
         const checkbox = event.target.closest('.unit-checkbox');
 
@@ -1507,10 +875,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (unitToUpdate) {
                     try {
                         await unitsCol.doc(unitId).update({ isFavorite: !unitToUpdate.isFavorite });
-                        notificationManager.info("Favori", `${unitToUpdate.name} ${unitToUpdate.isFavorite ? 'retiré des' : 'ajouté aux'} favoris.`);
+                        showToast("Statut favori mis à jour.", 'success');
                     } catch (e) {
                         console.error("Error updating favorite status: ", e);
-                        notificationManager.error("Erreur", "Impossible de mettre à jour le statut favori.");
+                        showToast("Erreur lors de la mise à jour du favori.", 'error');
                     }
                 }
             } else if (button.classList.contains('edit-btn')) {
@@ -1520,10 +888,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (await showConfirm('Supprimer', `Êtes-vous sûr de vouloir supprimer ${unitName} ?`)) {
                     try {
                         await unitsCol.doc(unitId).delete();
-                        notificationManager.info('Suppression', `${unitName} a été supprimé.`);
+                        showToast('Unité supprimée.', 'info');
                     } catch (e) {
                         console.error("Error deleting document: ", e);
-                        notificationManager.error("Erreur", "Impossible de supprimer l'unité.");
+                        showToast("Erreur lors de la suppression de l'unité.", 'error');
                     }
                 }
             }
@@ -1534,8 +902,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Tri des colonnes
-    table?.querySelector('thead')?.addEventListener('click', (event) => {
+    searchInput.addEventListener('input', displayUnits);
+    filterElement.addEventListener('change', displayUnits);
+    filterRarity.addEventListener('change', displayUnits);
+
+    filterFavoritesBtn.addEventListener('click', () => {
+        favoritesFilterActive = !favoritesFilterActive;
+        filterFavoritesBtn.classList.toggle('active', favoritesFilterActive);
+        displayUnits();
+    });
+
+    table.querySelector('thead').addEventListener('click', (event) => {
         const header = event.target.closest('th');
         if (!header || !header.classList.contains('sortable')) return;
         const sortKey = header.dataset.sort;
@@ -1548,19 +925,17 @@ document.addEventListener('DOMContentLoaded', () => {
         displayUnits();
     });
 
-    // Sélection multiple
-    selectAllCheckbox?.addEventListener('change', () => {
+    selectAllCheckbox.addEventListener('change', () => {
         document.querySelectorAll('.unit-checkbox').forEach(checkbox => {
             checkbox.checked = selectAllCheckbox.checked;
         });
         updateSelectionState();
     });
 
-    deleteSelectedBtn?.addEventListener('click', async () => {
+    deleteSelectedBtn.addEventListener('click', async () => {
         const selectedIds = Array.from(document.querySelectorAll('.unit-checkbox:checked')).map(cb => cb.dataset.id);
         if (selectedIds.length === 0) return;
-        if(await showConfirm('Suppression en masse', `Êtes-vous sûr de vouloir supprimer ${selectedIds.length} unité(s) ?`)) {
-            const loadingId = notificationManager.loading('Suppression', 'Suppression en cours...');
+        if(await showConfirm('Supprimer en masse', `Êtes-vous sûr de vouloir supprimer ${selectedIds.length} unité(s) ?`)) {
             try {
                 const batch = db.batch();
                 selectedIds.forEach(id => {
@@ -1568,21 +943,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     batch.delete(docRef);
                 });
                 await batch.commit();
-                notificationManager.remove(loadingId);
-                notificationManager.success('Suppression terminée', `${selectedIds.length} unité(s) supprimée(s).`);
+                showToast(`${selectedIds.length} unité(s) supprimée(s).`, 'success');
                 selectAllCheckbox.checked = false;
                 selectAllCheckbox.indeterminate = false;
                 deleteSelectedBtn.style.display = 'none';
             } catch (e) {
                 console.error("Error batch deleting documents: ", e);
-                notificationManager.remove(loadingId);
-                notificationManager.error("Erreur", "Impossible de supprimer les unités sélectionnées.");
+                showToast("Erreur lors de la suppression en masse.", 'error');
             }
         }
     });
 
-    // Édition des unités
-    editForm?.addEventListener('submit', async (event) => {
+    editForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const unitId = document.getElementById('edit-unit-id').value;
 
@@ -1601,24 +973,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             await unitsCol.doc(unitId).update(updatedUnitData);
-            notificationManager.success('Modification', 'Les modifications ont été sauvegardées.');
+            showToast('Modifications enregistrées.', 'success');
             closeEditModal();
         } catch (e) {
             console.error("Error updating document: ", e);
-            notificationManager.error("Erreur", "Impossible de sauvegarder les modifications.");
+            showToast("Erreur lors de l'enregistrement des modifications.", 'error');
         }
     });
-
-    closeModalBtn?.addEventListener('click', closeEditModal);
+    closeModalBtn.addEventListener('click', closeEditModal);
     window.addEventListener('click', (event) => { if (event.target == editModal) closeEditModal(); });
 
-    // Import/Export
-    exportBtn?.addEventListener('click', () => {
+    exportBtn.addEventListener('click', () => {
         if (units.length === 0 && teams.length === 0 && manualObjectives.length === 0 && Object.keys(dailyRoutine).length === 0) {
-            notificationManager.warning("Aucune donnée", "Il n'y a aucune donnée à exporter.");
+            showToast("Il n'y a aucune donnée à exporter.", 'info');
             return;
         }
-        
         const unitsExport = units.map(({ id, ...rest }) => rest);
         const teamsExport = teams.map(({ id, ...rest }) => ({...rest, units: rest.units.filter(u => u != null) }));
         const objectivesExport = manualObjectives.map(({ id, ...rest }) => rest);
@@ -1634,18 +1003,17 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        notificationManager.success('Export', 'Sauvegarde créée avec succès !');
+        showToast('Exportation réussie !', 'success');
     });
 
-    importInput?.addEventListener('change', (event) => {
+    importInput.addEventListener('change', (event) => {
         const file = event.target.files[0]; if (!file) return;
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
                 const importedData = JSON.parse(e.target.result);
-                if (await showConfirm('Import JSON', "Voulez-vous vraiment remplacer vos données par celles importées ? Cette action est irréversible.")) {
-                    const loadingId = notificationManager.loading("Import", "Importation en cours...");
-                    
+                if (await showConfirm('Importer un fichier JSON', "Voulez-vous vraiment remplacer vos données par celles importées ? Cette action est irréversible et écrasera les données sur Firebase.")) {
+                    showToast("Importation en cours... Veuillez patienter.", 'info', 5000);
                     const deleteBatch = db.batch();
                     const existingUnits = await unitsCol.get();
                     existingUnits.forEach(doc => deleteBatch.delete(doc.ref));
@@ -1665,19 +1033,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         addBatch.set(dailyRoutineDoc, importedData.dailyRoutine);
                     }
                     await addBatch.commit();
-                    
-                    notificationManager.remove(loadingId);
-                    notificationManager.success("Import réussi", "Toutes les données ont été importées !");
+                    showToast("Importation complète réussie !", 'success');
                 }
             } catch (error) {
                 console.error("Error during import:", error);
-                notificationManager.error("Erreur d'import", "Le fichier est invalide ou corrompu.");
+                showToast("Erreur : Le fichier est invalide ou corrompu ou un problème avec Firebase.", 'error');
             } finally { importInput.value = ''; }
         };
         reader.readAsText(file);
     });
 
-    importCsvInput?.addEventListener('change', (event) => {
+    importCsvInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
@@ -1694,7 +1060,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 let updatedCount = 0;
                 let addedCount = 0;
                 const batch = db.batch();
-                const loadingId = notificationManager.loading("Import CSV", "Traitement du fichier CSV...");
 
                 for (const line of dataLines) {
                     const columns = line.split(delimiter);
@@ -1730,10 +1095,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 await batch.commit();
-                notificationManager.remove(loadingId);
-                notificationManager.success("Import CSV réussi", `${addedCount} unité(s) ajoutée(s), ${updatedCount} mise(s) à jour.`);
+                showToast(`Importation CSV : ${addedCount} ajouté(s), ${updatedCount} mis à jour.`, 'success');
             } catch (error) {
-                notificationManager.error("Erreur CSV", "Impossible de traiter le fichier CSV. Vérifiez le format.");
+                showToast("Erreur lors de l'importation du CSV. Vérifiez le format.", 'error');
                 console.error(error);
             } finally {
                 importCsvInput.value = '';
@@ -1742,17 +1106,248 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsText(file, 'UTF-8');
     });
 
-    // === FIREBASE LISTENERS ===
+    teamBuilderUnitList.addEventListener('dragstart', (e) => {
+        if(e.target.tagName === 'IMG') {
+            e.dataTransfer.setData('text/plain', e.target.dataset.unitId);
+            e.dataTransfer.effectAllowed = 'copy';
+        }
+    });
+
+    teamSlotsContainer.addEventListener('dragover', (e) => { e.preventDefault(); const slot = e.target.closest('.team-slot'); if (slot) slot.classList.add('drag-over'); });
+    teamSlotsContainer.addEventListener('dragleave', (e) => { const slot = e.target.closest('.team-slot'); if (slot) slot.classList.remove('drag-over'); });
+    teamSlotsContainer.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        const slot = e.target.closest('.team-slot');
+        if(slot) {
+            slot.classList.remove('drag-over');
+            const unitId = e.dataTransfer.getData('text/plain');
+            const targetSlot = e.target.classList.contains('team-slot') ? e.target : e.target.closest('.team-slot');
+            const slotIndex = parseInt(targetSlot.dataset.slotIndex);
+            const unitToAdd = units.find(u => u.id === unitId);
+            if (unitToAdd && activeTeamId) {
+                const activeTeam = teams.find(t => t.id === activeTeamId);
+                if (activeTeam) {
+                    const newUnits = [...(activeTeam.units || [null, null, null, null, null])];
+                    newUnits[slotIndex] = { ...unitToAdd, id: unitId };
+                    try {
+                        await teamsCol.doc(activeTeamId).update({ units: newUnits });
+                        showToast("Unité ajoutée à l'équipe.", 'success');
+                    } catch (e) {
+                        console.error("Error adding unit to team: ", e);
+                        showToast("Erreur lors de l'ajout de l'unité à l'équipe.", 'error');
+                    }
+                }
+            }
+        }
+    });
+
+    teamSlotsContainer.addEventListener('click', async (e) => {
+        const target = e.target;
+        const slot = target.closest('.team-slot');
+        if (target.classList.contains('remove-from-team-btn')) {
+            const slotIndex = parseInt(target.dataset.slotIndex);
+            if (activeTeamId) {
+                const activeTeam = teams.find(t => t.id === activeTeamId);
+                if (activeTeam) {
+                    const newUnits = [...(activeTeam.units || [null, null, null, null, null])];
+                    newUnits[slotIndex] = null;
+                    try {
+                        await teamsCol.doc(activeTeamId).update({ units: newUnits });
+                        showToast("Unité retirée de l'équipe.", 'info');
+                    } catch (e) {
+                        console.error("Error removing unit from team: ", e);
+                        showToast("Erreur lors du retrait de l'unité.", 'error');
+                    }
+                }
+            }
+            selectionModeSlotIndex = null;
+            updateSelectionModeUI();
+        } else if (slot) {
+            const clickedSlotIndex = parseInt(slot.dataset.slotIndex);
+            if (selectionModeSlotIndex === clickedSlotIndex) {
+                selectionModeSlotIndex = null;
+            } else {
+                selectionModeSlotIndex = clickedSlotIndex;
+            }
+            updateSelectionModeUI();
+        }
+    });
+
+    teamBuilderUnitList.addEventListener('click', async (e) => {
+        if (e.target.tagName === 'IMG' && selectionModeSlotIndex !== null) {
+            const unitId = e.target.dataset.unitId;
+            const unitToAdd = units.find(u => u.id === unitId);
+
+            if (unitToAdd && activeTeamId) {
+                const activeTeam = teams.find(t => t.id === activeTeamId);
+                if (activeTeam) {
+                    const newUnits = [...(activeTeam.units || [null, null, null, null, null])];
+                    newUnits[selectionModeSlotIndex] = { ...unitToAdd, id: unitId };
+                    try {
+                        await teamsCol.doc(activeTeamId).update({ units: newUnits });
+                        showToast("Unité ajoutée à l'équipe.", 'success');
+                    } catch (e) {
+                        console.error("Error adding unit to team: ", e);
+                        showToast("Erreur lors de l'ajout de l'unité à l'équipe.", 'error');
+                    }
+                }
+            }
+            selectionModeSlotIndex = null;
+            updateSelectionModeUI();
+        }
+    });
+
+    teamSelect.addEventListener('change', (event) => {
+        activeTeamId = event.target.value;
+        renderActiveTeam();
+    });
+
+    saveTeamBtn.addEventListener('click', async () => {
+        const newName = teamNameInput.value.trim();
+        if (newName && activeTeamId) {
+            try {
+                await teamsCol.doc(activeTeamId).update({ name: newName });
+                showToast('Nom de l\'équipe sauvegardé !', 'success');
+            } catch (e) {
+                console.error("Error saving team name: ", e);
+                showToast("Erreur lors de la sauvegarde du nom de l'équipe.", 'error');
+            }
+        } else {
+            showToast('Veuillez donner un nom à votre équipe.', 'info');
+        }
+    });
+
+    newTeamBtn.addEventListener('click', async () => {
+        const newTeamData = { name: 'Nouvelle Équipe', units: [null, null, null, null, null], notes: '' };
+        try {
+            const docRef = await teamsCol.add(newTeamData);
+            activeTeamId = docRef.id;
+            showToast('Nouvelle équipe créée !', 'success');
+        } catch (e) {
+            console.error("Error adding new team: ", e);
+            showToast("Erreur lors de la création de la nouvelle équipe.", 'error');
+        }
+    });
+
+    deleteTeamBtn.addEventListener('click', async () => {
+        if(teams.length <= 1) {
+            showToast("Vous ne pouvez pas supprimer votre dernière équipe.", 'info');
+            return;
+        }
+        const teamToDelete = teams.find(t => t.id === activeTeamId);
+        if(teamToDelete && await showConfirm('Supprimer l\'équipe', `Êtes-vous sûr de vouloir supprimer l'équipe "${teamToDelete.name}" ?`)) {
+            try {
+                await teamsCol.doc(activeTeamId).delete();
+                showToast('Équipe supprimée.', 'success');
+            } catch (e) {
+                console.error("Error deleting team: ", e);
+                showToast("Erreur lors de la suppression de l'équipe.", 'error');
+            }
+        }
+    });
+
+    teamNotesTextarea.addEventListener('input', async () => {
+        if (activeTeamId) {
+            try {
+                await teamsCol.doc(activeTeamId).update({ notes: teamNotesTextarea.value });
+            } catch (e) {
+                console.error("Error updating team notes: ", e);
+                showToast("Erreur lors de la sauvegarde des notes.", 'error');
+            }
+        }
+    });
+
+    addObjectiveForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = newObjectiveInput.value.trim();
+        if (text) {
+            try {
+                await manualObjectivesCol.add({ text: text, completed: false });
+                showToast("Objectif ajouté !", 'success');
+                newObjectiveInput.value = '';
+            } catch (error) {
+                console.error("Error adding objective: ", error);
+                showToast("Erreur lors de l'ajout de l'objectif.", 'error');
+            }
+        }
+    });
+
+    objectivesListContainer.addEventListener('click', async (e) => {
+        const target = e.target;
+        const li = target.closest('.objective-item');
+        if (!li) return;
+        const objectiveId = li.dataset.id;
+
+        if (target.classList.contains('objective-checkbox')) {
+            const currentStatus = target.checked;
+            try {
+                await manualObjectivesCol.doc(objectiveId).update({ completed: currentStatus });
+            } catch (error) {
+                console.error("Error updating objective status: ", error);
+                showToast("Erreur lors de la mise à jour de l'objectif.", 'error');
+            }
+        }
+        if (target.closest('.delete-objective-btn')) {
+            try {
+                await manualObjectivesCol.doc(objectiveId).delete();
+                showToast("Objectif supprimé.", 'info');
+            } catch (error) {
+                console.error("Error deleting objective: ", error);
+                showToast("Erreur lors de la suppression de l'objectif.", 'error');
+            }
+        }
+    });
+
+    routineTrackerContent.addEventListener('click', async (e) => {
+        const item = e.target.closest('.routine-item');
+        if (!item) return;
+
+        const taskName = item.dataset.taskName;
+        const taskType = item.dataset.taskType;
+        const taskDef = ROUTINE_DEFINITION.find(t => t.name === taskName);
+        if (!taskDef) return;
+
+        let updatedTasks = { ...dailyRoutine.tasks };
+        let taskState = updatedTasks[taskName];
+
+        const currentGameDay = getGameDay();
+
+        if (taskType === 'checkbox') {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            taskState = { completedOn: checkbox.checked ? currentGameDay : null };
+        } else if (taskDef.type === 'counter') {
+            const action = e.target.dataset.action;
+            let count = (taskState && taskState.count) || 0;
+            if (action === 'plus') {
+                count = Math.min(taskDef.max, count + 1);
+            } else if (action === 'minus') {
+                count = Math.max(0, count - 1);
+            }
+            taskState = { count: count, updatedOn: currentGameDay };
+        }
+        updatedTasks[taskName] = taskState;
+
+        try {
+            await dailyRoutineDoc.update({ tasks: updatedTasks });
+        } catch (error) {
+            console.error("Error updating routine task: ", error);
+            showToast("Erreur lors de la mise à jour de la routine.", 'error');
+        }
+    });
+
+    // #endregion
+
+    // #region --- INITIALISATION DE L'APPLICATION (Firebase Listeners) ---
+
     const setupFirestoreListeners = () => {
         unitsCol.onSnapshot(snapshot => {
             units = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             refreshUI();
             renderTeamBuilderUnitList();
             renderActiveTeam();
-            updateSynergyAnalysis();
         }, error => {
             console.error("Error listening to units collection:", error);
-            notificationManager.error("Erreur de sync", "Problème de synchronisation des unités.");
+            showToast("Erreur de synchronisation des unités.", 'error');
         });
 
         teamsCol.orderBy('name').onSnapshot(snapshot => {
@@ -1765,17 +1360,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     teamsCol.add({ name: 'Mon Équipe', units: [null, null, null, null, null], notes: '' })
                         .then(docRef => {
                             activeTeamId = docRef.id;
-                            notificationManager.info("Équipe créée", "Équipe par défaut créée.");
+                            showToast("Équipe par défaut créée.", 'info');
                         })
                         .catch(e => console.error("Error creating default team: ", e));
                 }
             }
             renderTeamSelect();
             renderActiveTeam();
-            updateSynergyAnalysis();
         }, error => {
             console.error("Error listening to teams collection:", error);
-            notificationManager.error("Erreur de sync", "Problème de synchronisation des équipes.");
+            showToast("Erreur de synchronisation des équipes.", 'error');
         });
 
         manualObjectivesCol.orderBy('text').onSnapshot(snapshot => {
@@ -1783,7 +1377,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderManualObjectives();
         }, error => {
             console.error("Error listening to objectives collection:", error);
-            notificationManager.error("Erreur de sync", "Problème de synchronisation des objectifs.");
+            showToast("Erreur de synchronisation des objectifs.", 'error');
         });
 
         dailyRoutineDoc.onSnapshot(doc => {
@@ -1796,7 +1390,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderRoutineTracker();
         }, error => {
             console.error("Error listening to daily routine document:", error);
-            notificationManager.error("Erreur de sync", "Problème de synchronisation de la routine.");
+            showToast("Erreur de synchronisation de la routine quotidienne.", 'error');
         });
     };
 
@@ -1806,17 +1400,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSelectionState();
     };
 
-    // === INITIALISATION ===
     setupFirestoreListeners();
     switchView('manager');
-    notificationManager.success('Application prête', 'Etheria Manager est démarré !');
-
-    // Log de démarrage pour debugging
-    console.log('🚀 Etheria Restart Manager - Version Améliorée');
-    console.log('✅ Notifications améliorées');
-    console.log('✅ Filtres avancés');
-    console.log('✅ Thèmes personnalisés');
-    console.log('✅ Analyse de synergies');
-    console.log('✅ Optimisations de performance');
-    console.log('✅ Configuration Firebase sécurisée');
+    // #endregion
 });

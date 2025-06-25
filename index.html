@@ -20,19 +20,7 @@
             <div class="logo-container">
                 <img src="J2Grl0Ri.png" alt="Etheria Restart Logo" class="main-logo">
             </div>
-            <div class="header-controls">
-                <div class="theme-selector">
-                    <button id="theme-toggle-btn" class="action-btn" title="Changer de thème">
-                        <i class="fa-solid fa-sun"></i>
-                    </button>
-                    <select id="theme-selector" class="theme-select">
-                        <option value="dark">Sombre</option>
-                        <option value="light">Clair</option>
-                        <option value="gaming">Gaming</option>
-                        <option value="minimal">Minimal</option>
-                    </select>
-                </div>
-            </div>
+            <button id="theme-toggle-btn" class="action-btn" title="Changer de thème"></button>
             <nav class="main-nav">
                 <button id="show-manager-btn" class="nav-btn">Gestionnaire</button>
                 <button id="show-builder-btn" class="nav-btn">Équipes</button>
@@ -52,24 +40,6 @@
                         <div class="rarity-ssr" title="SSR"><i class="fa-solid fa-star"></i> <span id="stat-ssr-count">0</span></div>
                         <div class="rarity-sr" title="SR"><i class="fa-solid fa-star"></i> <span id="stat-sr-count">0</span></div>
                         <div class="rarity-r" title="R"><i class="fa-solid fa-star"></i> <span id="stat-r-count">0</span></div>
-                    </div>
-                </div>
-
-                <div class="stat-card card">
-                    <h3>Moyennes</h3>
-                    <div class="averages-display">
-                        <div class="avg-item">
-                            <span class="avg-label">Niveau:</span>
-                            <span class="avg-value" id="avg-level">0</span>
-                        </div>
-                        <div class="avg-item">
-                            <span class="avg-label">Étoiles:</span>
-                            <span class="avg-value" id="avg-stars">0</span>
-                        </div>
-                        <div class="avg-item">
-                            <span class="avg-label">Power:</span>
-                            <span class="avg-value" id="avg-power">0</span>
-                        </div>
                     </div>
                 </div>
 
@@ -183,123 +153,15 @@
                         </div>
                     </div>
 
-                    <!-- FILTRES AVANCÉS -->
-                    <div class="filter-container-enhanced">
-                        <div class="filter-header">
-                            <h3><i class="fas fa-filter"></i> Filtres de Recherche</h3>
-                            <button class="filter-toggle" id="toggle-advanced-filters">
-                                <i class="fas fa-cog"></i> Filtres Avancés
-                            </button>
-                        </div>
-
-                        <div class="filter-grid">
-                            <div class="filter-group">
-                                <label class="filter-label">Rechercher une unité</label>
-                                <div class="search-input-enhanced">
-                                    <i class="fas fa-search search-icon"></i>
-                                    <input type="search" id="search-input" placeholder="Nom de l'unité..." autocomplete="off">
-                                    <button class="clear-search" id="clear-search" style="display: none;">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="filter-group">
-                                <label class="filter-label">Élément</label>
-                                <select id="filter-element" class="filter-select-enhanced">
-                                    <option value="">Tous les éléments</option><option value="Rouge">Rouge</option><option value="Bleu">Bleu</option><option value="Vert">Vert</option><option value="Dark">Dark</option><option value="Light">Light</option>
-                                </select>
-                            </div>
-
-                            <div class="filter-group">
-                                <label class="filter-label">Rareté</label>
-                                <select id="filter-rarity" class="filter-select-enhanced">
-                                    <option value="">Toutes les raretés</option><option value="R">R</option><option value="SR">SR</option><option value="SSR">SSR</option>
-                                </select>
-                            </div>
-
-                            <div class="filter-group">
-                                <label class="filter-label">Tri</label>
-                                <select id="sort-select" class="filter-select-enhanced">
-                                    <option value="name-asc">Nom A-Z</option>
-                                    <option value="name-desc">Nom Z-A</option>
-                                    <option value="level-desc">Level ↓</option>
-                                    <option value="level-asc">Level ↑</option>
-                                    <option value="stars-desc">Étoiles ↓</option>
-                                    <option value="stars-asc">Étoiles ↑</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="quick-filters">
-                            <button class="quick-filter-btn" data-filter="favorites">
-                                <i class="fas fa-star"></i> Favoris uniquement
-                            </button>
-                            <button class="quick-filter-btn" data-filter="max-level">
-                                <i class="fas fa-arrow-up"></i> Level Max (50)
-                            </button>
-                            <button class="quick-filter-btn" data-filter="high-stars">
-                                <i class="fas fa-star"></i> 5-6 étoiles
-                            </button>
-                            <button class="quick-filter-btn" data-filter="has-notes">
-                                <i class="fas fa-note-sticky"></i> Avec notes
-                            </button>
-                            <button class="quick-filter-btn" data-filter="ssr-only">
-                                <i class="fas fa-gem"></i> SSR uniquement
-                            </button>
-                        </div>
-
-                        <div class="advanced-filters" id="advanced-filters" style="display: none;">
-                            <div class="range-filter">
-                                <label class="filter-label">Niveau</label>
-                                <div class="range-inputs">
-                                    <input type="number" class="range-input" id="level-min" placeholder="Min" min="1" max="50">
-                                    <span class="range-separator">-</span>
-                                    <input type="number" class="range-input" id="level-max" placeholder="Max" min="1" max="50">
-                                </div>
-                            </div>
-
-                            <div class="range-filter">
-                                <label class="filter-label">Étoiles</label>
-                                <div class="range-inputs">
-                                    <input type="number" class="range-input" id="stars-min" placeholder="Min" min="3" max="6">
-                                    <span class="range-separator">-</span>
-                                    <input type="number" class="range-input" id="stars-max" placeholder="Max" min="3" max="6">
-                                </div>
-                            </div>
-
-                            <div class="range-filter">
-                                <label class="filter-label">Doublon</label>
-                                <div class="range-inputs">
-                                    <input type="number" class="range-input" id="doublon-min" placeholder="Min" min="0" max="5">
-                                    <span class="range-separator">-</span>
-                                    <input type="number" class="range-input" id="doublon-max" placeholder="Max" min="0" max="5">
-                                </div>
-                            </div>
-
-                            <div class="filter-group">
-                                <label class="filter-label">Compétences</label>
-                                <select class="filter-select-enhanced" id="skill-filter">
-                                    <option value="">Toutes les compétences</option>
-                                    <option value="maxed">Toutes au max (5/5/5)</option>
-                                    <option value="high">Élevées (4+)</option>
-                                    <option value="low">À améliorer (≤3)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="filter-actions">
-                            <button class="action-btn secondary" id="clear-all-filters">
-                                <i class="fas fa-eraser"></i> Effacer tout
-                            </button>
-                            <button class="action-btn" id="save-filter-preset">
-                                <i class="fas fa-save"></i> Sauvegarder preset
-                            </button>
-                        </div>
-
-                        <div class="results-info" id="results-info">
-                            <i class="fas fa-info-circle"></i> <span id="results-count">0</span> unité(s) trouvée(s)
-                        </div>
+                    <div class="filter-controls" style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <input type="search" id="search-input" placeholder="Rechercher par nom..." style="flex: 2; min-width: 180px;">
+                        <select id="filter-element" style="flex: 1; min-width: 140px;">
+                            <option value="">Tous les éléments</option><option value="Rouge">Rouge</option><option value="Bleu">Bleu</option><option value="Vert">Vert</option><option value="Dark">Dark</option><option value="Light">Light</option></select>
+                        <select id="filter-rarity" style="flex: 1; min-width: 140px;">
+                            <option value="">Toutes les raretés</option><option value="R">R</option><option value="SR">SR</option><option value="SSR">SSR</option></select>
+                        <button id="filter-favorites-btn" class="filter-btn" title="Afficher uniquement les favoris">
+                            <i class="fa-solid fa-star"></i> Favoris
+                        </button>
                     </div>
 
                     <div class="table-wrapper">
@@ -342,21 +204,6 @@
                         <button id="delete-team-btn" class="action-btn" title="Supprimer l'équipe" style="background-color: var(--danger-color); border:none; color:white;"><i class="fa-solid fa-trash"></i></button>
                     </div>
                     <div class="team-slots"></div>
-
-                    <!-- ANALYSE DE SYNERGIES -->
-                    <div class="synergy-analysis">
-                        <h4><i class="fas fa-chart-line"></i> Analyse de Synergies</h4>
-                        <div class="synergy-score">
-                            <div class="score-circle" id="synergy-score-circle">
-                                <span id="synergy-score-value">0</span>
-                            </div>
-                            <div class="synergy-info">
-                                <div class="synergy-title">Score de Synergie</div>
-                                <div class="synergy-description" id="synergy-description">Équipe vide</div>
-                            </div>
-                        </div>
-                        <div class="synergy-details" id="synergy-details"></div>
-                    </div>
 
                     <div class="team-notes-container">
                         <h3 style="margin-top: 20px; margin-bottom: 10px;">Bloc-notes de l'équipe</h3>
@@ -469,8 +316,7 @@
         </div>
     </div>
 
-    <!-- CONTAINER DE NOTIFICATIONS AMÉLIORÉ -->
-    <div id="notification-container" class="notification-container"></div>
+    <div id="toast-container"></div>
 
     <div id="confirm-modal" class="modal">
         <div class="modal-content">
@@ -492,7 +338,7 @@
                 <input type="checkbox" class="unit-checkbox">
             </td>
             <td class="unit-image-cell" data-label="Unité">
-                <img src="" alt="" loading="lazy" data-src="">
+                <img src="" alt="">
                 <span class="unit-name-cell"></span>
             </td>
             <td class="unit-element-cell" data-label="Élément"></td>
@@ -516,7 +362,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script> 
-    <script src="config.js"></script>
     <script src="script.js" defer></script>
 </body>
 </html>
